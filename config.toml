@@ -2,3 +2,5 @@
 base_url = "/"
 
 theme = "after-dark"
+
+output_dir = "docs"
