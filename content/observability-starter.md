@@ -1,5 +1,6 @@
 +++
 title = "An Observability Starter"
+slug = "observability-starter"
 +++
 
 Observability refers to how well the state of a system can be understood by external outputs. When a system is more observable, you can more quickly identify root causes of performance issues, business logic bugs, and more. In the software engineering space, Application Performance Monitoring (APM) tools help in assisting in the overall observability of a software stack. The ecosystem as a whole began to evolve as distributed computing gained popularity, monoliths were broken up into microservices, and horizontal pod autoscalers were introduced to Kubernetes. New tools around tracking metrics in your applications and distributed tracing across service-to-service communication has surfaced over the years, with some larger players at the forefront of the open source space such as [OpenTelemetry](https://opentelemetry.io/), [StatsD](https://github.com/statsd/statsd), and [OpenMetrics](https://openmetrics.io/).
