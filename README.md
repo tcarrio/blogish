@@ -5,12 +5,14 @@ Notes and posts and more gathered and altogether maniacally tossed together.
 ## stack
 
 - [Zola]
+- [Git]
 - [GitHub Actions]
 - [GitHub Pages]
 - [Zola Deploy Action]
+- [Zola After Dark Theme]
 - [Devenv]
 
-[Zola] is a static site generator written in Rust which provides the bulk of functionality in this blog.
+[Zola] is a static site generator written in Rust which provides the bulk of functionality in this blog. Zola has many themes available, in my case I'm using the [Zola After Dark Theme]. The repository is kept very minimal since I'm utilizing [Git] submodules to reference the external repository.
 
 [GitHub Actions] is utilized for deploying to [GitHub Pages]. The [Zola Deploy Action] provides a simple way to configure CI jobs to execute. In my case, I am able to build for PRs and publish in `main`.
 
@@ -35,8 +37,10 @@ That's it. [Devenv] uses [Nix] under the hood and drops you into a shell with al
 <!-- References: in no particular order but maybe ascending -->
 
 [Devenv]: https://devenv.sh
+[Git]: https://git-scm.org
 [GitHub Actions]: https://github.com/features/actions
 [GitHub Pages]: https://pages.github.com/
 [Nix]: https://nixos.org
+[Zola After Dark Theme]: https://github.com/getzola/after-dark
 [Zola Deploy Action]: https://github.com/shalzz/zola-deploy-action
 [Zola]: https://getzola.org
