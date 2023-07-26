@@ -1,4 +1,7 @@
-# Regaining Access to Synology DSM
++++
+title = "Recovering Access to Synology DSM"
+slug = "synology-dsm-access-recovery"
++++
 
 I'll paint the landscape. Suppose you happened to have just applied some new permissions in your system an the effort to minimize permissions and otherwise improve the security footprint of your Synology NAS. You fly through rules on AFS, NFS, rsync, DSM, FTP- knocking off these services that you don't use (or don't think you do). Now your system has every user blocked from DSM by default. So what was DSM again?
 
@@ -10,13 +13,13 @@ If you still have SSH permissions and sudo privileges on the user, you can take 
 
 First, connect to your Synology NAS via SSH:
 
-```shell
+```bash
 ssh username@synology_hostname
 ```
 
 Next, get the user ID of your user by username:
 
-```shell
+```bash
 id username
 
 # uid=1026(username) gid=100(users) groups=100(users),101(administrators)
@@ -26,14 +29,14 @@ You'll have to take note of the ID (in the command output as `uid=$id($username)
 
 The next step is modifying the SQLite database. Synology maintains its application-level privileges in a SQLite database at `/etc/synoappprvilege.db`. You can modify this in order to provide yourself permissions. Just to be safe, make a copy of the database. In case you decide to truncate a table.
 
-```shell
+```bash
 # copies the file to the same name with a `.bak` extension
 sudo cp /etc/synoappprivilege.db{,.bak}
 ```
 
 Now open the database using
 
-```shell
+```bash
 sudo sqlite3 /etc/synoappprivilege.db
 # SQLite version 3.40.0 2022-11-16 12:10:08
 # Enter ".help" for usage hints.
