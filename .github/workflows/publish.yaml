@@ -14,7 +14,7 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v3.0.0
       - name: Build only 
-        uses: shalzz/zola-deploy-action@v0.17.2
+        uses: shalzz/zola-deploy-action@v0.16.1
         env:
           BUILD_ONLY: true
           BUILD_FLAGS: --drafts
