@@ -1,1 +1,6 @@
 # artifacts WILL be commited
+
+# Devenv
+.devenv*
+devenv.local.nix
+
