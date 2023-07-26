@@ -1,0 +1,42 @@
+# blogish
+
+Notes and posts and more gathered and altogether maniacally tossed together.
+
+## stack
+
+- [Zola]
+- [GitHub Actions]
+- [GitHub Pages]
+- [Zola Deploy Action]
+- [Devenv]
+
+Zola is a static site generator written in Rust which provides the bulk of functionality in this blog.
+
+GitHub Actions is utilized for deploying to GitHub Pages.
+
+Devenv makes it simple across systems to quickly start up a shell with a Zola executable in the path and everything else it needs.
+
+## develop
+
+I'm going to assume you're me and have Devenv installed because I'm the only real consumer of said repository so if I'm not me then something has gone horribly wrong. Tag along.
+
+```bash
+devenv shell
+
+# (devenv) host:repo username$ ...
+
+zola serve
+
+# Web server is available at http://127.0.0.1:1111...
+```
+
+That's it. [Devenv] uses [Nix] under the hood and drops you into a shell with all tooling necessary. This repository is pretty lightweight with just `git` and `zola` but the premise applies everywhere. Feel free to check it out!
+
+<!-- References: in no particular order but maybe ascending -->
+
+[Devenv]: https://devenv.sh
+[GitHub Actions]: https://github.com/features/actions
+[GitHub Pages]: https://pages.github.com/
+[Nix]: https://nixos.org
+[Zola Deploy Action]: https://github.com/shalzz/zola-deploy-action
+[Zola]: https://getzola.org
