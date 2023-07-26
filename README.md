@@ -10,11 +10,11 @@ Notes and posts and more gathered and altogether maniacally tossed together.
 - [Zola Deploy Action]
 - [Devenv]
 
-Zola is a static site generator written in Rust which provides the bulk of functionality in this blog.
+[Zola] is a static site generator written in Rust which provides the bulk of functionality in this blog.
 
-GitHub Actions is utilized for deploying to GitHub Pages. The [Zola Deploy Action] provides a simple way to configure CI jobs to execute. In my case, I am able to build for PRs and publish in `main`.
+[GitHub Actions] is utilized for deploying to [GitHub Pages]. The [Zola Deploy Action] provides a simple way to configure CI jobs to execute. In my case, I am able to build for PRs and publish in `main`.
 
-Devenv makes it simple across systems to quickly start up a shell with a Zola executable in the path and everything else it needs.
+[Devenv] makes it simple across systems to quickly start up a shell with a Zola executable in the path and everything else it needs.
 
 ## develop
 
