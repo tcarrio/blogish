@@ -17,7 +17,7 @@ jobs:
           submodules: true
       - name: Transfer theme data
         run: |
-          mkdir ./sass ./static ./templates
+          mkdir ./sass ./templates
           cp -r ./themes/after-dark/sass/*      ./sass/
           cp -r ./themes/after-dark/templates/* ./templates/
       - name: Build only 
@@ -38,7 +38,7 @@ jobs:
           submodules: true
       - name: Transfer theme data
         run: |
-          mkdir ./sass ./static ./templates
+          mkdir ./sass ./templates
           cp -r ./themes/after-dark/sass/*      ./sass/
           cp -r ./themes/after-dark/templates/* ./templates/
       - name: Build and deploy
