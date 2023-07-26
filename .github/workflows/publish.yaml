@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v3.0.0
+      - name: Transfer theme data
+        run: |
+          mkdir ./sass ./static ./templates
+          cp -r ./themes/after-dark/sass/*      ./sass/
+          cp -r ./themes/after-dark/static/*    ./static/
+          cp -r ./themes/after-dark/templates/* ./templates/
       - name: Build only 
         uses: shalzz/zola-deploy-action@master
         env:
@@ -27,6 +33,12 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v3.0.0
+      - name: Transfer theme data
+        run: |
+          mkdir ./sass ./static ./templates
+          cp -r ./themes/after-dark/sass/*      ./sass/
+          cp -r ./themes/after-dark/static/*    ./static/
+          cp -r ./themes/after-dark/templates/* ./templates/
       - name: Build and deploy
         uses: shalzz/zola-deploy-action@master
         env:
