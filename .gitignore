@@ -1,0 +1,3 @@
+# artifacts won't be commited
+/public
+!/public/.gitkeep
