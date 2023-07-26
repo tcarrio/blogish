@@ -10,6 +10,9 @@
         <loc>/page/1/</loc>
     </url>
     <url>
+        <loc>/sparse-integer-decomposition/</loc>
+    </url>
+    <url>
         <loc>/synology-dsm-access-recovery/</loc>
     </url>
 </urlset>
