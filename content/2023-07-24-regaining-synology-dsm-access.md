@@ -1,6 +1,13 @@
 +++
 title = "Recovering Access to Synology DSM"
 slug = "synology-dsm-access-recovery"
+date = 2023-07-24
+
+[extra]
+author = "Tom Carrio"
+
+[taxonomies]
+tags = ["sysadmin", "synology", "nas", "linux"]
 +++
 
 I'll paint the landscape. Suppose you happened to have just applied some new permissions in your system an the effort to minimize permissions and otherwise improve the security footprint of your Synology NAS. You fly through rules on AFS, NFS, rsync, DSM, FTP- knocking off these services that you don't use (or don't think you do). Now your system has every user blocked from DSM by default. So what was DSM again?

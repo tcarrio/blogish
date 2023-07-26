@@ -1,5 +1,11 @@
 +++
 title = "Codility :: Sparse Integer Decomposition"
+date = 2023-07-21
+
+[extra]
+author = "Tom Carrio"
+
+[taxonomies]
 tags = ["coding", "algorithms"]
 +++
 

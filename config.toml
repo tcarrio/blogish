@@ -4,3 +4,21 @@ base_url = "/"
 theme = "after-dark"
 
 output_dir = "public"
+
+taxonomies = [
+    # You can enable/disable RSS
+    {name = "categories", feed = true},
+    {name = "tags", feed = true},
+]
+
+[extra]
+after_dark_title = "blogish :: notes by tom carrio"
+after_dark_menu = [
+    {url = "$BASE_URL", name = "Home"},
+    # {url = "$BASE_URL/categories", name = "Categories"},
+    {url = "$BASE_URL/tags", name = "Tags"},
+    {url = "https://tom.carrio.dev", name = "Profile"},
+]
+
+
+author = "Tom Carrio"

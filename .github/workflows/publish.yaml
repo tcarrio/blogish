@@ -15,11 +15,11 @@ jobs:
         uses: actions/checkout@v3.0.0
         with:
           submodules: true
-      - name: Transfer theme data
-        run: |
-          mkdir ./sass ./templates
-          cp -r ./themes/after-dark/sass/*      ./sass/
-          cp -r ./themes/after-dark/templates/* ./templates/
+      # - name: Transfer theme data
+      #   run: |
+      #     mkdir ./sass ./templates
+      #     cp -r ./themes/after-dark/sass/*      ./sass/
+      #     cp -r ./themes/after-dark/templates/* ./templates/
       - name: Build only 
         uses: shalzz/zola-deploy-action@master
         env:
@@ -36,11 +36,11 @@ jobs:
         uses: actions/checkout@v3.0.0
         with:
           submodules: true
-      - name: Transfer theme data
-        run: |
-          mkdir ./sass ./templates
-          cp -r ./themes/after-dark/sass/*      ./sass/
-          cp -r ./themes/after-dark/templates/* ./templates/
+      # - name: Transfer theme data
+      #   run: |
+      #     mkdir ./sass ./templates
+      #     cp -r ./themes/after-dark/sass/*      ./sass/
+      #     cp -r ./themes/after-dark/templates/* ./templates/
       - name: Build and deploy
         uses: shalzz/zola-deploy-action@master
         env:
