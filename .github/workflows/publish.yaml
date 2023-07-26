@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v3.0.0
+        with:
+          submodules: true
       - name: Transfer theme data
         run: |
           mkdir ./sass ./static ./templates
@@ -33,6 +35,8 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v3.0.0
+        with:
+          submodules: true
       - name: Transfer theme data
         run: |
           mkdir ./sass ./static ./templates
