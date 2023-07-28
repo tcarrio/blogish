@@ -8,7 +8,7 @@ draft = true
 author = "Tom Carrio"
 
 [taxonomies]
-tags = ["coding", "swe", "nextjs", "build", "bazel"]
+tags = ["web", "security"]
 +++
 
 ## Microsoft Teams
