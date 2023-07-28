@@ -12,7 +12,7 @@ tags = ["sms", "python", "scripting", "requests"]
 
 ## Foreword from the future :magic-hands:
 
-This post is a simple summary of how you can accomplish SMS text messaging via web APIs. Services exist today like Twilio that are massively popular, but a decade ago these were not _as_ stable or accessible. This post is based on source code from my [**py2sms** repository][py2sms], which showcased how you could do this.
+This post is a simple summary of how you can accomplish SMS text messaging via web APIs. Services exist today like Twilio that are massively popular, but a decade ago these were not _as_ stable or accessible. This post is based on source code from my [**py2sms** repository][py2sms], which showcased how you could do this. This was forked from another project that was based on another SMS API service.
 
 ## The goal
 
@@ -125,6 +125,31 @@ def sms(pnumber,msg):
 # sms(phonenumber,'sending this text message')
 # sms(5551235555,'Hello World!')
 ```
+
+### Documentation!
+
+A project can always use a README. It helps people get started in your codebase and understand further context behind decisions, design, and more. 
+
+```md
+# About
+
+Fork of the py2sms project which was based off the <b>textbelt</b> service.
+
+Due to limited functionality and inconsistent service, this implementation will utilize the <b>eztexting</b> service instead.
+
+# How To Use
+
+You will need to create a <b>free</b> account at <a href="https://www.eztexting.com/start?pid=free">eztexting.com</a>, and add your username/password to the credentials file.
+
+The script pulls this info to make requests to the RESTful API. 
+
+You are alotted a total of 500 messages per month with this service. 
+
+# API Documentation
+
+https://www.eztexting.com/developers/sms-api-documentation/rest
+```
+
 
 <!-- References -->
 [py2sms]: https://github.com/tcarrio/py2sms
