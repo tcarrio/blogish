@@ -1,7 +1,7 @@
 +++
 title = "MS Teams SameSite Scramble"
 slug = "teams-samesite-scramble"
-date = 2023-07-29
+date = 2020-02-11
 
 [extra]
 author = "Tom Carrio"
