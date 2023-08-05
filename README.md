@@ -1,4 +1,4 @@
-# blogish
+# 0xc
 
 Notes and posts and more gathered and altogether maniacally tossed together.
 

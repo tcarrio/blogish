@@ -12,7 +12,7 @@ taxonomies = [
 ]
 
 [extra]
-after_dark_title = "blogish :: notes by tom carrio"
+after_dark_title = "0xc :: ramblings from tom carrio"
 after_dark_menu = [
     {url = "$BASE_URL", name = "Home"},
     # {url = "$BASE_URL/categories", name = "Categories"},

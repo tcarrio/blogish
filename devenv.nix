@@ -2,7 +2,7 @@
 
 {
   # https://devenv.sh/basics/
-  env.PROJECT_NAME = "blogish";
+  env.PROJECT_NAME = "0xc";
 
   # https://devenv.sh/packages/
   packages = with pkgs; [
