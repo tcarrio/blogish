@@ -1,7 +1,7 @@
 # The URL the site will be built for
 base_url = "https://blog.carrio.dev"
 
-theme = "after-dark"
+theme = "0xc-dark"
 
 output_dir = "public"
 
@@ -13,8 +13,8 @@ taxonomies = [
 
 [markdown]
 highlight_code = true
-highlight_theme = "ayu-dark"
-# highlight_theme = "base16-ocean-dark"
+highlight_theme = "base16-ateliersavanna.dark"
+extra_syntaxes_and_themes = ["themes/0xc-dark/highlight_themes"]
 
 [extra]
 after_dark_title = "0xc :: ramblings from tom carrio"

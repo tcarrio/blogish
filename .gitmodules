@@ -1,9 +1,0 @@
-[submodule "themes/Seje2"]
-	path = themes/Seje2
-	url = https://github.com/eatradish/Seje2.git
-[submodule "themes/zerm"]
-	path = themes/zerm
-	url = https://github.com/ejmg/zerm.git
-[submodule "themes/after-dark"]
-	path = themes/after-dark
-	url = https://github.com/getzola/after-dark.git
