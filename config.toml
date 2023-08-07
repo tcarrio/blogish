@@ -24,6 +24,7 @@ after_dark_menu = [
     {url = "$BASE_URL/tags", name = "Tags"},
     {url = "https://tom.carrio.dev", name = "Profile"},
     {url = "https://github.com/tcarrio", name = "GitHub"},
+    {url = "https://docs.google.com/viewer?url=https://docs.google.com/document/d/1ur6r_SJm0j2ETTJNG0GLsf3t671W5NuBo-RLl0-T25k/export?format=pdf", name = "CV"},
 ]
 
 
