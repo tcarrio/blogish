@@ -1,7 +1,7 @@
 +++
 title = "JSON Web Tokens: The Full Picture"
 slug = "jwt-the-full-picture-jose"
-date = 2023-08-02
+date = 2023-08-06
 
 [extra]
 author = "Tom Carrio"
