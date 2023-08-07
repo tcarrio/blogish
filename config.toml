@@ -23,6 +23,7 @@ after_dark_menu = [
     # {url = "$BASE_URL/categories", name = "Categories"},
     {url = "$BASE_URL/tags", name = "Tags"},
     {url = "https://tom.carrio.dev", name = "Profile"},
+    {url = "https://github.com/tcarrio", name = "GitHub"},
 ]
 
 
