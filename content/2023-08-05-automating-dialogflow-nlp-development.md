@@ -16,6 +16,32 @@ tags = ["ml", "nlp", "automation", "swe"]
 
 At the time I was working on the [Davis Assistant][] project at Dynatrace. After joining the team, I assisted with our project automation, TypeScript migration, and DevOps enhancements. One of my proposed projects thereafter was to completely automate our natural language processing definitions in such a way that it would also be entirely reusable inside of our codebase. Thus, not only would we have safe deployments and consistent definitions, they would be utilized inside of our APIs and hook directly into the domain logic of our system. As an example, this means the same enums powering various event definitions in Dialogflow training phrases could also be utilized in logic in our API handlers relating to them.
 
+## Dialogflow's Natural Language Processing Model
+
+I won't do a deep dive into this subject, as it's now been several years and I definitely wouldn't call myself an expert on it at this point. However, this gives you an idea of the various elements involved in defining an NLP model with Dialogflow, which is what the later solution automates.
+
+### Entities
+
+Referred to as Entity Types, these allow you to control how the user input data gets extracted. There are many predefined entity, which I'll refer to as _default entities_ later on in the automation. The entity type allows us to define many entries for a single entity, or synonyms. So you could recognize multiple specific _types_ of **fruit**, like strawberries grapes and oranges, as a **fruit** entity.
+
+### Intents
+
+An Intent will categorize the intention of the user interaction. What these eventually break down for us, in the context of a tool like Davis Assistant, are the various user journeys of interactions with the bot. Think of the sentence "Show me the **Apdex** for **Production** over the **last week**". We might have broken down that user journey as "application performance".
+
+For an Intent you can specify a number of _training phrases_ and _parameters_. The _training phrases_ can reference various entity types, custom or default, parts, and more. These become particularly useful as defined variables since many of the training phrases we'll build out end up being permutations of the same input parameters, sometimes including a date or sometimes including an application name, etc. The _parameters_ allow you to specify parts of the user input that you might want to extract, effectively acting as parameters to the intent _handlers_ in our service.
+
+### Events
+
+While intents are typically matched when users provide some input phrase, we can also utilize events to trigger intents. This is particularly useful for directing user interactions in a similar fashion to invoking callbacks on various functionality in a system.
+
+### Context
+
+An important component of our design was to support specific user's and their data only during the lifecycle of their requests. When someone from Average Joe Gym says "Hey Google, talk to Davis Assistant" and asks a question about their website, we don't need data about their tenant leaking into the rest of our user's requests. We can utilize a context to fulfill metadata relevant to processing user input, such as application and service names and more that are available inside the Dynatrace tenants. We fulfill this context prior to executing the user action as best as possible so that user's can naturally interact with Davis Assistant. Otherwise, references to your applications, like "the blog", simply mean nothing to us.
+
+### Webhooks
+
+Webhooks are very common in the industry today, and we can utilize them with Dialogflow to allow them to direct the processed user input to our services. When user input is processed and in intent and its parameters are determined, we'll receive a request to our Router which handles the validation and forwarding of the request to our internal service for handling and responding to user interactions.
+
 ## Research
 
 Various tools were looked at in terms of how to support such a feature. Infrastructure-as-Code tools at the time didn't support general purpose programming languages and general platforms, it was typically one or the other. Newer projects today may not have this limitation, such as Pulumi, but because of that a custom solution was the final option for how we would implement such functionality.
