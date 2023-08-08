@@ -17,7 +17,7 @@ highlight_theme = "base16-ateliersavanna.dark"
 extra_syntaxes_and_themes = ["themes/0xc-dark/highlight_themes"]
 
 [extra]
-after_dark_title = "0xc :: ramblings from tom carrio"
+after_dark_title = "0xc :: a blog by tcarrio on tech, open source, and more"
 after_dark_menu = [
     {url = "$BASE_URL", name = "Home"},
     # {url = "$BASE_URL/categories", name = "Categories"},
