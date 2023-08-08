@@ -14,7 +14,7 @@ tags = ["swe", "open source", "feature flags"]
 
 Feature flags are a way to dynamically control the capabilities of software, often with granularity to specific users, regions, and more. Flagging empowers companies to experiment with new features, and companies like Spotify, Duolingo, and Google use these heavily to prove out their hypotheses around generating better user experiences and products. It can be as simple as flipping the title of a landing page to an entire suite of features in the product- the possibilities are almost endless.
 
-This is often times pretty simple, and in the code could be done with a simple `if/else` block:
+This is often times pretty simple, and in the code could be done with a basic `if/else` block:
 
 ```tsx
 const {flagService} = useContext('FeatureFlagging');
