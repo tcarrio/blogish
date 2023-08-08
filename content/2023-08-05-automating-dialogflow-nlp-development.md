@@ -2,7 +2,6 @@
 title = "Automating NLP Model Development with Dialogflow"
 slug = "automate-dialogflow-nlp"
 date = 2023-08-05
-draft = true
 
 [extra]
 author = "Tom Carrio"
