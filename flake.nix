@@ -47,4 +47,7 @@
         }
       );
     };
+
+    nixConfig.bash-prompt = "\[0xc\]$ ";
+
 }
