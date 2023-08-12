@@ -1,8 +1,7 @@
 +++
 title = "Nix Flakes Starter"
 slug = "nix-flakes-starter"
-date = 2023-08-08
-draft = true
+date = 2023-08-11
 
 [extra]
 author = "Tom Carrio"
@@ -78,12 +77,171 @@ The `description` is very straightforward, but let's break down the remaining at
 
 <!-- TODO -->
 
+The `inputs` schema allows the definition of zero or more flakes as references to the `outputs` schema. Any external requirements for the flake will be defined here, whether it's a CLI tool, library, or service.
+
+The `inputs` allows you to define any number of flake inputs as local paths, Git repositories over SSH or HTTPS, and special shorthands for GitHub.
+
+```nix
+inputs = {
+    # specifying a GitHub repository by org/repo and branch name ("master")
+    nixpkgs.url = "github:NixOS/nixpkgs/master";
+
+    # specifying a Git repository by URL, using HTTPS or SSH protocol
+    https-example.url = "git+https://git.example.test/org/repo?ref=branch&rev=deadbeef";
+    ssh-example.url = "git+ssh://git.example.test/org/repo?ref=branch&rev=deadbeef";
+
+    # specifying a shallow clone (won't clone the `.git` directory)
+    shallow-clone-example.url = "git+file:/local/project/path?shallow=1";
+
+    # specifying a local directory
+    relative-path-dir-example.url = "path:/local/project/path";
+    absolute-path-dir-example.url = "/local/project/path"
+
+    # specifying a non-flake input
+    not-a-flake = {
+        url = "github:0xc/nonflake/branch";
+        flake = false;
+    };
+
+    # specifying that the dependency's `inputs.nixpkgs` should inherit from this flake
+    inherit-nixpkgs-example = {
+        url = "github:another/example";
+        inputs.nixpkgs.follows = "nixpkgs";
+    };
+}
+```
+
+These inputs and their controls give flakes substantially more power over deterministic build processes and consistency across the dependencies utilized within the inputs and the flake definitions' resources.
+
 ### Outputs
 
-<!-- TODO -->
+The magic of a flake. This is where we actually define the resources of a flake, and the schema provides us several mechanisms for things like development shells, applications, build targets, overlays, and more.
+
+#### Applications
+
+These are predefined run targets in your flake. These are suitable for packaging your application so you can execute it consistently.
+
+Utilized with the `nix run` command. Within the outputs, you can specify these by doing:
+
+```nix
+apps.${system}.<target-name> = {
+    type = "app";
+    program = "run-the-thing";
+};
+```
+
+This can be executed using `nix run .#target-name`.
+
+If you want to execute this with arguments you would run `nix run .#target-name -- ...`
+
+#### Development shells
+
+Dev shells are an extremely useful feature of flakes. There are some differences to the legacy Nix shell and the new `devShells` functionality of Nix flakes.
+
+**TODO: Add more info on these differences**
+
+You can define `devShells` in the `outputs`, and the most convenient way is using the `mkShell` function exposed in the `nixpkgs` input argument. Suppose you have the nixpkgs repository input as `pkgs`, then you would be able to do
+
+```nix
+outputs = { self, pkgs }: {
+    devShells = {
+        default = pkgs.mkShell {
+            packages = [pkgs.git];
+        };
+
+        go = pkgs.mkShell {
+            packages = [pkgs.go];
+        }
+    };
+};
+```
+
+The default target can be invoked with `nix develop .` and in this case will provide the `git` package, available in your PATH.
+
+To invoke the `go` target, you would do `nix develop .#go`. Then we'd have the Go toolchain loaded and available so we could run or compile some Go code with `go build main.go`.
+
+
+#### Overlays
+
+Overlays are an interesting albeit somewhat advanced topic in Nix, but the goal of overlays is to support advanced flake customization capabilities, such as overriding packages within a flake. Overlays supercedes an old approach to this which was limited in scope to this one simple use case, called `packageOverride` and `overridePackages`.
+
+Overlays are defined as a nested function whose first argument is `final` and second argument is `prev`. 
+
+The following diagram visualizes the flow of the overlay function components throughout the system.
+
+```
++---------------------+-----------------------+------------------------------+
+|                     |                       |                              |
+|                     |                       |                              |
+|  +-------------+    |  +-------------+      |  +--------------+            |
+|  |             |    |  |             |      |  |              |            |
+|  +-----+       |    |  +-----+       |      |  +-----+        |            |
++->|final|       |    +->|final|       |      +->|final|        |            |
+   +-----+       |       +-----+       |         +-----+        |            |
+   |             |       |             |         |              |            |
+   |    main     +---+   |             +--+      |              +------+     |
+   |             |   |   |             |  |      |              |      |     |
+   |             |   |   +-----+       |  |      +-----+        |      |     |
+   |             |   +-->|prev |       |  |    +>|prev |        |      |     |
+   |             |   |   +-----+       |  |    | +-----+        |      |     |
+   |             |   |   |             |  |    | |              |      |     |
+   +-------------+   |   +-------------+  |    | +--------------+      |     |
+                     |                    |    |                       |     |
+                     |                    |    |                       |     |
+                     |                    |    |                       |     |
+                     |                  +-v--+ |                     +-v--+  |
+                     |                  |    | |                     |    |  |
+                     +------------------> // +-+---------------------> // +--+
+                                        +----+                       +----+
+```
+
+Within your flake, you can define overlays with the following:
+
+```nix
+# Specifying an overlay by "name"
+overlays."<name>" = final: prev: { };
+# Specifying the default overlay
+overlays.default = final: prev: { };
+```
+
+These can be utilized in interesting ways, a good example is how the NodeJS runtimes and NPM dependencies like [Yarn] can be configured with overlays to ensure the correct underlying runtime is used for the package.
+
+My [devshells] repository showcases this. A _paraphrased_ version of the code would be:
+
+```nix
+let rec
+    node16Overlay = self: super: {
+        nodejs = self.nodejs-16_x;
+    };
+    yarn16Overlay = self: super: {
+        yarn = super.yarn.override {
+            nodejs = self.nodejs-16_x;
+        };
+    };
+    pkgsNode16 = import nixpkgs {
+        inherit system;
+        overlays = [node16Overlay yarn16Overlay];
+    };
+in {
+    devShells = {
+        default = pkgs.mkShell {
+            packages = with pkgsNode16; [
+                nodejs-16_x
+                yarn
+            ]
+        }
+    }
+}
+```
+
+#### And more
+
+There are _even more_ use cases for Nix flake outputs, that I won't dive into much here. The resources mentioned throughout this article are extremely useful though, and there is tremendous depth to Nix that you can dive into.
 
 
 <!-- References -->
 
 [nixos-wiki-flakes]: https://nixos.wiki/wiki/Flakes
 [flake schema]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html#flake-format
+[Yarn]: https://yarnpkg.com/
+[devshells]: https://github.com/tcarrio/devshells
