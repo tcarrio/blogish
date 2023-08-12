@@ -151,7 +151,7 @@ outputs = { self, pkgs }: {
 
         go = pkgs.mkShell {
             packages = [pkgs.go];
-        }
+        };
     };
 };
 ```
