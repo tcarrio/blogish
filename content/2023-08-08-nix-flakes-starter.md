@@ -7,7 +7,7 @@ date = 2023-08-11
 author = "Tom Carrio"
 
 [taxonomies]
-tags = ["functional", "open source", "automation", "build tools"]
+tags = ["functional", "open source", "automation", "build tools", "nix"]
 +++
 
 ## What is Nix
