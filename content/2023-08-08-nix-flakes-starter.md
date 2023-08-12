@@ -209,7 +209,7 @@ These can be utilized in interesting ways, a good example is how the NodeJS runt
 My [devshells] repository showcases this. A _paraphrased_ version of the code would be:
 
 ```nix
-let rec
+let
     node16Overlay = self: super: {
         nodejs = self.nodejs-16_x;
     };
@@ -222,15 +222,15 @@ let rec
         inherit system;
         overlays = [node16Overlay yarn16Overlay];
     };
-in {
+in rec {
     devShells = {
         default = pkgs.mkShell {
             packages = with pkgsNode16; [
                 nodejs-16_x
                 yarn
-            ]
-        }
-    }
+            ];
+        };
+    };
 }
 ```
 
