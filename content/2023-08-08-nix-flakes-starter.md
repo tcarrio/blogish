@@ -95,7 +95,7 @@ inputs = {
 
     # specifying a local directory
     relative-path-dir-example.url = "path:/local/project/path";
-    absolute-path-dir-example.url = "/local/project/path"
+    absolute-path-dir-example.url = "/local/project/path";
 
     # specifying a non-flake input
     not-a-flake = {
