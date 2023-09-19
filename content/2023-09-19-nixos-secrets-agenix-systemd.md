@@ -107,9 +107,12 @@ We'll break this out into four sections, but they can all be managed in one file
 
 Agenix itself mounts files with Systemd in the `run-agenix.mount` unit. As such, you can utilize the mechanism of Systemd service definitions, namely `after` and `wants`, in order to ensure that the `agenix` secret mounts have been completed prior to starting your service. In this way, you can be sure that the secret is available.
 
+If you want to read more on NixOS configuration, you can check out my [nix-config] repository which maintains several of my systems.
+
 <!-- References -->
 
 [NixOS Manual]: https://nixos.org/manual/
 [NixOS Secrets Wiki]: https://nixos.wiki/wiki/Comparison_of_secret_managing_schemes
 [age]: https://age-encryption.org/
 [agenix]: https://github.com/ryantm/agenix
+[nix-config]: https://github.com/tcarrio/nix-config
