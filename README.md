@@ -23,16 +23,18 @@ Notes and posts and more gathered and altogether maniacally tossed together.
 I'm going to assume you're me and have Devenv installed because I'm the only real consumer of said repository so if I'm not me then something has gone horribly wrong. Tag along.
 
 ```bash
-devenv shell
+nix develop
 
-# (devenv) host:repo username$ ...
+# $ Started devshell for 0xc
+#
+# [0xc]$ ...
 
 zola serve
 
 # Web server is available at http://127.0.0.1:1111...
 ```
 
-That's it. [Devenv] uses [Nix] under the hood and drops you into a shell with all tooling necessary. This repository is pretty lightweight with just `git` and `zola` but the premise applies everywhere. Feel free to check it out!
+That's it. [Nix] drops you into a shell with all tooling necessary. This repository is pretty lightweight with just `git` and `zola` but the premise applies everywhere. Feel free to check it out!
 
 <!-- References: in no particular order but maybe ascending -->
 
