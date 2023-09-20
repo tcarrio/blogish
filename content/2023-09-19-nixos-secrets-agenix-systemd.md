@@ -38,7 +38,9 @@ First step degenerating secrets with `agenix` is by setting up a `secrets.nix` f
 
 > This is a hint for those who are not familiar, but the system has its own SSH public and private keys in the `/etc` directory. If these exist then `agenix` will utilize those to decrypt the mounted secrets.
 
-The output of the Nix expression is a map set. Each of these is a path, relative to the current directory of secrets.nex, and the public keys that the secret should be encrypted for. An example of the secrets.nix file:
+### secrets.nix
+
+The output of the Nix expression is a map set. Each of these is a path, relative to the current directory of secrets.nix, and the public keys that the secret should be encrypted for. An example of the secrets.nix file:
 
 ```nix
 let
