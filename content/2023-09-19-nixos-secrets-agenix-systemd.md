@@ -14,7 +14,9 @@ tags = ["nix", "open source", "secrets", "sysadmin"]
 
 I will assume that you're here to learn more about managing secrets on a NixOS system. If you want to learn more about NixOS itself, check out the [NixOS manual]. There is a lot to catch up on.
 
-> FYI, I have more updates to push to this blog post, but I want it available in case others run into the same issue I did for utilizing `agenix` in Systemd service units.
+> ℹ️ I may add more updates to this blog post, but I want it available in case others run into the same issue I did for utilizing `agenix` in Systemd service units.
+
+> 🎙️I do make use of voice to text tooling, but I try to correct as much as possible.
 
 ## Managing Secrets on NixOS
 
@@ -30,11 +32,13 @@ Well, I was building off an existing blog post by Tailscale on how to configure 
 
 So in this post, I'll demonstrate this in the way I implemented the NixOS configuration to utilize `agenix` for automatic Tailscale connection with a secret token, managed in code securely with `age` encryption.
 
-## TODO
+## Generating secrets with agenix
 
-!! I have to expand on a lot of this content more, but I want to dump some code snippets before I lose context and sleep.
+First step degenerating secrets with `agenix` is by setting up a `secrets.nix` file this file should define the public SSH keys of hosts or users who are able to decrypt the secrets.
 
-### secrets.nix
+> This is a hint for those who are not familiar, but the system has its own SSH public and private keys in the `/etc` directory. If these exist then `agenix` will utilize those to decrypt the mounted secrets.
+
+The output of the Nix expression is a map set. Each of these is a path, relative to the current directory of secrets.nex, and the public keys that the secret should be encrypted for. An example of the secrets.nix file:
 
 ```nix
 let
@@ -45,9 +49,15 @@ in
 }
 ```
 
+Once this file is defined, `agenix` now understands within the context of the directory how to encrypt secrets with `age`. So, you can execute the `agenix` command in order to open a terminal editor, determined by the configured `VISUAL` environment variables, in which you can then insert the content and after saving the buffer will be encrypted to the desired file location.
+
+```
+agenix -e tailscale.age
+```
+
 ### tailscale.nix
 
-We'll break this out into four sections, but they can all be managed in one file.
+I have broken out the tailscale.nix file into its own expression that can be imported by an exos configuration. It encapsulates all of the necessary configurations, namely installing the tailscale package, enabling the tailscale service, enabling port forwarding for the tailscale service, configuring a one-off Systemd unit file which references the agents mounted secret file. By referencing the content of that file in line within the Systemd unit script, the encrypted token is now available in plain text for the tailscale Auto configuration.
 
 ```nix
 # tailscale.nix
