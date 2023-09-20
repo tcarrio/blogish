@@ -59,7 +59,9 @@ agenix -e tailscale.age
 
 ### tailscale.nix
 
-I have broken out the tailscale.nix file into its own expression that can be imported by an exos configuration. It encapsulates all of the necessary configurations, namely installing the tailscale package, enabling the tailscale service, enabling port forwarding for the tailscale service, configuring a one-off Systemd unit file which references the agents mounted secret file. By referencing the content of that file in line within the Systemd unit script, the encrypted token is now available in plain text for the tailscale Auto configuration.
+I have broken out the tailscale.nix file into its own expression that can be imported by an exos configuration. It encapsulates all of the necessary configurations, namely installing the tailscale package, enabling the tailscale service, enabling port forwarding for the tailscale service, configuring a one-off Systemd unit file which references the agents mounted secret file. By referencing the content of that file in line within the Systemd unit script, the encrypted token is now available in plain text for the tailscale auto-configuration.
+
+The last important piece is that you must wait for the `run-agenix.d.mount` unit in this unit, otherwise there is the potential for a race condition where the `agenix` secret has not been decrypted to the secure location you are referencing, those resulting in no content being passed for the token.
 
 ```nix
 # tailscale.nix
