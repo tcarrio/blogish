@@ -36,7 +36,7 @@ Documentation separate from code tends to decay. Once it's committed, the drift 
 
 ```nix
 {
-    services."${serviceName}" = {
+    services.deathStar = {
         enabled = true;
         customConfig = ''
             something something dark side
