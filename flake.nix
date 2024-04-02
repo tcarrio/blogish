@@ -1,9 +1,14 @@
 {
   description = "0xc dev shell";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-  outputs = { self, nixpkgs }:
+    nix-formatter-pack.url = "github:Gerschtli/nix-formatter-pack";
+    nix-formatter-pack.inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, nix-formatter-pack }:
     let
       # Systems supported
       allSystems = [
@@ -43,6 +48,18 @@
                 echo "zola version $(zola --version)"
                 echo
             '';
+          };
+        }
+      );
+
+      formatter = forAllSystems (system:
+        nix-formatter-pack.lib.mkFormatter {
+          pkgs = nixpkgs.legacyPackages.${system};
+          config.tools = {
+            alejandra.enable = false;
+            deadnix.enable = true;
+            nixpkgs-fmt.enable = true;
+            statix.enable = true;
           };
         }
       );
