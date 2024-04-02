@@ -1,5 +1,4 @@
 +++
-title = "Content"
-paginate_by = 9
+title = "Tom Carrio"
 sort_by = "date"
 +++

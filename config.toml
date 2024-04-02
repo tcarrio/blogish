@@ -5,6 +5,8 @@ theme = "0xc-dark"
 
 output_dir = "public"
 
+generate_feed = true
+
 taxonomies = [
     # You can enable/disable RSS
     {name = "categories", feed = true},
@@ -17,14 +19,26 @@ highlight_theme = "base16-ateliersavanna.dark"
 extra_syntaxes_and_themes = ["themes/0xc-dark/highlight_themes"]
 
 [extra]
-after_dark_title = "0xc :: a blog by tcarrio on tech, open source, and more"
+after_dark_home_photo = "https://avatars.githubusercontent.com/u/8659099?v=4"
+after_dark_title = "tcarrio :::"
+after_dark_subtitles = [
+    "staff engineer",
+    "observability expert",
+    "engineering manager",
+    "open source advocate"
+]
 after_dark_menu = [
+    {url = "$BASE_URL", name = "Home", icon = "house-simple"},
+    {url = "$BASE_URL/blog", name = "Blog", icon = "article"},
+    {url = "https://github.com/tcarrio", name = "GitHub", icon = "github-logo"},
+    {url = "https://types.pl/@0xc", name = "Mastodon", icon = "mastodon-logo"},
+    {url = "https://docs.google.com/viewer?url=https://docs.google.com/document/d/1ur6r_SJm0j2ETTJNG0GLsf3t671W5NuBo-RLl0-T25k/export?format=pdf", name = "CV", icon = "read-cv-logo"},
+]
+after_dark_blog_title = "0xc :: a blog by tcarrio on tech, open source, and more"
+after_dark_blog_menu = [
     {url = "$BASE_URL", name = "Home"},
-    # {url = "$BASE_URL/categories", name = "Categories"},
+    {url = "$BASE_URL/blog", name = "Blog"},
     {url = "$BASE_URL/tags", name = "Tags"},
-    {url = "https://tom.carrio.dev", name = "Profile"},
-    {url = "https://github.com/tcarrio", name = "GitHub"},
-    {url = "https://docs.google.com/viewer?url=https://docs.google.com/document/d/1ur6r_SJm0j2ETTJNG0GLsf3t671W5NuBo-RLl0-T25k/export?format=pdf", name = "CV"},
 ]
 
 
