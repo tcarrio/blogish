@@ -34,12 +34,13 @@ menu = [
 ]
 only_icons = true
 photo = "https://avatars.githubusercontent.com/u/8659099?v=4"
-title = ":: tcarrio ::"
+title = "<i class=\"ph ph-bounding-box\"></i> Tom Carrio <i class=\"ph ph-graph\"></i>"
 subtitles = [
-    "staff engineer",
-    "observability expert",
-    "engineering manager",
-    "open source advocate"
+    "<i class=\"ph ph-map-pin\"></i> Detroit, MI",
+    "<i class=\"ph ph-code-block\"></i> Staff Engineer",
+    "<i class=\"ph ph-tree-view\"></i> Observability Expert",
+    "<i class=\"ph ph-users-three\"></i> Engineering Manager",
+    "<i class=\"ph ph-git-branch\"></i> Open Source Maintainer"
 ]
 
 [extra.after_dark.blog]
