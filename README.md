@@ -10,17 +10,18 @@ Notes and posts and more gathered and altogether maniacally tossed together.
 - [GitHub Pages]
 - [Zola Deploy Action]
 - [Zola After Dark Theme]
-- [Devenv]
+- [Direnv]
+- [Nix]
 
 [Zola] is a static site generator written in Rust which provides the bulk of functionality in this blog. Zola has many themes available, in my case I'm using the [Zola After Dark Theme]. The repository is kept very minimal since I'm utilizing [Git] submodules to reference the external repository.
 
 [GitHub Actions] is utilized for deploying to [GitHub Pages]. The [Zola Deploy Action] provides a simple way to configure CI jobs to execute. In my case, I am able to build for PRs and publish in `main`.
 
-[Devenv] makes it simple across systems to quickly start up a shell with a Zola executable in the path and everything else it needs.
+[Nix] makes it simple across systems to quickly start up a shell with a Zola executable in the path and everything else it needs.
 
 ## develop
 
-I'm going to assume you're me and have Devenv installed because I'm the only real consumer of said repository so if I'm not me then something has gone horribly wrong. Tag along.
+I'm going to assume you're me and have [Nix] and [Direnv] installed because I'm the only real consumer of said repository so if I'm not me then something has gone horribly wrong. Tag along.
 
 ```bash
 nix develop
@@ -38,7 +39,7 @@ That's it. [Nix] drops you into a shell with all tooling necessary. This reposit
 
 <!-- References: in no particular order but maybe ascending -->
 
-[Devenv]: https://devenv.sh
+[Direnv]: https://direnv.net/
 [Git]: https://git-scm.org
 [GitHub Actions]: https://github.com/features/actions
 [GitHub Pages]: https://pages.github.com/
