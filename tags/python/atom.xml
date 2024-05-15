@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - python</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/python/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2015-06-11T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/python/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Python SMS scripting</title>
+        <published>2015-06-11T00:00:00+00:00</published>
+        <updated>2015-06-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/python-sms-scripting/"/>
+        <id>https://blog.carrio.dev/blog/python-sms-scripting/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/python-sms-scripting/">&lt;h2 id=&quot;foreword-from-the-future-magic-hands&quot;&gt;Foreword from the future :magic-hands:&lt;&#x2F;h2&gt;
+&lt;p&gt;This post is a simple summary of how you can accomplish SMS text messaging via web APIs. Services exist today like Twilio that are massively popular, but a decade ago these were not &lt;em&gt;as&lt;&#x2F;em&gt; stable or accessible. This post is based on source code from my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;py2sms&quot;&gt;&lt;strong&gt;py2sms&lt;&#x2F;strong&gt; repository&lt;&#x2F;a&gt;, which showcased how you could do this. This was forked from another project that was based on another SMS API service.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-goal&quot;&gt;The goal&lt;&#x2F;h2&gt;
+&lt;p&gt;We&#x27;re going to build a simple script showcasing how you can send text messages with Python. The service I&#x27;m going to utilize for this is &lt;a href=&quot;https:&#x2F;&#x2F;eztexting.com&quot;&gt;eztexting&lt;&#x2F;a&gt;. This will utilize a popular HTTP library and be implemented for Python 3.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-api&quot;&gt;The API&lt;&#x2F;h2&gt;
+&lt;p&gt;The API for sending SMS messages with &lt;a href=&quot;https:&#x2F;&#x2F;eztexting.com&quot;&gt;eztexting&lt;&#x2F;a&gt; allows you to POST data to an endpoint with your authentication info (username&#x2F;password), a list of numbers, and the message content. The format is optional, and in this case we&#x27;re going to prefer JSON since it&#x27;s straightforward to define Python dictionaries and serialize them to JSON with the &lt;code&gt;json&lt;&#x2F;code&gt; package.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;http-requests&quot;&gt;HTTP requests&lt;&#x2F;h2&gt;
+&lt;p&gt;While Python has standard libraries for working with HTTP, they can feel &lt;em&gt;clunky&lt;&#x2F;em&gt; in regards to developer experience. You have to handle a lot of defaults and calls and objects to do this yourself. Due to this, I&#x27;m going to rely on [requests], a popular HTTP request library for Python. &lt;strong&gt;requests&lt;&#x2F;strong&gt; touts itself as &amp;quot;HTTP for Humans. An elegant and simple HTTP library for Python, built for human beings.&amp;quot; I would request this for anyone not doing low-level networking type of work with Python, and even then consider whether you really need to subject yourself to the world of &lt;code&gt;urllib`` and &lt;&#x2F;code&gt;http`.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;coding-it-up&quot;&gt;Coding it up&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;api-credentials&quot;&gt;API Credentials&lt;&#x2F;h3&gt;
+&lt;p&gt;This is just a proof of concept, so in this solution I&#x27;m going to have a very basic approach to secrets management and the overall script safety. To start off, we&#x27;re going to need a way to load credentials without embedding them in our version control. In my case, I define a &lt;code&gt;credentials&lt;&#x2F;code&gt; file which I configure &lt;code&gt;git&lt;&#x2F;code&gt; to ignore with a &lt;code&gt;.gitignore&lt;&#x2F;code&gt; entry:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;# .gitignore:
+&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;credentials
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now I can throw my username and password for eztexting in there&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;# &#x2F;credentials
+&lt;&#x2F;span&gt;&lt;span&gt;a_username
+&lt;&#x2F;span&gt;&lt;span&gt;def1n1t3lyMyP@ssword
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;dependencies&quot;&gt;Dependencies&lt;&#x2F;h3&gt;
+&lt;p&gt;Now let&#x27;s make sure we have our dependencies. In my case I&#x27;m using &lt;code&gt;requests&lt;&#x2F;code&gt;, &lt;code&gt;pprint&lt;&#x2F;code&gt;, and &lt;code&gt;json&lt;&#x2F;code&gt;. The first two need to be installed in your system. There are better ways to do this than global installs, like a virtualenv. You would run this inside there:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pip&lt;&#x2F;span&gt;&lt;span&gt; install requests pprint
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And then you can import these with&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;py&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-py &quot;&gt;&lt;code class=&quot;language-py&quot; data-lang=&quot;py&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;json
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;pprint
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;requests
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;http-requests-1&quot;&gt;HTTP Requests&lt;&#x2F;h3&gt;
+&lt;p&gt;Next, we&#x27;ll create an HTTP request with the necessary URL and body using my credentials:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;py&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-py &quot;&gt;&lt;code class=&quot;language-py&quot; data-lang=&quot;py&quot;&gt;&lt;span&gt;cred = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;open&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;credentials&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;r&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;readlines&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;addr = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;https:&#x2F;&#x2F;app.eztexting.com&#x2F;sending&#x2F;messages?format=json&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;number = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;str&lt;&#x2F;span&gt;&lt;span&gt;(pnumber)
+&lt;&#x2F;span&gt;&lt;span&gt;message= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;str&lt;&#x2F;span&gt;&lt;span&gt;(msg)
+&lt;&#x2F;span&gt;&lt;span&gt;content = {
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;User&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: cred[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;].&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;strip&lt;&#x2F;span&gt;&lt;span&gt;(), 
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Password&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: cred[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;].&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;strip&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;PhoneNumbers[]&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;555-123-4567,&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Message&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Hello world&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;r = requests.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;post&lt;&#x2F;span&gt;&lt;span&gt;(addr,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span&gt;=content)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This technically works as is, other than eztexting blowing up about the number. A successful response is going to be indicated with a 204, &#x27;No Content&#x27;, HTTP status code.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;wrapping-it-all-up&quot;&gt;Wrapping it all up&lt;&#x2F;h3&gt;
+&lt;p&gt;Let&#x27;s check the status and log errors, and finally parameterize the logic so it can be called as a function by other modules. Here&#x27;s the final code afterward:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;#  _____   __     __  ___     _____   __  __    _____ 
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# |  __ \  \ \   &#x2F; &#x2F; |__ \   &#x2F; ____| |  \&#x2F;  |  &#x2F; ____|
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# | |__) |  \ \_&#x2F; &#x2F;     ) | | (___   | \  &#x2F; | | (___  
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# |  ___&#x2F;    \   &#x2F;     &#x2F; &#x2F;   \___ \  | |\&#x2F;| |  \___ \ 
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# | |         | |     &#x2F; &#x2F;_   ____) | | |  | |  ____) |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# |_|         |_|    |____| |_____&#x2F;  |_|  |_| |_____&#x2F; 
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;#                                                     
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;json
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;pprint
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;requests
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# &amp;#39;pip install requests&amp;#39; to install this library
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;open&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;credentials&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;,&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;r&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;as &lt;&#x2F;span&gt;&lt;span&gt;c:
+&lt;&#x2F;span&gt;&lt;span&gt;		cred = c.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;readlines&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;sms&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pnumber&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;msg&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;	addr = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;https:&#x2F;&#x2F;app.eztexting.com&#x2F;sending&#x2F;messages?format=json&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;	number = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;str&lt;&#x2F;span&gt;&lt;span&gt;(pnumber)
+&lt;&#x2F;span&gt;&lt;span&gt;	message= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;str&lt;&#x2F;span&gt;&lt;span&gt;(msg)
+&lt;&#x2F;span&gt;&lt;span&gt;	content = {
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;User&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: cred[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;].&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;strip&lt;&#x2F;span&gt;&lt;span&gt;(), 
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Password&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: cred[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;].&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;strip&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;PhoneNumbers[]&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: number,
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Message&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: message}
+&lt;&#x2F;span&gt;&lt;span&gt;	pprint.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pprint&lt;&#x2F;span&gt;&lt;span&gt;(content)
+&lt;&#x2F;span&gt;&lt;span&gt;	r = requests.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;post&lt;&#x2F;span&gt;&lt;span&gt;(addr,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span&gt;=content)
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;r.status_code != &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;204&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;		pprint.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pprint&lt;&#x2F;span&gt;&lt;span&gt;(r.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;json&lt;&#x2F;span&gt;&lt;span&gt;())
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;else&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Status code 204: No content returned&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# To send a text message call the function with
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# sms(phonenumber,&amp;#39;sending this text message&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# sms(5551235555,&amp;#39;Hello World!&amp;#39;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;documentation&quot;&gt;Documentation!&lt;&#x2F;h3&gt;
+&lt;p&gt;A project can always use a README. It helps people get started in your codebase and understand further context behind decisions, design, and more. &lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;md&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-md &quot;&gt;&lt;code class=&quot;language-md&quot; data-lang=&quot;md&quot;&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;# About
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;Fork of the py2sms project which was based off the &amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;textbelt&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; service.
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;Due to limited functionality and inconsistent service, this implementation will utilize the &amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;eztexting&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; service instead.
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;# How To Use
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;You will need to create a &amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;free&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; account at &amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;a &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;href&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;https:&#x2F;&#x2F;www.eztexting.com&#x2F;start?pid=free&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&amp;gt;eztexting.com&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;, and add your username&#x2F;password to the credentials file.
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;The script pulls this info to make requests to the RESTful API. 
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;You are alotted a total of 500 messages per month with this service. 
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;# API Documentation
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;https:&#x2F;&#x2F;www.eztexting.com&#x2F;developers&#x2F;sms-api-documentation&#x2F;rest
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

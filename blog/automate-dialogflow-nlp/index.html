@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Automating NLP Model Development with Dialogflow</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>7 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-08-05
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#dialogflow">Dialogflow</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#dialogflow-s-natural-language-processing-model">Dialogflow&#x27;s Natural Language Processing Model</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#entities">Entities</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#intents">Intents</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#events">Events</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#context">Context</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#webhooks">Webhooks</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#research">Research</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#dialogflow-and-nodejs">Dialogflow and NodeJS</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#migration-phase">Migration Phase</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#example-time">Example Time</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/#wrap-up">Wrap-up</a>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h2 id="dialogflow">Dialogflow</h2>
+<p><a href="https://cloud.google.com/dialogflow/">Dialogflow</a> is a natural language processing system developed by Google. It provides all the constructs necessary in order to define a natural language processing model that can intelligently infer what a user is saying, but also providing various functionality on top of this including sentiment analysis and any recognition and more</p>
+<p>At the time I was working on the <a href="https://www.Dynatrace.com/news/blog/davis-assistant-is-now-smarter-than-ever/">Davis Assistant</a> project at Dynatrace. After joining the team, I assisted with our project automation, TypeScript migration, and DevOps enhancements. One of my proposed projects thereafter was to completely automate our natural language processing definitions in such a way that it would also be entirely reusable inside of our codebase. Thus, not only would we have safe deployments and consistent definitions, they would be utilized inside of our APIs and hook directly into the domain logic of our system. As an example, this means the same enums powering various event definitions in Dialogflow training phrases could also be utilized in logic in our API handlers relating to them.</p>
+<h2 id="dialogflow-s-natural-language-processing-model">Dialogflow's Natural Language Processing Model</h2>
+<p>I won't do a deep dive into this subject, as it's now been several years and I definitely wouldn't call myself an expert on it at this point. However, this gives you an idea of the various elements involved in defining an NLP model with Dialogflow, which is what the later solution automates.</p>
+<h3 id="entities">Entities</h3>
+<p>Referred to as Entity Types, these allow you to control how the user input data gets extracted. There are many predefined entity, which I'll refer to as <em>default entities</em> later on in the automation. The entity type allows us to define many entries for a single entity, or synonyms. So you could recognize multiple specific <em>types</em> of <strong>fruit</strong>, like strawberries grapes and oranges, as a <strong>fruit</strong> entity.</p>
+<h3 id="intents">Intents</h3>
+<p>An Intent will categorize the intention of the user interaction. What these eventually break down for us, in the context of a tool like Davis Assistant, are the various user journeys of interactions with the bot. Think of the sentence &quot;Show me the <strong>Apdex</strong> for <strong>Production</strong> over the <strong>last week</strong>&quot;. We might have broken down that user journey as &quot;application performance&quot;.</p>
+<p>For an Intent you can specify a number of <em>training phrases</em> and <em>parameters</em>. The <em>training phrases</em> can reference various entity types, custom or default, parts, and more. These become particularly useful as defined variables since many of the training phrases we'll build out end up being permutations of the same input parameters, sometimes including a date or sometimes including an application name, etc. The <em>parameters</em> allow you to specify parts of the user input that you might want to extract, effectively acting as parameters to the intent <em>handlers</em> in our service.</p>
+<h3 id="events">Events</h3>
+<p>While intents are typically matched when users provide some input phrase, we can also utilize events to trigger intents. This is particularly useful for directing user interactions in a similar fashion to invoking callbacks on various functionality in a system.</p>
+<h3 id="context">Context</h3>
+<p>An important component of our design was to support specific user's and their data only during the lifecycle of their requests. When someone from Average Joe Gym says &quot;Hey Google, talk to Davis Assistant&quot; and asks a question about their website, we don't need data about their tenant leaking into the rest of our user's requests. We can utilize a context to fulfill metadata relevant to processing user input, such as application and service names and more that are available inside the Dynatrace tenants. We fulfill this context prior to executing the user action as best as possible so that user's can naturally interact with Davis Assistant. Otherwise, references to your applications, like &quot;the blog&quot;, simply mean nothing to us.</p>
+<h3 id="webhooks">Webhooks</h3>
+<p>Webhooks are very common in the industry today, and we can utilize them with Dialogflow to allow them to direct the processed user input to our services. When user input is processed and in intent and its parameters are determined, we'll receive a request to our Router which handles the validation and forwarding of the request to our internal service for handling and responding to user interactions.</p>
+<h2 id="research">Research</h2>
+<p>Various tools were looked at in terms of how to support such a feature. Infrastructure-as-Code tools at the time didn't support general purpose programming languages and general platforms, it was typically one or the other. Newer projects today may not have this limitation, such as Pulumi, but because of that a custom solution was the final option for how we would implement such functionality.</p>
+<p>Our stack was now entirely in TypeScript as previously mentioned, and so the tool itself would need to be reusable inside of that code. Since we controlled all of the components of our system we didn't need to implement this tool and such a manner to support a polyglot environment generating JSON definitions or the like. This gave us a lot of power and simplified the overall solution more, as opposed to requiring a code generator component as part of the integration.</p>
+<h2 id="dialogflow-and-nodejs">Dialogflow and NodeJS</h2>
+<p>Google provided a NodeJS SDK for Dialogflow under the NPM package <a href="https://github.com/googleapis/nodejs-dialogflow">nodejs-dialogflow</a>. This <em>was</em> a purely JavaScript package when this work started, and in our time utilizing Dialogflow we contributed the [@types/dialogflow] package in the <a href="https://github.com/DefinitelyTyped/DefinitelyTyped">DefinitelyTyped</a> repository, helped facilitate resolution around <a href="https://github.com/DefinitelyTyped/DefinitelyTyped/pull/39627">typing chaos</a> during a package migration, and eased others over to the new <a href="https://www.npmjs.com/package/@google-cloud/dialogflow">@google-cloud/dialogflow</a> package after its release.</p>
+<h2 id="migration-phase">Migration Phase</h2>
+<p>One component of the project was the ability to synchronize the definitions in our code to Dialogflow servers, but during the development phase of the project we also had to be able to continue utilizing the Dialogflow UI. As such, I also implemented a capability for importing Dialogflow resources and automatically generating all of the necessary entity types, contexts, events, intents, and more. You could simply export the Dialogflow project to a file and then run:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#5f6d64;"># given you had installed `@0xc/dialogflow-as-code
+</span><span style="color:#b16139;">dialogflow-as-code -i</span><span> ./export-dir</span><span style="color:#b16139;"> -o</span><span> ./src/dialogflow
+</span></code></pre>
+<p>And you now had an entire set of Dialogflow-as-Code source code in TypeScript that defined <strong>all</strong> of your project resources. This functionality made the continuous integration of UI changes into our source code possible until we flipped the responsibilities, eventually making our source code the source of truth for our Dialogflow project. We still had the ability to triage issues in the web interface when necessary, but due to the change our environment inconsistencies dropped significantly.</p>
+<h2 id="example-time">Example Time</h2>
+<blockquote>
+<p>You can find out more about each of these types of resources on <a href="https://cloud.google.com/dialogflow/cx/docs/concept">the Dialogflow documentation site</a>.</p>
+</blockquote>
+<pre data-lang="ts" style="background-color:#171c19;color:#87928a;" class="language-ts "><code class="language-ts" data-lang="ts"><span style="color:#5f6d64;">// Sample Entity Type Builder
+</span><span style="color:#55859b;">export const </span><span style="color:#b16139;">etFruit </span><span>= </span><span style="color:#478c90;">entityType</span><span>()
+</span><span>  .</span><span style="color:#478c90;">d</span><span>(&quot;</span><span style="color:#489963;">fruit</span><span>&quot;)
+</span><span>  .</span><span style="color:#478c90;">e</span><span>([</span><span style="color:#478c90;">syn</span><span>(&quot;</span><span style="color:#489963;">apple</span><span>&quot;), </span><span style="color:#478c90;">syn</span><span>(&quot;</span><span style="color:#489963;">strawberry</span><span>&quot;)])
+</span><span>  .</span><span style="color:#478c90;">k</span><span>(</span><span style="color:#b16139;">ek</span><span>.</span><span style="color:#b16139;">list</span><span>)
+</span><span>  .</span><span style="color:#478c90;">build</span><span>();
+</span><span>
+</span><span style="color:#5f6d64;">// Sample Entity Type
+</span><span style="color:#55859b;">export const </span><span style="color:#b16139;">etSample</span><span>: EntityType = {
+</span><span>  displayName: &quot;</span><span style="color:#489963;">sample</span><span>&quot;,
+</span><span>  entities: [{ value: &quot;</span><span style="color:#489963;">sample</span><span>&quot;, synonyms: [&quot;</span><span style="color:#489963;">piece</span><span>&quot;, &quot;</span><span style="color:#489963;">swab</span><span>&quot;, &quot;</span><span style="color:#489963;">choice</span><span>&quot;] }],
+</span><span>  kind: &quot;</span><span style="color:#489963;">KIND_MAP</span><span>&quot;,
+</span><span>  autoExpansionMode: &quot;</span><span style="color:#489963;">AUTO_EXPANSION_MODE_DEFAULT</span><span>&quot;,
+</span><span>};
+</span><span>
+</span><span style="color:#5f6d64;">// Sample Context Builder
+</span><span style="color:#55859b;">export const </span><span style="color:#b16139;">cxFruit </span><span>= </span><span style="color:#478c90;">cx</span><span>()
+</span><span>  .</span><span style="color:#478c90;">n</span><span>(&quot;</span><span style="color:#489963;">fruit-context</span><span>&quot;)
+</span><span>  .</span><span style="color:#478c90;">lc</span><span>(</span><span style="color:#9f713c;">5</span><span>)
+</span><span>  .</span><span style="color:#478c90;">p</span><span>(&quot;</span><span style="color:#489963;">date-time-original</span><span>&quot;, &quot;</span><span style="color:#489963;">string_value</span><span>&quot;)
+</span><span>  .</span><span style="color:#478c90;">build</span><span>();
+</span><span>
+</span><span style="color:#5f6d64;">// Sample Events
+</span><span style="color:#55859b;">export enum </span><span>Event {
+</span><span>  </span><span style="color:#b16139;">FEEDBACK </span><span>= &quot;</span><span style="color:#489963;">FEEDBACK</span><span>&quot;,
+</span><span>  </span><span style="color:#b16139;">YES </span><span>= &quot;</span><span style="color:#489963;">YES</span><span>&quot;,
+</span><span>  </span><span style="color:#b16139;">NO </span><span>= &quot;</span><span style="color:#489963;">NO</span><span>&quot;,
+</span><span>}
+</span><span>
+</span><span style="color:#5f6d64;">// Sample Intent
+</span><span style="color:#5f6d64;">// prettier-ignore
+</span><span style="color:#55859b;">export const </span><span style="color:#b16139;">ntFruitInfo </span><span>= </span><span style="color:#478c90;">intent</span><span>(&quot;</span><span style="color:#489963;">fruitInfo</span><span>&quot;)
+</span><span>  .</span><span style="color:#478c90;">priority</span><span>(</span><span style="color:#b16139;">Priority</span><span>.</span><span style="color:#b16139;">LOW</span><span>)
+</span><span>  .</span><span style="color:#478c90;">webhook</span><span>(</span><span style="color:#9f713c;">true</span><span>)
+</span><span>  .</span><span style="color:#478c90;">trainingPhrases</span><span>([
+</span><span>    </span><span style="color:#478c90;">tp</span><span>([&quot;</span><span style="color:#489963;">describe the </span><span>&quot;, </span><span style="color:#478c90;">pb</span><span>(&quot;</span><span style="color:#489963;">sample</span><span>&quot;), &quot;</span><span style="color:#489963;"> of </span><span>&quot;, </span><span style="color:#b16139;">etFruit</span><span>, &quot;</span><span style="color:#489963;"> over </span><span>&quot;, </span><span style="color:#478c90;">det</span><span>(&quot;</span><span style="color:#489963;">date-time</span><span>&quot;)]),
+</span><span>    </span><span style="color:#478c90;">tp</span><span>([&quot;</span><span style="color:#489963;">how was the </span><span>&quot;, </span><span style="color:#478c90;">pb</span><span>(&quot;</span><span style="color:#489963;">sample</span><span>&quot;), &quot;</span><span style="color:#489963;"> of </span><span>&quot;, </span><span style="color:#b16139;">etFruit</span><span>]),
+</span><span>    </span><span style="color:#478c90;">tp</span><span>([</span><span style="color:#478c90;">pb</span><span>(&quot;</span><span style="color:#489963;">sample</span><span>&quot;), &quot;</span><span style="color:#489963;"> of </span><span>&quot;, </span><span style="color:#b16139;">etFruit</span><span>, &quot; &quot;, </span><span style="color:#478c90;">det</span><span>(&quot;</span><span style="color:#489963;">date-time</span><span>&quot;)]),
+</span><span>    </span><span style="color:#478c90;">tp</span><span>([</span><span style="color:#478c90;">pb</span><span>(&quot;</span><span style="color:#489963;">sample</span><span>&quot;), &quot;</span><span style="color:#489963;"> of </span><span>&quot;, </span><span style="color:#b16139;">etFruit</span><span>]),
+</span><span>    </span><span style="color:#478c90;">tp</span><span>([&quot;</span><span style="color:#489963;">what was the </span><span>&quot;, </span><span style="color:#478c90;">pb</span><span>(&quot;</span><span style="color:#489963;">sample</span><span>&quot;), &quot;</span><span style="color:#489963;"> of </span><span>&quot;, </span><span style="color:#b16139;">etFruit</span><span>, &quot; &quot;, </span><span style="color:#478c90;">det</span><span>(&quot;</span><span style="color:#489963;">date-time</span><span>&quot;), &quot;</span><span style="color:#489963;">?</span><span>&quot;]),
+</span><span>    </span><span style="color:#478c90;">tp</span><span>([&quot;</span><span style="color:#489963;">what was the </span><span>&quot;, </span><span style="color:#478c90;">pb</span><span>(&quot;</span><span style="color:#489963;">sample</span><span>&quot;), &quot;</span><span style="color:#489963;"> of </span><span>&quot;, </span><span style="color:#b16139;">etFruit</span><span>]),
+</span><span>  ])
+</span><span>  .</span><span style="color:#478c90;">messages</span><span>([
+</span><span>    </span><span style="color:#478c90;">msg</span><span>(&quot;</span><span style="color:#489963;">text</span><span>&quot;).</span><span style="color:#1c9aa0;">set</span><span>([&quot;</span><span style="color:#489963;">I&#39;m sorry Dave, I can&#39;t do that</span><span>&quot;]).</span><span style="color:#478c90;">build</span><span>(),
+</span><span>    </span><span style="color:#478c90;">msg</span><span>(&quot;</span><span style="color:#489963;">text</span><span>&quot;).</span><span style="color:#1c9aa0;">set</span><span>([&quot;</span><span style="color:#489963;">Second response</span><span>&quot;]).</span><span style="color:#478c90;">build</span><span>(),
+</span><span>  ])
+</span><span>  .</span><span style="color:#478c90;">events</span><span>([</span><span style="color:#a07e3b;">Event</span><span>.</span><span style="color:#b16139;">FEEDBACK</span><span>])
+</span><span>  .</span><span style="color:#478c90;">outputContexts</span><span>([</span><span style="color:#b16139;">cxFruit</span><span>])
+</span><span>  .</span><span style="color:#478c90;">followUpOf</span><span>(</span><span style="color:#b16139;">ntFruitReminder</span><span>);
+</span><span>
+</span><span style="color:#5f6d64;">// Sample Resource Build and Sync Script
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">svcAcctKeyJson</span><span>: string = &quot;</span><span style="color:#489963;">./service-account-key.json</span><span>&quot;;
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">svcAcctConfig</span><span>: DialogflowServiceAccount = </span><span style="color:#1c9aa0;">require</span><span>(`</span><span style="color:#489963;">.${</span><span style="color:#b16139;">svcAcctKeyJson</span><span style="color:#489963;">}</span><span>`);
+</span><span style="color:#b16139;">Container</span><span>.</span><span style="color:#1c9aa0;">set</span><span>(</span><span style="color:#b16139;">KEY_FILENAME</span><span>, </span><span style="color:#b16139;">svcAcctKeyJson</span><span>);
+</span><span style="color:#b16139;">Container</span><span>.</span><span style="color:#1c9aa0;">set</span><span>(</span><span style="color:#b16139;">DIALOGFLOW_CONFIG</span><span>, </span><span style="color:#b16139;">svcAcctConfig</span><span>);
+</span><span>
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">resources </span><span>= </span><span style="color:#b16139;">Container</span><span>.</span><span style="color:#1c9aa0;">get</span><span>(</span><span style="color:#b16139;">DialogflowBuilder</span><span>)
+</span><span>  .</span><span style="color:#478c90;">entityTypes</span><span>([</span><span style="color:#b16139;">etSample</span><span>, </span><span style="color:#b16139;">etFruit</span><span>])
+</span><span>  .</span><span style="color:#478c90;">intents</span><span>([</span><span style="color:#b16139;">ntFruitInfo</span><span>, </span><span style="color:#b16139;">ntFruitReminder</span><span>])
+</span><span>  .</span><span style="color:#478c90;">build</span><span>();
+</span><span>
+</span><span style="color:#b16139;">Container</span><span>.</span><span style="color:#1c9aa0;">get</span><span>(</span><span style="color:#b16139;">DialogflowCreator</span><span>).</span><span style="color:#478c90;">sync</span><span>(</span><span style="color:#b16139;">resources</span><span>);
+</span></code></pre>
+<h2 id="wrap-up">Wrap-up</h2>
+<p>The outcome of the project: Dialogflow-as-Code. This package was made available as <code>@0xc/dialogflow-as-code</code> on the NPM registry through an open source project on <a href="https://github.com/tcarrio/dialogflow-as-code">my GitHub</a>.</p>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/ml/">ml</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/nlp/">nlp</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/automation/">automation</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/swe/">swe</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

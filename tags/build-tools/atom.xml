@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - build tools</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/build-tools/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-08-11T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/build-tools/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Nix Flakes Starter</title>
+        <published>2023-08-11T00:00:00+00:00</published>
+        <updated>2023-08-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/nix-flakes-starter/"/>
+        <id>https://blog.carrio.dev/blog/nix-flakes-starter/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/nix-flakes-starter/">&lt;h2 id=&quot;what-is-nix&quot;&gt;What is Nix&lt;&#x2F;h2&gt;
+&lt;p&gt;Nix consists of many things, and because of the common naming of &amp;quot;Nix&amp;quot; throughout it all, it can be confusing beyond just the surface level.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt;OS: An Operating System powered by Nix configurations and package manager&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt; language: A declarative, pure, functional, domain-specific language&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt; package manager: A purely functional package manager&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;As it pertains to this post on Nix Flakes, we&#x27;re mostly talking about the Nix &lt;em&gt;language&lt;&#x2F;em&gt;, which is used to implement a flake, and the Nix &lt;em&gt;package manager&lt;&#x2F;em&gt;, which can utilize and interact with flakes.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nix-flakes&quot;&gt;Nix Flakes&lt;&#x2F;h2&gt;
+&lt;p&gt;If you look up Nix flakes, the first article you&#x27;ll find it likely &lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Flakes&quot;&gt;the one on the NixOS Wiki&lt;&#x2F;a&gt;. This same article also clearly states at the top&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Nix flakes&lt;&#x2F;strong&gt; are an &lt;em&gt;experimental feature&lt;&#x2F;em&gt; of the Nix package manager.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Well that sounds dangerous, unstable, fragile, etc. etc. Yeah it does. But a lot of the Nix community believe that Nix flakes are &lt;strong&gt;The Future&lt;&#x2F;strong&gt;. And it&#x27;s been considered &amp;quot;experimental&amp;quot; for many years now, to be clear. But this post is less focused on the political discussion of flakes&#x27; stability and future and more on what it is, how to get started, and some example use cases.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;what-are-flakes&quot;&gt;What Are Flakes&lt;&#x2F;h3&gt;
+&lt;p&gt;Flakes provide a kind of specification around how to define a Nix expression, how dependencies are managed between it and others, and provide general improvements to the Nix ecosystem such as reproducibility and composability. A flake consists of a file system tree which contains a &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file in its root directory. You would expect to see something like the following in a Nix flake:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[0xc@sys ~]$ tree .&#x2F;devshells
+&lt;&#x2F;span&gt;&lt;span&gt;.
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.lock
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.nix
+&lt;&#x2F;span&gt;&lt;span&gt;└── README.md
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;1 directory, 3 files
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file offers a uniform &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;manual&#x2F;nix&#x2F;stable&#x2F;command-ref&#x2F;new-cli&#x2F;nix3-flake.html#flake-format&quot;&gt;schema&lt;&#x2F;a&gt; that allows other flakes to be referenced as dependencies, and the values produced by the Nix expression in the &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file follow a specific structure to support certain use cases. Since a flake can reference others in a way that supports the lockfile mechanism, even composed Nix flakes support reproducibility.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;nix&lt;&#x2F;code&gt; CLI also supports flakes as an experimental feature.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;creating-a-flake&quot;&gt;Creating a Flake&lt;&#x2F;h2&gt;
+&lt;p&gt;With the &lt;code&gt;nix&lt;&#x2F;code&gt; CLI, you can run:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[0xc@sys ~]$ mkdir flake-test
+&lt;&#x2F;span&gt;&lt;span&gt;[0xc@sys ~]$ cd flake-test
+&lt;&#x2F;span&gt;&lt;span&gt;[0xc@sys ~]$ nix flake init
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;crafting-a-flake-file&quot;&gt;Crafting a Flake File&lt;&#x2F;h2&gt;
+&lt;p&gt;As mentioned, there is a uniform schema to Flake files. The following attributes are defined at the top-level in a Nix flake:&lt;&#x2F;p&gt;
+&lt;p&gt;Flake schema&lt;&#x2F;p&gt;
+&lt;p&gt;The flake.nix file is a Nix file but that has special restrictions (more on that later).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;description&lt;&#x2F;strong&gt;: a string describing the flake.
+&lt;strong&gt;inputs&lt;&#x2F;strong&gt;: an attribute set of all the dependencies of the flake.
+&lt;strong&gt;outputs&lt;&#x2F;strong&gt;: a function of one argument that takes an attribute set of all the realized inputs, and outputs another attribute set whose schema is described below.
+&lt;strong&gt;nixConfig&lt;&#x2F;strong&gt;: an attribute set of values which reflect the values given to nix.conf. This can extend the normal behavior of a user&#x27;s nix experience by adding flake-specific configuration, such as a binary cache.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Flakes&quot;&gt;&lt;em&gt;Reference&lt;&#x2F;em&gt;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;description&lt;&#x2F;code&gt; is very straightforward, but let&#x27;s break down the remaining attributes, particularly &lt;code&gt;inputs&lt;&#x2F;code&gt; and &lt;code&gt;outputs&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;inputs&quot;&gt;Inputs&lt;&#x2F;h3&gt;
+&lt;!-- TODO --&gt;
+&lt;p&gt;The &lt;code&gt;inputs&lt;&#x2F;code&gt; schema allows the definition of zero or more flakes as references to the &lt;code&gt;outputs&lt;&#x2F;code&gt; schema. Any external requirements for the flake will be defined here, whether it&#x27;s a CLI tool, library, or service.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;inputs&lt;&#x2F;code&gt; allows you to define any number of flake inputs as local paths, Git repositories over SSH or HTTPS, and special shorthands for GitHub.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;inputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a GitHub repository by org&#x2F;repo and branch name (&amp;quot;master&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;master&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a Git repository by URL, using HTTPS or SSH protocol
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;https-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+https:&#x2F;&#x2F;git.example.test&#x2F;org&#x2F;repo?ref=branch&amp;amp;rev=deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;ssh-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+ssh:&#x2F;&#x2F;git.example.test&#x2F;org&#x2F;repo?ref=branch&amp;amp;rev=deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a shallow clone (won&amp;#39;t clone the `.git` directory)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;shallow-clone-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+file:&#x2F;local&#x2F;project&#x2F;path?shallow=1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a local directory
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;relative-path-dir-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;path:&#x2F;local&#x2F;project&#x2F;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;absolute-path-dir-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;local&#x2F;project&#x2F;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a non-flake input
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;not-a-flake &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:0xc&#x2F;nonflake&#x2F;branch&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;flake &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying that the dependency&amp;#39;s `inputs.nixpkgs` should inherit from this flake
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;inherit&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs-example &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;another&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;example&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;follows &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These inputs and their controls give flakes substantially more power over deterministic build processes and consistency across the dependencies utilized within the inputs and the flake definitions&#x27; resources.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;outputs&quot;&gt;Outputs&lt;&#x2F;h3&gt;
+&lt;p&gt;The magic of a flake. This is where we actually define the resources of a flake, and the schema provides us several mechanisms for things like development shells, applications, build targets, overlays, and more.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;applications&quot;&gt;Applications&lt;&#x2F;h4&gt;
+&lt;p&gt;These are predefined run targets in your flake. These are suitable for packaging your application so you can execute it consistently.&lt;&#x2F;p&gt;
+&lt;p&gt;Utilized with the &lt;code&gt;nix run&lt;&#x2F;code&gt; command. Within the outputs, you can specify these by doing:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;apps&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;lt;target-name&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;program &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;run-the-thing&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This can be executed using &lt;code&gt;nix run .#target-name&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If you want to execute this with arguments you would run &lt;code&gt;nix run .#target-name -- ...&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;development-shells&quot;&gt;Development shells&lt;&#x2F;h4&gt;
+&lt;p&gt;Dev shells are an extremely useful feature of flakes. There are some differences to the legacy Nix shell and the new &lt;code&gt;devShells&lt;&#x2F;code&gt; functionality of Nix flakes.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;TODO: Add more info on these differences&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;You can define &lt;code&gt;devShells&lt;&#x2F;code&gt; in the &lt;code&gt;outputs&lt;&#x2F;code&gt;, and the most convenient way is using the &lt;code&gt;mkShell&lt;&#x2F;code&gt; function exposed in the &lt;code&gt;nixpkgs&lt;&#x2F;code&gt; input argument. Suppose you have the nixpkgs repository input as &lt;code&gt;pkgs&lt;&#x2F;code&gt;, then you would be able to do&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;self, pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;go &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;go&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The default target can be invoked with &lt;code&gt;nix develop .&lt;&#x2F;code&gt; and in this case will provide the &lt;code&gt;git&lt;&#x2F;code&gt; package, available in your PATH.&lt;&#x2F;p&gt;
+&lt;p&gt;To invoke the &lt;code&gt;go&lt;&#x2F;code&gt; target, you would do &lt;code&gt;nix develop .#go&lt;&#x2F;code&gt;. Then we&#x27;d have the Go toolchain loaded and available so we could run or compile some Go code with &lt;code&gt;go build main.go&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;overlays&quot;&gt;Overlays&lt;&#x2F;h4&gt;
+&lt;p&gt;Overlays are an interesting albeit somewhat advanced topic in Nix, but the goal of overlays is to support advanced flake customization capabilities, such as overriding packages within a flake. Overlays supercedes an old approach to this which was limited in scope to this one simple use case, called &lt;code&gt;packageOverride&lt;&#x2F;code&gt; and &lt;code&gt;overridePackages&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Overlays are defined as a nested function whose first argument is &lt;code&gt;final&lt;&#x2F;code&gt; and second argument is &lt;code&gt;prev&lt;&#x2F;code&gt;. &lt;&#x2F;p&gt;
+&lt;p&gt;The following diagram visualizes the flow of the overlay function components throughout the system.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;+---------------------+-----------------------+------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;|                     |                       |                              |
+&lt;&#x2F;span&gt;&lt;span&gt;|                     |                       |                              |
+&lt;&#x2F;span&gt;&lt;span&gt;|  +-------------+    |  +-------------+      |  +--------------+            |
+&lt;&#x2F;span&gt;&lt;span&gt;|  |             |    |  |             |      |  |              |            |
+&lt;&#x2F;span&gt;&lt;span&gt;|  +-----+       |    |  +-----+       |      |  +-----+        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;+-&amp;gt;|final|       |    +-&amp;gt;|final|       |      +-&amp;gt;|final|        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   +-----+       |       +-----+       |         +-----+        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |       |             |         |              |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   |    main     +---+   |             +--+      |              +------+     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   |             |  |      |              |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   +-----+       |  |      +-----+        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   +--&amp;gt;|prev |       |  |    +&amp;gt;|prev |        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   +-----+       |  |    | +-----+        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   |             |  |    | |              |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   +-------------+   |   +-------------+  |    | +--------------+      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                  +-v--+ |                     +-v--+  |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                  |    | |                     |    |  |
+&lt;&#x2F;span&gt;&lt;span&gt;                     +------------------&amp;gt; &#x2F;&#x2F; +-+---------------------&amp;gt; &#x2F;&#x2F; +--+
+&lt;&#x2F;span&gt;&lt;span&gt;                                        +----+                       +----+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Within your flake, you can define overlays with the following:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Specifying an overlay by &amp;quot;name&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;overlays&lt;&#x2F;span&gt;&lt;span&gt;.&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;lt;name&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; final: prev: { }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Specifying the default overlay
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;overlays&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; final: prev: { }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These can be utilized in interesting ways, a good example is how the NodeJS runtimes and NPM dependencies like &lt;a href=&quot;https:&#x2F;&#x2F;yarnpkg.com&#x2F;&quot;&gt;Yarn&lt;&#x2F;a&gt; can be configured with overlays to ensure the correct underlying runtime is used for the package.&lt;&#x2F;p&gt;
+&lt;p&gt;My &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;devshells&quot;&gt;devshells&lt;&#x2F;a&gt; repository showcases this. A &lt;em&gt;paraphrased&lt;&#x2F;em&gt; version of the code would be:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;node16Overlay &lt;&#x2F;span&gt;&lt;span&gt;= self: super: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nodejs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;yarn16Overlay &lt;&#x2F;span&gt;&lt;span&gt;= self: super: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;yarn &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;super&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;override &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nodejs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;pkgsNode16 &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nixpkgs &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;inherit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;overlays &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;node16Overlay yarn16Overlay&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in rec &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgsNode16&lt;&#x2F;span&gt;&lt;span&gt;; [
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn
+&lt;&#x2F;span&gt;&lt;span&gt;            ];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;and-more&quot;&gt;And more&lt;&#x2F;h4&gt;
+&lt;p&gt;There are &lt;em&gt;even more&lt;&#x2F;em&gt; use cases for Nix flake outputs, that I won&#x27;t dive into much here. The resources mentioned throughout this article are extremely useful though, and there is tremendous depth to Nix that you can dive into.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

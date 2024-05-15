@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - automation</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/automation/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-08-11T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/automation/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Nix Flakes Starter</title>
+        <published>2023-08-11T00:00:00+00:00</published>
+        <updated>2023-08-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/nix-flakes-starter/"/>
+        <id>https://blog.carrio.dev/blog/nix-flakes-starter/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/nix-flakes-starter/">&lt;h2 id=&quot;what-is-nix&quot;&gt;What is Nix&lt;&#x2F;h2&gt;
+&lt;p&gt;Nix consists of many things, and because of the common naming of &amp;quot;Nix&amp;quot; throughout it all, it can be confusing beyond just the surface level.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt;OS: An Operating System powered by Nix configurations and package manager&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt; language: A declarative, pure, functional, domain-specific language&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt; package manager: A purely functional package manager&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;As it pertains to this post on Nix Flakes, we&#x27;re mostly talking about the Nix &lt;em&gt;language&lt;&#x2F;em&gt;, which is used to implement a flake, and the Nix &lt;em&gt;package manager&lt;&#x2F;em&gt;, which can utilize and interact with flakes.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nix-flakes&quot;&gt;Nix Flakes&lt;&#x2F;h2&gt;
+&lt;p&gt;If you look up Nix flakes, the first article you&#x27;ll find it likely &lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Flakes&quot;&gt;the one on the NixOS Wiki&lt;&#x2F;a&gt;. This same article also clearly states at the top&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Nix flakes&lt;&#x2F;strong&gt; are an &lt;em&gt;experimental feature&lt;&#x2F;em&gt; of the Nix package manager.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Well that sounds dangerous, unstable, fragile, etc. etc. Yeah it does. But a lot of the Nix community believe that Nix flakes are &lt;strong&gt;The Future&lt;&#x2F;strong&gt;. And it&#x27;s been considered &amp;quot;experimental&amp;quot; for many years now, to be clear. But this post is less focused on the political discussion of flakes&#x27; stability and future and more on what it is, how to get started, and some example use cases.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;what-are-flakes&quot;&gt;What Are Flakes&lt;&#x2F;h3&gt;
+&lt;p&gt;Flakes provide a kind of specification around how to define a Nix expression, how dependencies are managed between it and others, and provide general improvements to the Nix ecosystem such as reproducibility and composability. A flake consists of a file system tree which contains a &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file in its root directory. You would expect to see something like the following in a Nix flake:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[0xc@sys ~]$ tree .&#x2F;devshells
+&lt;&#x2F;span&gt;&lt;span&gt;.
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.lock
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.nix
+&lt;&#x2F;span&gt;&lt;span&gt;└── README.md
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;1 directory, 3 files
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file offers a uniform &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;manual&#x2F;nix&#x2F;stable&#x2F;command-ref&#x2F;new-cli&#x2F;nix3-flake.html#flake-format&quot;&gt;schema&lt;&#x2F;a&gt; that allows other flakes to be referenced as dependencies, and the values produced by the Nix expression in the &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file follow a specific structure to support certain use cases. Since a flake can reference others in a way that supports the lockfile mechanism, even composed Nix flakes support reproducibility.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;nix&lt;&#x2F;code&gt; CLI also supports flakes as an experimental feature.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;creating-a-flake&quot;&gt;Creating a Flake&lt;&#x2F;h2&gt;
+&lt;p&gt;With the &lt;code&gt;nix&lt;&#x2F;code&gt; CLI, you can run:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[0xc@sys ~]$ mkdir flake-test
+&lt;&#x2F;span&gt;&lt;span&gt;[0xc@sys ~]$ cd flake-test
+&lt;&#x2F;span&gt;&lt;span&gt;[0xc@sys ~]$ nix flake init
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;crafting-a-flake-file&quot;&gt;Crafting a Flake File&lt;&#x2F;h2&gt;
+&lt;p&gt;As mentioned, there is a uniform schema to Flake files. The following attributes are defined at the top-level in a Nix flake:&lt;&#x2F;p&gt;
+&lt;p&gt;Flake schema&lt;&#x2F;p&gt;
+&lt;p&gt;The flake.nix file is a Nix file but that has special restrictions (more on that later).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;description&lt;&#x2F;strong&gt;: a string describing the flake.
+&lt;strong&gt;inputs&lt;&#x2F;strong&gt;: an attribute set of all the dependencies of the flake.
+&lt;strong&gt;outputs&lt;&#x2F;strong&gt;: a function of one argument that takes an attribute set of all the realized inputs, and outputs another attribute set whose schema is described below.
+&lt;strong&gt;nixConfig&lt;&#x2F;strong&gt;: an attribute set of values which reflect the values given to nix.conf. This can extend the normal behavior of a user&#x27;s nix experience by adding flake-specific configuration, such as a binary cache.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Flakes&quot;&gt;&lt;em&gt;Reference&lt;&#x2F;em&gt;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;description&lt;&#x2F;code&gt; is very straightforward, but let&#x27;s break down the remaining attributes, particularly &lt;code&gt;inputs&lt;&#x2F;code&gt; and &lt;code&gt;outputs&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;inputs&quot;&gt;Inputs&lt;&#x2F;h3&gt;
+&lt;!-- TODO --&gt;
+&lt;p&gt;The &lt;code&gt;inputs&lt;&#x2F;code&gt; schema allows the definition of zero or more flakes as references to the &lt;code&gt;outputs&lt;&#x2F;code&gt; schema. Any external requirements for the flake will be defined here, whether it&#x27;s a CLI tool, library, or service.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;inputs&lt;&#x2F;code&gt; allows you to define any number of flake inputs as local paths, Git repositories over SSH or HTTPS, and special shorthands for GitHub.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;inputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a GitHub repository by org&#x2F;repo and branch name (&amp;quot;master&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;master&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a Git repository by URL, using HTTPS or SSH protocol
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;https-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+https:&#x2F;&#x2F;git.example.test&#x2F;org&#x2F;repo?ref=branch&amp;amp;rev=deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;ssh-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+ssh:&#x2F;&#x2F;git.example.test&#x2F;org&#x2F;repo?ref=branch&amp;amp;rev=deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a shallow clone (won&amp;#39;t clone the `.git` directory)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;shallow-clone-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+file:&#x2F;local&#x2F;project&#x2F;path?shallow=1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a local directory
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;relative-path-dir-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;path:&#x2F;local&#x2F;project&#x2F;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;absolute-path-dir-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;local&#x2F;project&#x2F;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a non-flake input
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;not-a-flake &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:0xc&#x2F;nonflake&#x2F;branch&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;flake &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying that the dependency&amp;#39;s `inputs.nixpkgs` should inherit from this flake
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;inherit&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs-example &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;another&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;example&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;follows &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These inputs and their controls give flakes substantially more power over deterministic build processes and consistency across the dependencies utilized within the inputs and the flake definitions&#x27; resources.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;outputs&quot;&gt;Outputs&lt;&#x2F;h3&gt;
+&lt;p&gt;The magic of a flake. This is where we actually define the resources of a flake, and the schema provides us several mechanisms for things like development shells, applications, build targets, overlays, and more.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;applications&quot;&gt;Applications&lt;&#x2F;h4&gt;
+&lt;p&gt;These are predefined run targets in your flake. These are suitable for packaging your application so you can execute it consistently.&lt;&#x2F;p&gt;
+&lt;p&gt;Utilized with the &lt;code&gt;nix run&lt;&#x2F;code&gt; command. Within the outputs, you can specify these by doing:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;apps&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;lt;target-name&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;program &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;run-the-thing&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This can be executed using &lt;code&gt;nix run .#target-name&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If you want to execute this with arguments you would run &lt;code&gt;nix run .#target-name -- ...&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;development-shells&quot;&gt;Development shells&lt;&#x2F;h4&gt;
+&lt;p&gt;Dev shells are an extremely useful feature of flakes. There are some differences to the legacy Nix shell and the new &lt;code&gt;devShells&lt;&#x2F;code&gt; functionality of Nix flakes.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;TODO: Add more info on these differences&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;You can define &lt;code&gt;devShells&lt;&#x2F;code&gt; in the &lt;code&gt;outputs&lt;&#x2F;code&gt;, and the most convenient way is using the &lt;code&gt;mkShell&lt;&#x2F;code&gt; function exposed in the &lt;code&gt;nixpkgs&lt;&#x2F;code&gt; input argument. Suppose you have the nixpkgs repository input as &lt;code&gt;pkgs&lt;&#x2F;code&gt;, then you would be able to do&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;self, pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;go &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;go&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The default target can be invoked with &lt;code&gt;nix develop .&lt;&#x2F;code&gt; and in this case will provide the &lt;code&gt;git&lt;&#x2F;code&gt; package, available in your PATH.&lt;&#x2F;p&gt;
+&lt;p&gt;To invoke the &lt;code&gt;go&lt;&#x2F;code&gt; target, you would do &lt;code&gt;nix develop .#go&lt;&#x2F;code&gt;. Then we&#x27;d have the Go toolchain loaded and available so we could run or compile some Go code with &lt;code&gt;go build main.go&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;overlays&quot;&gt;Overlays&lt;&#x2F;h4&gt;
+&lt;p&gt;Overlays are an interesting albeit somewhat advanced topic in Nix, but the goal of overlays is to support advanced flake customization capabilities, such as overriding packages within a flake. Overlays supercedes an old approach to this which was limited in scope to this one simple use case, called &lt;code&gt;packageOverride&lt;&#x2F;code&gt; and &lt;code&gt;overridePackages&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Overlays are defined as a nested function whose first argument is &lt;code&gt;final&lt;&#x2F;code&gt; and second argument is &lt;code&gt;prev&lt;&#x2F;code&gt;. &lt;&#x2F;p&gt;
+&lt;p&gt;The following diagram visualizes the flow of the overlay function components throughout the system.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;+---------------------+-----------------------+------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;|                     |                       |                              |
+&lt;&#x2F;span&gt;&lt;span&gt;|                     |                       |                              |
+&lt;&#x2F;span&gt;&lt;span&gt;|  +-------------+    |  +-------------+      |  +--------------+            |
+&lt;&#x2F;span&gt;&lt;span&gt;|  |             |    |  |             |      |  |              |            |
+&lt;&#x2F;span&gt;&lt;span&gt;|  +-----+       |    |  +-----+       |      |  +-----+        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;+-&amp;gt;|final|       |    +-&amp;gt;|final|       |      +-&amp;gt;|final|        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   +-----+       |       +-----+       |         +-----+        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |       |             |         |              |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   |    main     +---+   |             +--+      |              +------+     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   |             |  |      |              |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   +-----+       |  |      +-----+        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   +--&amp;gt;|prev |       |  |    +&amp;gt;|prev |        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   +-----+       |  |    | +-----+        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   |             |  |    | |              |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   +-------------+   |   +-------------+  |    | +--------------+      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                  +-v--+ |                     +-v--+  |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                  |    | |                     |    |  |
+&lt;&#x2F;span&gt;&lt;span&gt;                     +------------------&amp;gt; &#x2F;&#x2F; +-+---------------------&amp;gt; &#x2F;&#x2F; +--+
+&lt;&#x2F;span&gt;&lt;span&gt;                                        +----+                       +----+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Within your flake, you can define overlays with the following:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Specifying an overlay by &amp;quot;name&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;overlays&lt;&#x2F;span&gt;&lt;span&gt;.&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;lt;name&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; final: prev: { }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Specifying the default overlay
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;overlays&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; final: prev: { }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These can be utilized in interesting ways, a good example is how the NodeJS runtimes and NPM dependencies like &lt;a href=&quot;https:&#x2F;&#x2F;yarnpkg.com&#x2F;&quot;&gt;Yarn&lt;&#x2F;a&gt; can be configured with overlays to ensure the correct underlying runtime is used for the package.&lt;&#x2F;p&gt;
+&lt;p&gt;My &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;devshells&quot;&gt;devshells&lt;&#x2F;a&gt; repository showcases this. A &lt;em&gt;paraphrased&lt;&#x2F;em&gt; version of the code would be:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;node16Overlay &lt;&#x2F;span&gt;&lt;span&gt;= self: super: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nodejs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;yarn16Overlay &lt;&#x2F;span&gt;&lt;span&gt;= self: super: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;yarn &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;super&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;override &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nodejs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;pkgsNode16 &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nixpkgs &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;inherit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;overlays &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;node16Overlay yarn16Overlay&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in rec &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgsNode16&lt;&#x2F;span&gt;&lt;span&gt;; [
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn
+&lt;&#x2F;span&gt;&lt;span&gt;            ];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;and-more&quot;&gt;And more&lt;&#x2F;h4&gt;
+&lt;p&gt;There are &lt;em&gt;even more&lt;&#x2F;em&gt; use cases for Nix flake outputs, that I won&#x27;t dive into much here. The resources mentioned throughout this article are extremely useful though, and there is tremendous depth to Nix that you can dive into.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Automating NLP Model Development with Dialogflow</title>
+        <published>2023-08-05T00:00:00+00:00</published>
+        <updated>2023-08-05T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/automate-dialogflow-nlp/"/>
+        <id>https://blog.carrio.dev/blog/automate-dialogflow-nlp/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/automate-dialogflow-nlp/">&lt;h2 id=&quot;dialogflow&quot;&gt;Dialogflow&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;cloud.google.com&#x2F;dialogflow&#x2F;&quot;&gt;Dialogflow&lt;&#x2F;a&gt; is a natural language processing system developed by Google. It provides all the constructs necessary in order to define a natural language processing model that can intelligently infer what a user is saying, but also providing various functionality on top of this including sentiment analysis and any recognition and more&lt;&#x2F;p&gt;
+&lt;p&gt;At the time I was working on the &lt;a href=&quot;https:&#x2F;&#x2F;www.Dynatrace.com&#x2F;news&#x2F;blog&#x2F;davis-assistant-is-now-smarter-than-ever&#x2F;&quot;&gt;Davis Assistant&lt;&#x2F;a&gt; project at Dynatrace. After joining the team, I assisted with our project automation, TypeScript migration, and DevOps enhancements. One of my proposed projects thereafter was to completely automate our natural language processing definitions in such a way that it would also be entirely reusable inside of our codebase. Thus, not only would we have safe deployments and consistent definitions, they would be utilized inside of our APIs and hook directly into the domain logic of our system. As an example, this means the same enums powering various event definitions in Dialogflow training phrases could also be utilized in logic in our API handlers relating to them.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;dialogflow-s-natural-language-processing-model&quot;&gt;Dialogflow&#x27;s Natural Language Processing Model&lt;&#x2F;h2&gt;
+&lt;p&gt;I won&#x27;t do a deep dive into this subject, as it&#x27;s now been several years and I definitely wouldn&#x27;t call myself an expert on it at this point. However, this gives you an idea of the various elements involved in defining an NLP model with Dialogflow, which is what the later solution automates.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;entities&quot;&gt;Entities&lt;&#x2F;h3&gt;
+&lt;p&gt;Referred to as Entity Types, these allow you to control how the user input data gets extracted. There are many predefined entity, which I&#x27;ll refer to as &lt;em&gt;default entities&lt;&#x2F;em&gt; later on in the automation. The entity type allows us to define many entries for a single entity, or synonyms. So you could recognize multiple specific &lt;em&gt;types&lt;&#x2F;em&gt; of &lt;strong&gt;fruit&lt;&#x2F;strong&gt;, like strawberries grapes and oranges, as a &lt;strong&gt;fruit&lt;&#x2F;strong&gt; entity.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;intents&quot;&gt;Intents&lt;&#x2F;h3&gt;
+&lt;p&gt;An Intent will categorize the intention of the user interaction. What these eventually break down for us, in the context of a tool like Davis Assistant, are the various user journeys of interactions with the bot. Think of the sentence &amp;quot;Show me the &lt;strong&gt;Apdex&lt;&#x2F;strong&gt; for &lt;strong&gt;Production&lt;&#x2F;strong&gt; over the &lt;strong&gt;last week&lt;&#x2F;strong&gt;&amp;quot;. We might have broken down that user journey as &amp;quot;application performance&amp;quot;.&lt;&#x2F;p&gt;
+&lt;p&gt;For an Intent you can specify a number of &lt;em&gt;training phrases&lt;&#x2F;em&gt; and &lt;em&gt;parameters&lt;&#x2F;em&gt;. The &lt;em&gt;training phrases&lt;&#x2F;em&gt; can reference various entity types, custom or default, parts, and more. These become particularly useful as defined variables since many of the training phrases we&#x27;ll build out end up being permutations of the same input parameters, sometimes including a date or sometimes including an application name, etc. The &lt;em&gt;parameters&lt;&#x2F;em&gt; allow you to specify parts of the user input that you might want to extract, effectively acting as parameters to the intent &lt;em&gt;handlers&lt;&#x2F;em&gt; in our service.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;events&quot;&gt;Events&lt;&#x2F;h3&gt;
+&lt;p&gt;While intents are typically matched when users provide some input phrase, we can also utilize events to trigger intents. This is particularly useful for directing user interactions in a similar fashion to invoking callbacks on various functionality in a system.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;context&quot;&gt;Context&lt;&#x2F;h3&gt;
+&lt;p&gt;An important component of our design was to support specific user&#x27;s and their data only during the lifecycle of their requests. When someone from Average Joe Gym says &amp;quot;Hey Google, talk to Davis Assistant&amp;quot; and asks a question about their website, we don&#x27;t need data about their tenant leaking into the rest of our user&#x27;s requests. We can utilize a context to fulfill metadata relevant to processing user input, such as application and service names and more that are available inside the Dynatrace tenants. We fulfill this context prior to executing the user action as best as possible so that user&#x27;s can naturally interact with Davis Assistant. Otherwise, references to your applications, like &amp;quot;the blog&amp;quot;, simply mean nothing to us.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;webhooks&quot;&gt;Webhooks&lt;&#x2F;h3&gt;
+&lt;p&gt;Webhooks are very common in the industry today, and we can utilize them with Dialogflow to allow them to direct the processed user input to our services. When user input is processed and in intent and its parameters are determined, we&#x27;ll receive a request to our Router which handles the validation and forwarding of the request to our internal service for handling and responding to user interactions.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;research&quot;&gt;Research&lt;&#x2F;h2&gt;
+&lt;p&gt;Various tools were looked at in terms of how to support such a feature. Infrastructure-as-Code tools at the time didn&#x27;t support general purpose programming languages and general platforms, it was typically one or the other. Newer projects today may not have this limitation, such as Pulumi, but because of that a custom solution was the final option for how we would implement such functionality.&lt;&#x2F;p&gt;
+&lt;p&gt;Our stack was now entirely in TypeScript as previously mentioned, and so the tool itself would need to be reusable inside of that code. Since we controlled all of the components of our system we didn&#x27;t need to implement this tool and such a manner to support a polyglot environment generating JSON definitions or the like. This gave us a lot of power and simplified the overall solution more, as opposed to requiring a code generator component as part of the integration.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;dialogflow-and-nodejs&quot;&gt;Dialogflow and NodeJS&lt;&#x2F;h2&gt;
+&lt;p&gt;Google provided a NodeJS SDK for Dialogflow under the NPM package &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;googleapis&#x2F;nodejs-dialogflow&quot;&gt;nodejs-dialogflow&lt;&#x2F;a&gt;. This &lt;em&gt;was&lt;&#x2F;em&gt; a purely JavaScript package when this work started, and in our time utilizing Dialogflow we contributed the [@types&#x2F;dialogflow] package in the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;DefinitelyTyped&#x2F;DefinitelyTyped&quot;&gt;DefinitelyTyped&lt;&#x2F;a&gt; repository, helped facilitate resolution around &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;DefinitelyTyped&#x2F;DefinitelyTyped&#x2F;pull&#x2F;39627&quot;&gt;typing chaos&lt;&#x2F;a&gt; during a package migration, and eased others over to the new &lt;a href=&quot;https:&#x2F;&#x2F;www.npmjs.com&#x2F;package&#x2F;@google-cloud&#x2F;dialogflow&quot;&gt;@google-cloud&#x2F;dialogflow&lt;&#x2F;a&gt; package after its release.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;migration-phase&quot;&gt;Migration Phase&lt;&#x2F;h2&gt;
+&lt;p&gt;One component of the project was the ability to synchronize the definitions in our code to Dialogflow servers, but during the development phase of the project we also had to be able to continue utilizing the Dialogflow UI. As such, I also implemented a capability for importing Dialogflow resources and automatically generating all of the necessary entity types, contexts, events, intents, and more. You could simply export the Dialogflow project to a file and then run:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# given you had installed `@0xc&#x2F;dialogflow-as-code
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dialogflow-as-code -i&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;export-dir&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;src&#x2F;dialogflow
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And you now had an entire set of Dialogflow-as-Code source code in TypeScript that defined &lt;strong&gt;all&lt;&#x2F;strong&gt; of your project resources. This functionality made the continuous integration of UI changes into our source code possible until we flipped the responsibilities, eventually making our source code the source of truth for our Dialogflow project. We still had the ability to triage issues in the web interface when necessary, but due to the change our environment inconsistencies dropped significantly.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;example-time&quot;&gt;Example Time&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You can find out more about each of these types of resources on &lt;a href=&quot;https:&#x2F;&#x2F;cloud.google.com&#x2F;dialogflow&#x2F;cx&#x2F;docs&#x2F;concept&quot;&gt;the Dialogflow documentation site&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;ts&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-ts &quot;&gt;&lt;code class=&quot;language-ts&quot; data-lang=&quot;ts&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Sample Entity Type Builder
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;entityType&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;d&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;fruit&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;e&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;syn&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;apple&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;syn&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;strawberry&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;k&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ek&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;list&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Sample Entity Type
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etSample&lt;&#x2F;span&gt;&lt;span&gt;: EntityType = {
+&lt;&#x2F;span&gt;&lt;span&gt;  displayName: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;  entities: [{ value: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, synonyms: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;piece&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;swab&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;choice&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;] }],
+&lt;&#x2F;span&gt;&lt;span&gt;  kind: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;KIND_MAP&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;  autoExpansionMode: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;AUTO_EXPANSION_MODE_DEFAULT&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;};
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Sample Context Builder
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;cxFruit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;cx&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;fruit-context&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;lc&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;date-time-original&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;string_value&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Sample Events
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export enum &lt;&#x2F;span&gt;&lt;span&gt;Event {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;FEEDBACK &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;FEEDBACK&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;YES &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;YES&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;NO &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;NO&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Sample Intent
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; prettier-ignore
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ntFruitInfo &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;intent&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;fruitInfo&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;priority&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Priority&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;LOW&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;webhook&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;trainingPhrases&lt;&#x2F;span&gt;&lt;span&gt;([
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;tp&lt;&#x2F;span&gt;&lt;span&gt;([&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;describe the &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pb&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; of &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; over &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;det&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;date-time&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)]),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;tp&lt;&#x2F;span&gt;&lt;span&gt;([&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;how was the &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pb&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; of &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;]),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;tp&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pb&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; of &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot; &amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;det&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;date-time&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)]),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;tp&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pb&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; of &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;]),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;tp&lt;&#x2F;span&gt;&lt;span&gt;([&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;what was the &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pb&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; of &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot; &amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;det&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;date-time&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;?&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;tp&lt;&#x2F;span&gt;&lt;span&gt;([&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;what was the &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pb&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;sample&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;), &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; of &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;]),
+&lt;&#x2F;span&gt;&lt;span&gt;  ])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;messages&lt;&#x2F;span&gt;&lt;span&gt;([
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;msg&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;([&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;I&amp;#39;m sorry Dave, I can&amp;#39;t do that&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;msg&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;([&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Second response&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;  ])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;events&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Event&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;FEEDBACK&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;outputContexts&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;cxFruit&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;followUpOf&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ntFruitReminder&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Sample Resource Build and Sync Script
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;svcAcctKeyJson&lt;&#x2F;span&gt;&lt;span&gt;: string = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;.&#x2F;service-account-key.json&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;svcAcctConfig&lt;&#x2F;span&gt;&lt;span&gt;: DialogflowServiceAccount = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span&gt;(`&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;.${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;svcAcctKeyJson&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;`);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Container&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;KEY_FILENAME&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;svcAcctKeyJson&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Container&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;DIALOGFLOW_CONFIG&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;svcAcctConfig&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;resources &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Container&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;DialogflowBuilder&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;entityTypes&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etSample&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;etFruit&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;intents&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ntFruitInfo&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ntFruitReminder&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;  .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Container&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;DialogflowCreator&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;sync&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;resources&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;wrap-up&quot;&gt;Wrap-up&lt;&#x2F;h2&gt;
+&lt;p&gt;The outcome of the project: Dialogflow-as-Code. This package was made available as &lt;code&gt;@0xc&#x2F;dialogflow-as-code&lt;&#x2F;code&gt; on the NPM registry through an open source project on &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;dialogflow-as-code&quot;&gt;my GitHub&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - dvd</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/dvd/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-12-27T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/dvd/atom.xml</id>
+    <entry xml:lang="en">
+        <title>DVD Backups on Linux</title>
+        <published>2023-12-27T00:00:00+00:00</published>
+        <updated>2023-12-27T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/dvd-backups-on-linux/"/>
+        <id>https://blog.carrio.dev/blog/dvd-backups-on-linux/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/dvd-backups-on-linux/">&lt;h1 id=&quot;dvd-backup&quot;&gt;DVD Backup&lt;&#x2F;h1&gt;
+&lt;p&gt;I recently went through the process up backing up a series of DVDs from my partners childhood. Since this process entailed multiple systems and both CPU and GPU hardware for video rendering, I figured I would capture some the steps at a high level that I took to accomplish the task.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;background-the-hardware&quot;&gt;Background: The Hardware&lt;&#x2F;h2&gt;
+&lt;p&gt;During this run-through I utilized a number of systems. Namely, I pulled out my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;nix-config&#x2F;blob&#x2F;main&#x2F;nixos&#x2F;workstation&#x2F;t510&#x2F;default.nix&quot;&gt;Lenovo T510&lt;&#x2F;a&gt; to make use of the DVD bay, my DiskStation 420 for intermediate network storage and backup of the DVD and MP4 files, and &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;nix-config&#x2F;blob&#x2F;main&#x2F;nixos&#x2F;workstation&#x2F;glass&#x2F;default.nix&quot;&gt;my personal desktop&lt;&#x2F;a&gt; with both an AMD Ryzen and GTX 1080Ti- both come into play in the following.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;backing-up-dvds-with-dvdbackup&quot;&gt;Backing up DVDs with dvdbackup&lt;&#x2F;h2&gt;
+&lt;p&gt;Unsurprisingly, the tool &lt;code&gt;dvdbackup&lt;&#x2F;code&gt; exists as a means to backup DVDs. It mostly retains the same filesystem structure as the mounted DVD, but it&#x27;s a useful tool for inspecting and saving videos from a DVD.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# CWD must be where you want to save your DVD backup
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dvdbackup -i&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;dev&#x2F;sr0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -M
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;What you&#x27;ll end up with is the main feature of the DVD but in the typical hierarchy of the original DVD itself, had you mounted &lt;code&gt;&#x2F;dev&#x2F;sr0&lt;&#x2F;code&gt; directly.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ If you need to recover a damaged disk, you may need to use a tool like &lt;code&gt;dvdisaster&lt;&#x2F;code&gt; or &lt;code&gt;ddrescue&lt;&#x2F;code&gt;. There is no guarantee your data is recoverable.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;splicing-the-video-files&quot;&gt;Splicing the video files&lt;&#x2F;h2&gt;
+&lt;p&gt;The VOB files can be directly concatenated, and is this is exactly how you would perform a splicing of the video content before conversion.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;cat&lt;&#x2F;span&gt;&lt;span&gt; VTS_01_*.VOB &amp;gt; video.vob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ If you include the &lt;code&gt;VIDEOTS.VOB&lt;&#x2F;code&gt; file you may encounter audio issues with your spliced video. &lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;syncing-to-the-sftp-server&quot;&gt;Syncing to the SFTP server&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;scp&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;video.vob 0xc@nas-ds418-00:&#x2F;path&#x2F;to&#x2F;target&#x2F;video.vob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;All of your operations from here &lt;em&gt;can&lt;&#x2F;em&gt; be entirely remote, if you utilize a filesystem mount for the SFTP server, and have a stable connection. In one case I encountered a packet failure and resorted to copying to and from my local system responsible for the conversions going forward.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ For hostnames, I&#x27;m utilizing &lt;strong&gt;[tailscale]&lt;&#x2F;strong&gt; for both private P2P networking &lt;strong&gt;and&lt;&#x2F;strong&gt; DNS resolution of private hosts.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;converting-from-vob-to-mp4&quot;&gt;Converting from VOB to MP4&lt;&#x2F;h2&gt;
+&lt;p&gt;This was done in two separate modes: CPU and GPU. I&#x27;m on NixOS, so for me I dropped into separate shells of non-NVENC-supported ffmpeg and an NVENC-supported ffmpeg.&lt;&#x2F;p&gt;
+&lt;p&gt;One key component is that for the DVD videos (which are 420p) the best (the most 1:1 comparatively) format to target is &lt;code&gt;yuv420p&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;on-network-conversion&quot;&gt;On-network conversion&lt;&#x2F;h3&gt;
+&lt;p&gt;Suppose you have an SFTP server, you can mount that locally and then perform the following conversions directly in the network share.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;run&#x2F;user&#x2F;1000&#x2F;gvfs&#x2F;sftp&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\:&lt;&#x2F;span&gt;&lt;span&gt;host&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\=&lt;&#x2F;span&gt;&lt;span&gt;nas-ds418-00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\,&lt;&#x2F;span&gt;&lt;span&gt;user&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\=&lt;&#x2F;span&gt;&lt;span&gt;0xc&#x2F;path&#x2F;to&#x2F;target
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now, within the network share, you could run the following instructions for CPU&#x2F;GPU.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ Alternatively, &lt;code&gt;scp&lt;&#x2F;code&gt; the VOB files to the local machine first&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;cpu-acceleration&quot;&gt;CPU acceleration&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# without NVENC support
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ffmpeg -i&lt;&#x2F;span&gt;&lt;span&gt; video.vob&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -vf&lt;&#x2F;span&gt;&lt;span&gt; format=yuv420p video.mp4
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;gpu-acceleration&quot;&gt;GPU acceleration&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; ffmpeg-full
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# in the subshell
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ffmpeg -hwaccel_device&lt;&#x2F;span&gt;&lt;span&gt; 0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -hwaccel&lt;&#x2F;span&gt;&lt;span&gt; cuda&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -i&lt;&#x2F;span&gt;&lt;span&gt; video.vob&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -c&lt;&#x2F;span&gt;&lt;span&gt;:v h264_nvenc&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -vf&lt;&#x2F;span&gt;&lt;span&gt; format=yuv420p video.mp4
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;enhancements&quot;&gt;Enhancements&lt;&#x2F;h2&gt;
+&lt;p&gt;A project I was considering toying around with that might have made it simpler to work is the &lt;a href=&quot;https:&#x2F;&#x2F;nbd.sourceforge.io&#x2F;&quot;&gt;Network Block Device (NBD) project&lt;&#x2F;a&gt;. This exists as a user-space tool for interacting with block devices that are mounted over the network. As an example, a T510 with a DVD disk drive accessible over the network could expose the disk device via NBD, and my desktop could mount it. This would save me from having to switch back and forth between the two systems.&lt;&#x2F;p&gt;
+&lt;p&gt;With NixOS, this is directly supported as a &lt;em&gt;service&lt;&#x2F;em&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;_:
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nbd&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;server &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;listenAddress &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0.0.0.0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;exports &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;dvd-drive &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;dev&#x2F;sr0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;allowAddresses &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;10.0.0.0&#x2F;8&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span&gt;      };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then, mount the share from another system with&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# as root
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nbd-client&lt;&#x2F;span&gt;&lt;span&gt; t510&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -N&lt;&#x2F;span&gt;&lt;span&gt; dvd-drive &#x2F;dev&#x2F;sr0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now you can open the network-attached DVD via VLC as though it were a local device:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;vlc&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;dev&#x2F;sr0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Next, enjoy T2: Judgement Day 👋&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">SSH Key Management</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>3 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2022-02-21
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ssh-key-management/#table-of-contents">Table of Contents:</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ssh-key-management/#checking-for-existing-ssh-keys">Checking for existing SSH keys</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ssh-key-management/#generating-a-new-ssh-key">Generating a new SSH key</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ssh-key-management/#adding-your-ssh-key-to-the-ssh-agent">Adding your SSH key to the ssh-agent</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ssh-key-management/#adding-your-key-to-your-github-account">Adding your key to your GitHub Account</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ssh-key-management/#references">References</a>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h2 id="table-of-contents">Table of Contents:</h2>
+<ol>
+<li><a href="https://blog.carrio.dev/blog/ssh-key-management/#checking-for-existing-ssh-keys">Checking for existings keys</a></li>
+<li><a href="https://blog.carrio.dev/blog/ssh-key-management/#generating-a-new-ssh-key">Generating a new SSH key</a></li>
+<li><a href="https://blog.carrio.dev/blog/ssh-key-management/#adding-your-ssh-key-to-the-ssh-agent">Adding your SSH key to the ssh-agent</a></li>
+</ol>
+<h2 id="checking-for-existing-ssh-keys">Checking for existing SSH keys</h2>
+<p>Before you generate an SSH key, you can check to see if you have any existing SSH keys.</p>
+<ol>
+<li>
+<p>Open Git Bash.</p>
+</li>
+<li>
+<p>Enter <code>ls -al ~/.ssh</code> to see if existing SSH keys are present:</p>
+</li>
+</ol>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#5f6d64;"># Lists the files in your .ssh directory, if they exist
+</span><span style="color:#b16139;">ls -al ~</span><span>/.ssh
+</span></code></pre>
+<ol start="3">
+<li>Check the directory listing to see if you already have a public SSH key.</li>
+</ol>
+<p>By default, the filenames of the public keys are one of the following, based on the SSH key type:</p>
+<ul>
+<li>id_dsa.pub</li>
+<li>id_ecdsa.pub</li>
+<li>id_ed25519.pub</li>
+<li>id_rsa.pub</li>
+</ul>
+<p>If you don't have an existing public and private key pair, or don't wish to use any that are available to connect to GitHub, then generate a new SSH key.
+If you see an existing public and private key pair listed (for example id_rsa.pub and id_rsa) that you would like to use to connect to GitHub, you can add your SSH key to the ssh-agent.</p>
+<p>After you've checked that you don't have an existing SSH key or you simply want a new one, you can generate a new SSH key to use for authentication, then add it to the ssh-agent.</p>
+<h2 id="generating-a-new-ssh-key">Generating a new SSH key</h2>
+<p>This will generate a key that is generally compatible with most system to date while using a more state of the art algorithm, ED25519. </p>
+<ol>
+<li>
+<p>Open Terminal.</p>
+</li>
+<li>
+<p>Paste the text below, substituting in your GitHub email address.</p>
+</li>
+</ol>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#5f6d64;"># Creates a new ssh key, using the provided email as a label
+</span><span style="color:#b16139;">$</span><span> ssh-keygen</span><span style="color:#b16139;"> -t</span><span> ed25519</span><span style="color:#b16139;"> -b</span><span> 4096</span><span style="color:#b16139;"> -C </span><span>&quot;</span><span style="color:#489963;">your_email@example.com</span><span>&quot;
+</span><span>&gt; Generating </span><span style="color:#b16139;">public/private</span><span> ed25519 key pair.
+</span></code></pre>
+<ol start="3">
+<li>When you're prompted to &quot;Enter a file in which to save the key,&quot; press Enter. This accepts the default file location.</li>
+</ol>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span>&gt; Enter </span><span style="color:#b16139;">a</span><span> file in which to save the key (/Users/you/.ssh/id_ed25519)</span><span style="color:#1c9aa0;">: </span><span style="color:#55859b;">[</span><span>Press enter</span><span style="color:#55859b;">]
+</span></code></pre>
+<ol start="4">
+<li>At the prompt, type a secure passphrase. For more information, see &quot;Working with SSH key passphrases&quot;.</li>
+</ol>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span>&gt; Enter </span><span style="color:#b16139;">passphrase</span><span> (empty for no passphrase)</span><span style="color:#1c9aa0;">: </span><span style="color:#55859b;">[</span><span>Type a passphrase</span><span style="color:#55859b;">]
+</span><span>&gt; Enter </span><span style="color:#b16139;">same</span><span> passphrase again: </span><span style="color:#55859b;">[</span><span>Type passphrase again</span><span style="color:#55859b;">]
+</span></code></pre>
+<h2 id="adding-your-ssh-key-to-the-ssh-agent">Adding your SSH key to the ssh-agent</h2>
+<p>Before adding a new SSH key to the ssh-agent, you should have checked for existing SSH keys and generated a new SSH key.</p>
+<ol>
+<li>Ensure ssh-agent is enabled:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#5f6d64;"># start the ssh-agent in the background
+</span><span style="color:#b16139;">$</span><span> eval &quot;$</span><span style="color:#489963;">(</span><span style="color:#b16139;">ssh-agent -s</span><span style="color:#489963;">)</span><span>&quot;
+</span><span>&gt; Agent </span><span style="color:#b16139;">pid</span><span> 59566
+</span></code></pre>
+<ol start="2">
+<li>Add your SSH key to the ssh-agent. If you used an existing SSH key rather than generating a new SSH key, you'll need to replace id_ed25519 in the command with the name of your existing private key file.</li>
+</ol>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">$</span><span> ssh-add </span><span style="color:#b16139;">~</span><span>/.ssh/id_ed25519
+</span></code></pre>
+<p>If you will be using this for GitHub, continue. Otherwise, enjoy your new ssh key.</p>
+<h2 id="adding-your-key-to-your-github-account">Adding your key to your GitHub Account</h2>
+<p>Visit <a href="https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account">this GitHub article</a>. </p>
+<h2 id="references">References</h2>
+<p><a href="https://help.github.com/articles/generating-an-ssh-key/">Github: Generating an SSH key</a>
+<a href="https://ed25519.cr.yp.to/">ED25519</a></p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/ssh/">ssh</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/security/">security</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

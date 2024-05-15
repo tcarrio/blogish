@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">OpenFeature Introduction</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>8 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-08-07
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#what-are-feature-flags">What Are Feature Flags</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#what-is-openfeature">What is OpenFeature</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#providers">Providers</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#hooks">Hooks</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#getting-started">Getting Started</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#client-side-javascript">Client-side JavaScript</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#server-side-php">Server-side PHP</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#hooks-manual-instrumentation">Hooks Manual Instrumentation</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/openfeature-introduction/#hooks-observability-with-opentelemetry">Hooks: Observability with OpenTelemetry</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h2 id="what-are-feature-flags">What Are Feature Flags</h2>
+<p>Feature flags are a way to dynamically control the capabilities of software, often with granularity to specific users, regions, and more. Flagging empowers companies to experiment with new features, and companies like Spotify, Duolingo, and Google use these heavily to prove out their hypotheses around generating better user experiences and products. It can be as simple as flipping the title of a landing page to an entire suite of features in the product- the possibilities are almost endless.</p>
+<p>This is often times pretty simple, and in the code could be done with a basic <code>if/else</code> block:</p>
+<pre data-lang="tsx" style="background-color:#171c19;color:#87928a;" class="language-tsx "><code class="language-tsx" data-lang="tsx"><span style="color:#55859b;">const </span><span>{</span><span style="color:#b16139;">flagService</span><span>} = </span><span style="color:#478c90;">useContext</span><span>(&#39;</span><span style="color:#489963;">FeatureFlagging</span><span>&#39;);
+</span><span>
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">isNewExperience </span><span>= </span><span style="color:#b16139;">flagService</span><span>.</span><span style="color:#478c90;">isOn</span><span>(&#39;</span><span style="color:#489963;">new-experience</span><span>&#39;);
+</span><span>
+</span><span style="color:#55859b;">if </span><span>(</span><span style="color:#b16139;">isNewExperience</span><span>) {
+</span><span>  </span><span style="color:#55859b;">return </span><span>&lt;</span><span style="color:#a07e3b;">NewComponent </span><span style="color:#867469;">{</span><span>...</span><span style="color:#b16139;">props</span><span style="color:#867469;">} </span><span>/&gt;;
+</span><span>} </span><span style="color:#55859b;">else </span><span>{
+</span><span>  </span><span style="color:#55859b;">return </span><span>&lt;</span><span style="color:#a07e3b;">Component </span><span style="color:#867469;">{</span><span>...</span><span style="color:#b16139;">props</span><span style="color:#867469;">} </span><span>/&gt;;
+</span><span>}
+</span></code></pre>
+<p>And there you have it. You now have a dynamically response interface based on logic determined by your feature flagging service. None of the above code related to any existing tool in particular, but what this post will do is get you acquainted with a new open source project called OpenFeature which you can get started with today.</p>
+<h2 id="what-is-openfeature">What is OpenFeature</h2>
+<p>OpenFeature is a project that defines an <strong>open specification</strong> for feature flagging SDK behaviors to support consistent developer experiences backed by any feature flagging vendor in the ecosystem. The project provides an open source, vendor-agnostic SDK for many languages, which vendors can support with <strong>providers</strong> to back the flagging logic and <strong>hooks</strong> to enhance with various capabilities in the feature flagging lifecycle. The SDK is an implementation upon the OpenFeature specification, and can be configured against any one of the available providers for that language. If you're interested, take a look on their <a href="https://openfeature.dev/ecosystem">ecosystem</a> page, which lets you search across different types like server-side and client-side, technologies like Go, JavaScript, and PHP, Vendors like Split and CloudBees, and more.</p>
+<h3 id="providers">Providers</h3>
+<p>OpenFeature itself is a specification with vendor-agnostic open source packages for various languages. The vendors provide the feature flag evaluation component of the architecture though- and you'll need one. These can be backed by open source projects, companies' SDKs like LaunchDarkly and Split, or an in-house flagging system. You can develop your application against the OpenFeature interfaces and swap out providers across environments- easily allowing your local dev system utilize environment variable configurations where production is backed by an enterprise solution. Find out more on providers <a href="https://openfeature.dev/specification/sections/hooks">here</a>.</p>
+<h3 id="hooks">Hooks</h3>
+<p>The flag evaluation lifecyle is well documented in OpenFeature, and supports <em>hooks</em>, which can enhance or augment a flag evaluation. Perhaps you want to inject a logger in staging or provide tracing capabilities with OpenTelemetry. All of this is easily doable by utilizing a hooks package or writing your own hook against the interface. You can read more on the hooks lifecycle <a href="https://openfeature.dev/specification/sections/hooks">here</a>.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>This will depend on your language of choice, so I'll provide a couple of examples. The first will be JavaScript, with a focus on client-side use cases. The next will be a server-side reference with PHP. You can find more samples in the <a href="https://openfeature.dev/docs/reference/technologies/">technologies</a> page as well.</p>
+<h3 id="client-side-javascript">Client-side JavaScript</h3>
+<p>These utilize a pattern in OpenFeature called <em>static context</em>. What this amounts to is that there is just the current user, the one interacting with the web client, so there doesn't need to be as highly dynamic of a flag evaluation system backing the OpenFeature client.</p>
+<p>Start off by installing the package to your project. Here I'll use <code>yarn</code>:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">yarn</span><span> add @openfeature/js-sdk
+</span></code></pre>
+<p>Now you can start working with the SDK by coding the following:</p>
+<pre data-lang="ts" style="background-color:#171c19;color:#87928a;" class="language-ts "><code class="language-ts" data-lang="ts"><span style="color:#55859b;">import </span><span>{ </span><span style="color:#b16139;">OpenFeature </span><span>} </span><span style="color:#55859b;">from </span><span>&#39;</span><span style="color:#489963;">@openfeature/js-sdk</span><span>&#39;;
+</span><span>
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">client </span><span>= </span><span style="color:#b16139;">OpenFeature</span><span>.</span><span style="color:#478c90;">getClient</span><span>();
+</span><span>
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">isNewExperience </span><span>= </span><span style="color:#55859b;">await </span><span style="color:#b16139;">client</span><span>.</span><span style="color:#478c90;">getBooleanValue</span><span>(&#39;</span><span style="color:#489963;">new-experience</span><span>&#39;, </span><span style="color:#9f713c;">false</span><span>);
+</span><span>
+</span><span style="color:#55859b;">if </span><span>(</span><span style="color:#b16139;">isNewExperience</span><span>) {
+</span><span>  </span><span style="color:#5f6d64;">// ...
+</span><span>}
+</span></code></pre>
+<p>This is very similar to the above example, but needs the magic sauce to actually <em>provide</em> the logic- an OpenFeature <strong>provider</strong>.</p>
+<h4 id="wire-up-a-provider">Wire Up A Provider</h4>
+<p>You need a provider to back the flag evaluation in the OpenFeature SDK. These are pluggable, and anything that adheres to the defined Provider interface can fulfill this contract. I'll pull in a specific provider, just as an example. In my case I'll use the [Split] provider. The Split provider has a peer dependency on the Split SDK as well, so I will install them both with:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">yarn</span><span> add @splitsoftware/openfeature-js-split-provider @splitsoftware/splitio
+</span></code></pre>
+<p>Now that we have a provider, we can update our code example above accordingly:</p>
+<pre data-lang="ts" style="background-color:#171c19;color:#87928a;" class="language-ts "><code class="language-ts" data-lang="ts"><span style="color:#55859b;">import </span><span>{ </span><span style="color:#b16139;">OpenFeature </span><span>} </span><span style="color:#55859b;">from </span><span>&#39;</span><span style="color:#489963;">@openfeature/js-sdk</span><span>&#39;;
+</span><span style="color:#55859b;">import </span><span>{ </span><span style="color:#b16139;">SplitFactory </span><span>} </span><span style="color:#55859b;">from </span><span>&#39;</span><span style="color:#489963;">@splitsoftware/splitio</span><span>&#39;;
+</span><span style="color:#55859b;">import </span><span>{ </span><span style="color:#b16139;">OpenFeatureSplitProvider </span><span>} </span><span style="color:#55859b;">from </span><span>&#39;</span><span style="color:#489963;">@splitsoftware/openfeature-js-split-provider</span><span>&#39;;
+</span><span>
+</span><span style="color:#5f6d64;">// The key that authorizes the Split client to connect to the Split API
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">SPLIT_AUTHORIZATION_KEY </span><span>= &#39;</span><span style="color:#489963;">your-split-auth-key</span><span>&#39;;
+</span><span>
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">client </span><span>= </span><span style="color:#b16139;">OpenFeature</span><span>.</span><span style="color:#478c90;">getClient</span><span>();
+</span><span>
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">splitClient </span><span>= </span><span style="color:#478c90;">SplitFactory</span><span>({core: {</span><span style="color:#b16139;">authorizationKey</span><span>}}).</span><span style="color:#478c90;">client</span><span>();
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">provider </span><span>= new OpenFeatureSplitProvider({</span><span style="color:#b16139;">splitClient</span><span>});
+</span><span>
+</span><span style="color:#b16139;">OpenFeature</span><span>.</span><span style="color:#478c90;">setProvider</span><span>(</span><span style="color:#b16139;">provider</span><span>);
+</span><span>
+</span><span style="color:#5f6d64;">// With the provider set, let&#39;s get to work
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">isNewExperience </span><span>= </span><span style="color:#55859b;">await </span><span style="color:#b16139;">client</span><span>.</span><span style="color:#478c90;">getBooleanValue</span><span>(&#39;</span><span style="color:#489963;">new-experience</span><span>&#39;, </span><span style="color:#9f713c;">false</span><span>);
+</span><span>
+</span><span style="color:#55859b;">if </span><span>(</span><span style="color:#b16139;">isNewExperience</span><span>) {
+</span><span>  </span><span style="color:#5f6d64;">// ...
+</span><span>}
+</span></code></pre>
+<h3 id="server-side-php">Server-side PHP</h3>
+<p>As mentioned, several languages are supported, including .NET, Go, and more. In this example we'll utilize the PHP SDK since I wrote it.</p>
+<p>Let's assume you're using <code>composer</code> like every other PHP project- then you would install the SDK by running:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">composer</span><span> require open-feature/sdk
+</span></code></pre>
+<p>This will pull in the package and update your <code>composer.json</code> and <code>composer.lock</code> accordingly.</p>
+<p>Now, to utilize the SDK, you will simply retrieve an instance from the SDK:</p>
+<pre data-lang="php" style="background-color:#171c19;color:#87928a;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#867469;">&lt;?php
+</span><span>
+</span><span style="color:#55859b;">use </span><span>Api\</span><span style="color:#a07e3b;">Controller</span><span>;
+</span><span style="color:#55859b;">use </span><span>Api\</span><span style="color:#a07e3b;">Method</span><span>;
+</span><span style="color:#55859b;">use </span><span>Api\</span><span style="color:#a07e3b;">Route</span><span>;
+</span><span style="color:#55859b;">use </span><span>OpenFeature\</span><span style="color:#a07e3b;">OpenFeatureClient</span><span>;
+</span><span>
+</span><span style="color:#5f6d64;">#[Route(&quot;/cats&quot;)]
+</span><span style="color:#55859b;">class </span><span style="color:#a07e3b;">CatsController </span><span style="color:#55859b;">extends </span><span style="color:#489963;">Controller
+</span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">public function </span><span style="color:#1c9aa0;">__construct</span><span style="color:#ecf4ee;">(
+</span><span style="color:#ecf4ee;">    </span><span style="color:#a07e3b;">private readonly OpenFeatureClient </span><span>$</span><span style="color:#b16139;">client
+</span><span style="color:#ecf4ee;">  ) {}
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#5f6d64;">#[Method\Get]
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">public function </span><span style="color:#478c90;">actionFavorite</span><span style="color:#ecf4ee;">(): </span><span style="color:#a07e3b;">UI
+</span><span style="color:#ecf4ee;">  {
+</span><span style="color:#ecf4ee;">    </span><span>$</span><span style="color:#b16139;">userId </span><span>= $</span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">-&gt;</span><span style="color:#b16139;">getUserIdFromRequest</span><span style="color:#ecf4ee;">();
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">    </span><span>$</span><span style="color:#b16139;">favoriteCat </span><span>= $</span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">-&gt;</span><span style="color:#b16139;">client</span><span style="color:#ecf4ee;">-&gt;</span><span style="color:#b16139;">getStringValue</span><span style="color:#ecf4ee;">(</span><span>&#39;</span><span style="color:#489963;">favorite-cat</span><span>&#39;</span><span style="color:#ecf4ee;">, </span><span>&#39;</span><span style="color:#489963;">Nebelung</span><span>&#39;</span><span style="color:#ecf4ee;">, [
+</span><span style="color:#ecf4ee;">      </span><span>&#39;</span><span style="color:#489963;">user-id</span><span>&#39; =&gt; $</span><span style="color:#b16139;">userId</span><span style="color:#ecf4ee;">,
+</span><span style="color:#ecf4ee;">    ]);
+</span><span style="color:#ecf4ee;">    
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">return </span><span style="color:#ecf4ee;">[
+</span><span style="color:#ecf4ee;">      </span><span>&#39;</span><span style="color:#489963;">favoriteCat</span><span>&#39; =&gt; $</span><span style="color:#b16139;">favoriteCat</span><span style="color:#ecf4ee;">,
+</span><span style="color:#ecf4ee;">    ];
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">}
+</span></code></pre>
+<p>Now when the OpenFeature client evaluates the flag for the request, it'll pass some evaluation context as well, which includes the user's ID if it exists. The provider will utilize this to determine what the correct value to return will be, which allows us to provide consistent experiences at the user-level. As long as the same user is accessing the API, they will receive the same behavior.</p>
+<blockquote>
+<p>Note: This example removed the steps of instantiating a provider and instead utilized inversion of control to allow the framework to provide the necessary OpenFeature client instead. The process is similar to that shown in the JS SDK.</p>
+</blockquote>
+<h3 id="hooks-manual-instrumentation">Hooks Manual Instrumentation</h3>
+<p>Just like you can set a provider in your OpenFeature SDK, you can also add hooks. The hooks are executed in a particular ordered defined by the specification, such that you can expect the behavior in the JavaScript SDK to be identical to that of the PHP SDK, Go SDK, etc.</p>
+<p>When adding hooks, you can do so at any level of the OpenFeature SDK: API, Client, Provider, and invocation. How these are each evaluated is defined in the <a href="https://openfeature.dev/specification/sections/hooks#requirement-441">hook ordering</a> specification.</p>
+<p>Here we will add the <a href="https://packagist.org/packages/open-feature/validators-hook">validators</a> hook for PHP, available in the <a href="https://github.com/open-feature/php-sdk-contrib">php-sdk-contrib</a> repository:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">composer</span><span> require open-feature/validators-hook
+</span></code></pre>
+<p>And we can utilize the hook at each of the mentioned levels by doing:</p>
+<pre data-lang="php" style="background-color:#171c19;color:#87928a;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#867469;">&lt;?php
+</span><span>
+</span><span style="color:#55859b;">use </span><span>OpenFeature\Hooks\Validators\</span><span style="color:#a07e3b;">RegexpValidatorHook</span><span>;
+</span><span style="color:#55859b;">use </span><span>OpenFeature\</span><span style="color:#a07e3b;">OpenFeatureAPI</span><span>;
+</span><span>
+</span><span style="color:#5f6d64;">// Custom hook
+</span><span>$</span><span style="color:#b16139;">hexadecimalValidator </span><span>= </span><span style="color:#55859b;">new </span><span style="color:#a07e3b;">RegexpValidatorHook</span><span>(&#39;/</span><span style="color:#55859b;">^</span><span style="color:#9f713c;">[0-9a-f]</span><span>+</span><span style="color:#55859b;">$</span><span>/&#39;);
+</span><span>
+</span><span style="color:#5f6d64;">// API
+</span><span>$</span><span style="color:#b16139;">api </span><span>= </span><span style="color:#a07e3b;">OpenFeatureAPI</span><span>::</span><span style="color:#b16139;">getInstance</span><span>();
+</span><span>$</span><span style="color:#b16139;">api</span><span>-&gt;</span><span style="color:#b16139;">addHooks</span><span>($</span><span style="color:#b16139;">hexadecimalValidator</span><span>);
+</span><span>
+</span><span style="color:#5f6d64;">// Client
+</span><span>$</span><span style="color:#b16139;">client </span><span>= $</span><span style="color:#b16139;">api</span><span>-&gt;</span><span style="color:#b16139;">getClient</span><span>(&#39;</span><span style="color:#489963;">hooks-test</span><span>&#39;);
+</span><span>$</span><span style="color:#b16139;">client</span><span>-&gt;</span><span style="color:#b16139;">addHooks</span><span>($</span><span style="color:#b16139;">hexadecimalValidator</span><span>);
+</span><span>
+</span><span style="color:#5f6d64;">// Provider
+</span><span>$</span><span style="color:#b16139;">provider </span><span>= </span><span style="color:#55859b;">new </span><span style="color:#a07e3b;">ExampleProvider</span><span>();
+</span><span>$</span><span style="color:#b16139;">provider</span><span>-&gt;</span><span style="color:#b16139;">addHooks</span><span>($</span><span style="color:#b16139;">hexadecimalValidator</span><span>);
+</span><span>
+</span><span style="color:#5f6d64;">// Invocation
+</span><span>$</span><span style="color:#b16139;">client</span><span>-&gt;</span><span style="color:#b16139;">resolveStringValue</span><span>(&#39;</span><span style="color:#489963;">test-flag</span><span>&#39;, &#39;</span><span style="color:#489963;">deadbeef</span><span>&#39;, </span><span style="color:#9f713c;">null</span><span>, </span><span style="color:#55859b;">new </span><span style="color:#a07e3b;">EvaluationOptions</span><span>([$</span><span style="color:#b16139;">hexadecimalValidator</span><span>]));
+</span></code></pre>
+<p>Easy as that! The higher up you place the hook, the more <em>universal</em> it becomes across your application. Make sure to keep this in mind as applying something at the API-level will impact <em>every evaluation</em> in the entire application.</p>
+<h3 id="hooks-observability-with-opentelemetry">Hooks: Observability with OpenTelemetry</h3>
+<p>Something that you might find useful as a developer pushing code to production is how the behavior of the feature flagging system may impact your users. Perhaps you want to know whether the evaluation in the provider, or what value was determined for a given request. Well, you can utilize observability tools like OpenTelemetry to accomplish that.</p>
+<p>There are a couple of observability hooks already provided, and both of them utilize the PSR-4 autoloader functionality for PHP. The convenience of this is that all it takes is having the package <em>installed</em> and you'll get the hook set at the API-level to trace <em>all</em> evaluations, following the standard practices defined in e.g. OpenTelemetry's Semantic Conventions.</p>
+<p>So, install the package:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">composer</span><span> require open-feature/otel-hook
+</span></code></pre>
+<p>And autoload as you normally would! This example follows the standard practice of autoloading at the entrypoint of your PHP application:</p>
+<pre data-lang="php" style="background-color:#171c19;color:#87928a;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#867469;">&lt;?php
+</span><span>
+</span><span style="color:#55859b;">declare</span><span>(</span><span style="color:#9f713c;">strict_types</span><span>=</span><span style="color:#9f713c;">1</span><span>);
+</span><span>
+</span><span style="color:#55859b;">use </span><span>OpenFeature\</span><span style="color:#a07e3b;">OpenFeatureAPI</span><span>;
+</span><span>
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_PHP_AUTOLOAD_ENABLED=true</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_TRACES_EXPORTER=otlp</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_EXPORTER_OTLP_PROTOCOL=grpc</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_METRICS_EXPORTER=otlp</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=grpc</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4317</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_PHP_TRACES_PROCESSOR=batch</span><span>&#39;);
+</span><span style="color:#1c9aa0;">putenv</span><span>(&#39;</span><span style="color:#489963;">OTEL_PROPAGATORS=b3,baggage,tracecontext</span><span>&#39;);
+</span><span>
+</span><span style="color:#1c9aa0;">echo </span><span>&#39;</span><span style="color:#489963;">autoloading SDK example starting...</span><span>&#39; . PHP_EOL;
+</span><span>
+</span><span style="color:#5f6d64;">// Composer autoloader will execute SDK/_autoload.php which will register global instrumentation from environment configuration
+</span><span style="color:#55859b;">require </span><span style="color:#1c9aa0;">dirname</span><span>(</span><span style="color:#9f713c;">__DIR__</span><span>) . &#39;</span><span style="color:#489963;">/vendor/autoload.php</span><span>&#39;;
+</span><span>
+</span><span>$</span><span style="color:#b16139;">client </span><span>= </span><span style="color:#a07e3b;">OpenFeatureAPI</span><span>::</span><span style="color:#b16139;">getInstance</span><span>()-&gt;</span><span style="color:#b16139;">getClient</span><span>(&#39;</span><span style="color:#489963;">dev.openfeature.contrib.php.demo</span><span>&#39;, &#39;</span><span style="color:#489963;">1.0.0</span><span>&#39;);
+</span><span>
+</span><span>$</span><span style="color:#b16139;">version </span><span>= $</span><span style="color:#b16139;">client</span><span>-&gt;</span><span style="color:#b16139;">getStringValue</span><span>(&#39;</span><span style="color:#489963;">dev.openfeature.contrib.php.version-value</span><span>&#39;, &#39;</span><span style="color:#489963;">unknown</span><span>&#39;);
+</span><span>
+</span><span style="color:#1c9aa0;">echo </span><span>&#39;</span><span style="color:#489963;">Version is </span><span>&#39; . $</span><span style="color:#b16139;">version</span><span>;
+</span></code></pre>
+<p>As you can see, there were no <strong>explicit actions</strong> necessary. However, the OpenTelemetry hook is set up at the API-level and providing tracing based on the configuration of your OTel exporter.</p>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/swe/">swe</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/open-source/">open source</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/feature-flags/">feature flags</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

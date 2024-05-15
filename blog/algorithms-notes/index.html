@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Notes on algorithms</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>12 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-07-28
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#preface">Preface</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#shared-code">Shared code</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#algorithms-terminology">Algorithms Terminology</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#cardinality">Cardinality</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#regression">Regression</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#classification">Classification</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#feature">Feature</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#heuristic">Heuristic</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#more-general-terms">More general terms</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#arrays">Arrays</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#sorting-algorithms">Sorting algorithms</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#lists">Lists</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#graphs">Graphs</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#trees">Trees</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#summary">Summary</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#b-trees">B-trees</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#red-black-trees">Red-black trees</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#avl-trees">AVL trees</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#heaps">Heaps</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#splay-trees">Splay trees</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#k-nearest-neighbor">K-Nearest Neighbor</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#examples">Examples</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#fourier-transform">Fourier Transform</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#mapreduce">MapReduce</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/algorithms-notes/#scheduling-jobs">Scheduling Jobs</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/algorithms-notes/#earliest-ending-job">Earliest Ending Job</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <p>This was exported from an <a href="https://orgmode.org/">org-mode</a> notebook documenting various
+algorithm knowledge, with some example code snippets here and there
+implementing and executing algorithms inline.</p>
+<p>Code is reused where possible, such as algorithm implementations being
+defined in one section with multiple data tests in others, referencing
+that function.</p>
+<blockquote>
+<p>This post is a bit different, as I am documenting this for myself only- and I'm sorry if I lead you astray :)</p>
+</blockquote>
+<h1 id="preface">Preface</h1>
+<p>Since this is an <strong>org-mode</strong> notebook, it's actually possible to
+evaluate code using
+<a href="https://orgmode.org/worg/org-contrib/babel/">Babel</a>. As a bit of an
+org-mode novice, I'm not familiar with all of the capabilities, but it
+is possible to share sessions between source code snippets. Due to this,
+there are some shared functions I will define that will be reused across
+the notebook.</p>
+<h2 id="shared-code">Shared code</h2>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#55859b;">def </span><span style="color:#478c90;">swap_indices</span><span>(</span><span style="color:#b16139;">array</span><span>, </span><span style="color:#b16139;">i</span><span>, </span><span style="color:#b16139;">j</span><span>):
+</span><span>    array[i], array[j] = array[j], array[i]
+</span><span>
+</span><span>debug_state = {
+</span><span>    &#39;</span><span style="color:#489963;">enabled</span><span>&#39;: </span><span style="color:#9f713c;">False
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">class </span><span style="color:#a07e3b;">Logger</span><span style="color:#ecf4ee;">:
+</span><span>    </span><span style="color:#55859b;">def </span><span style="color:#478c90;">debug</span><span>(</span><span style="color:#b16139;">self</span><span>, </span><span style="color:#b16139;">content</span><span>):
+</span><span>        </span><span style="color:#55859b;">if </span><span>(debug_state[&#39;</span><span style="color:#489963;">enabled</span><span>&#39;]):
+</span><span>            </span><span style="color:#1c9aa0;">print</span><span>(content)
+</span><span>
+</span><span>logger = </span><span style="color:#b16139;">Logger</span><span>()
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">set_debugging</span><span>(</span><span style="color:#b16139;">enabled</span><span>):
+</span><span>    debug_state[&#39;</span><span style="color:#489963;">enabled</span><span>&#39;] = enabled
+</span></code></pre>
+<h1 id="algorithms-terminology">Algorithms Terminology</h1>
+<h2 id="cardinality">Cardinality</h2>
+<p>The size of the data. For set, arrays, or tuples, it's the number of
+elements stored in it.</p>
+<h2 id="regression">Regression</h2>
+<p>Predicting a response. An example of this is K-Nearest Neighbor.</p>
+<h2 id="classification">Classification</h2>
+<p>Categorization into a group. See features.</p>
+<h2 id="feature">Feature</h2>
+<p>Attributes or tangible data points that can be construed about the data
+set.</p>
+<p>Take for example, fruit, you might compare color and size.</p>
+<p>For another example, consider a pizza storefront. You might utilize a
+number of features, such as:</p>
+<ul>
+<li>The day of the week (Sunday is 0, Monday is 1, ... Saturday is 6)</li>
+<li>Weekend or holiday (Yes is 1, No is 0)</li>
+<li>Is it a game day (Yes is 1, No is 0)</li>
+</ul>
+<p>And so on. These could be used to guess what a likely outcome of another
+datapoint might be.</p>
+<h2 id="heuristic">Heuristic</h2>
+<p>Unlike an algorithm, which always produces a correct result, a heuristic
+usually does a godo job but does not provide any guarantees.</p>
+<p>To provide a more direct definition:</p>
+<p>&gt; proceeding to a solution by trial and error or by rules that are only
+loosely defined.</p>
+<h2 id="more-general-terms">More general terms</h2>
+<h1 id="arrays">Arrays</h1>
+<p>Arrays are continugous data structures. They provide instant access
+(O(1)) to any element of the array by index. They are limited in
+removals and insertions though, requiring on average O(n) time to insert
+or delete elements from the array.</p>
+<p>For removals, this is because any element to the right of the element
+needs to be shifted left.</p>
+<p>For insertions, this is because any element to the right of the element
+needs to be shifted right.</p>
+<p>So on average, since (n + 0)/2 or 1/2 * n, this equates to O(n).</p>
+<h2 id="sorting-algorithms">Sorting algorithms</h2>
+<p>There are many sorting algorithms relevant to array data structures.</p>
+<h3 id="insertion-sort">Insertion sort</h3>
+<p>This is one of the more simple sorting algorithms, and has a complexity
+of O(n^2^). The logic for this is simple.</p>
+<ol>
+<li>Start from the beginning of the array</li>
+<li>Step forward</li>
+<li>If the current element is less than the previous element</li>
+<li>If the current element is less than the previous element, walk
+backwards in the array until either you reach an element that is
+less than the current element, or the beginning of the list, and
+place it there</li>
+<li>If not at the end of the array, repeat from step 2</li>
+</ol>
+<p>An example implementation for this would be:</p>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#55859b;">def </span><span style="color:#478c90;">insertion_sort</span><span>(</span><span style="color:#b16139;">array</span><span>, </span><span style="color:#b16139;">debug</span><span>=</span><span style="color:#9f713c;">False</span><span>):
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Starting from position 1</span><span>&quot;)
+</span><span>    backwards_index = </span><span style="color:#9f713c;">1
+</span><span>
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Starting iterations...</span><span>&quot;)
+</span><span>    </span><span style="color:#55859b;">for </span><span>forwards_index </span><span style="color:#55859b;">in </span><span style="color:#1c9aa0;">range</span><span>(</span><span style="color:#9f713c;">1</span><span>, </span><span style="color:#1c9aa0;">len</span><span>(array)):
+</span><span>        backwards_index = forwards_index
+</span><span>
+</span><span>        logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Finding the best place for </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(array[forwards_index]))
+</span><span>
+</span><span>        </span><span style="color:#55859b;">while </span><span>(backwards_index &gt; </span><span style="color:#9f713c;">0 </span><span>and array[backwards_index] &lt; array[backwards_index-</span><span style="color:#9f713c;">1</span><span>]):
+</span><span>
+</span><span>            logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Swapping from position </span><span style="color:#9f713c;">{}</span><span style="color:#489963;"> to position </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(backwards_index, backwards_index-</span><span style="color:#9f713c;">1</span><span>))
+</span><span>            </span><span style="color:#5f6d64;"># array[backwards_index], array[backwards_index-1] = array[backwards_index-1], array[backwards_index]
+</span><span>            </span><span style="color:#b16139;">swap_indices</span><span>(array, backwards_index, backwards_index-</span><span style="color:#9f713c;">1</span><span>)
+</span><span>            backwards_index = backwards_index-</span><span style="color:#9f713c;">1
+</span><span>
+</span><span>        logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Found the resting place for </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(array[forwards_index]))
+</span></code></pre>
+<ol>
+<li>
+<p>Examples</p>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#55859b;">import </span><span>random
+</span><span>
+</span><span style="color:#b16139;">set_debugging</span><span>(</span><span style="color:#9f713c;">False</span><span>)
+</span><span>
+</span><span style="color:#5f6d64;"># always generates a list from 1-13 with 4 instances of each integer
+</span><span>arr = [x </span><span style="color:#55859b;">for </span><span>x </span><span style="color:#55859b;">in </span><span style="color:#1c9aa0;">range</span><span>(</span><span style="color:#9f713c;">1</span><span>,</span><span style="color:#9f713c;">14</span><span>) </span><span style="color:#55859b;">for </span><span>y </span><span style="color:#55859b;">in </span><span style="color:#1c9aa0;">range</span><span>(</span><span style="color:#9f713c;">0</span><span>,</span><span style="color:#9f713c;">4</span><span>)]
+</span><span>
+</span><span>random.</span><span style="color:#b16139;">shuffle</span><span>(arr)
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">The randomized array</span><span>&quot;)
+</span><span style="color:#1c9aa0;">print</span><span>(arr)
+</span><span>
+</span><span style="color:#b16139;">insertion_sort</span><span>(arr)
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;&quot;)
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">The sorted array</span><span>&quot;)
+</span><span style="color:#1c9aa0;">print</span><span>(arr)
+</span><span>
+</span></code></pre>
+<p>:</p>
+<pre data-lang="example" style="background-color:#171c19;color:#87928a;" class="language-example "><code class="language-example" data-lang="example"><span>The sorted array
+</span><span>[1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13]
+</span></code></pre>
+</li>
+</ol>
+<h1 id="lists">Lists</h1>
+<h1 id="graphs">Graphs</h1>
+<h1 id="trees">Trees</h1>
+<h2 id="summary">Summary</h2>
+<p>Trees are a special type of graph. The properties of a tree are:</p>
+<ul>
+<li>A non-linear data structure</li>
+<li>Always has n-1 edges for n nodes</li>
+<li>Edges are always directed</li>
+<li>There is a root node</li>
+<li>A node can only have up to one parent</li>
+<li>There are no cycles</li>
+</ul>
+<h3 id="terminology">Terminology</h3>
+<ol>
+<li>
+<p>Root node</p>
+<p>The topmost node in a tree. It has no parent, unlike the rest of the
+tree</p>
+</li>
+<li>
+<p>Parent</p>
+<p>In relation to a node, its parent is the node pointing to it</p>
+</li>
+<li>
+<p>Child</p>
+<p>In relation to a node, a child is a node it points to</p>
+</li>
+<li>
+<p>Leaf node</p>
+<p>A node that has no children. Also referred to as an external node</p>
+</li>
+<li>
+<p>Non-leaf node</p>
+<p>A node that does have children. Also referred to as an internal node</p>
+</li>
+<li>
+<p>Path</p>
+<p>A sequence of edges connecting a starting node to an end node.</p>
+</li>
+<li>
+<p>Edge</p>
+<p>A link between two node, just like in a graph. This must be
+directed.</p>
+</li>
+<li>
+<p>Ancestor</p>
+<p>In relation to a node, an ancestor is any node that is its parent,
+or a parent of its parent, and so on.</p>
+</li>
+<li>
+<p>Descendant</p>
+<p>In relation to a node, a descendent is any node that is its child,
+or a child of its child, and so on.</p>
+</li>
+<li>
+<p>Sibling</p>
+<p>In relation to a node, a sibling is any node that shares the same
+parent as it.</p>
+</li>
+<li>
+<p>Degree</p>
+<p>The number of children a node has.</p>
+</li>
+<li>
+<p>Depth of a node</p>
+<p>In relation to a node, this is the number of edges between the root
+node and it.</p>
+</li>
+<li>
+<p>Height of a node</p>
+<p>In relation to a node, this is the longest path that exists between
+it and any of its descendant leaf nodes.</p>
+</li>
+<li>
+<p>Level of a node</p>
+<p>In relation to a node, the number of edges that exist from the root
+node to it. Typically, depth of node + 1.</p>
+</li>
+<li>
+<p>Rooted tree</p>
+<p>A binary tree that has a root node and every node has at most two
+children.</p>
+</li>
+<li>
+<p>Full tree</p>
+<p>A binary tree in which every node has either 0 or 2 children.</p>
+</li>
+<li>
+<p>Balanced tree</p>
+<p>A binary tree where the left and right subtrees of every node differ
+in height by no more than 1.</p>
+</li>
+<li>
+<p>Degenerate / Pathological tree</p>
+<p>A tree where each parent node has only one associated child node.</p>
+<p>This is essentially a linked list structure and provides no
+additional benefits over it.</p>
+</li>
+</ol>
+<h2 id="b-trees">B-trees</h2>
+<p>These function by optimizing the number of reads that need to be
+performed in order to access data from a disk. These are often used in
+databases.</p>
+<p>In contrast to a binary tree which houses up to but not exceeding 2
+child nodes per node, this structures the maximum number of children per
+node in order to reach a full block size from the disk. In this way,
+each read maximally saturates the disk read operation and requires fewer
+reads from the disk in total to reach the desired data.</p>
+<h2 id="red-black-trees">Red-black trees</h2>
+<p>Red-black trees are a specialized type of binary tree which utilize a
+set of rule to automatically balance itself during insertions and
+deletions.</p>
+<h3 id="properties">Properties</h3>
+<ol>
+<li>Red/Black property: Every node is colored. They can either be red or
+black.</li>
+<li>Root property: The root is black</li>
+<li>Leaf property: Every leaf (nil) is black</li>
+<li>Red property: If a red node has children, then the children are
+always black.</li>
+<li>Depth property: Every path from a given node to any of its leaf
+(nil) nodes has the same number of black nodes.</li>
+</ol>
+<h3 id="rotation-rules">Rotation rules</h3>
+<h2 id="avl-trees">AVL trees</h2>
+<p>AVL trees are named after its inventors, Adelson-Velsky and Landis. It
+is another specialized type of binary tree which is self-balancing.</p>
+<h3 id="more-info">More info</h3>
+<h2 id="heaps">Heaps</h2>
+<p>A specialized tree data structure, which satisfies the <strong>heap
+property</strong>. There are two types of heaps, min heap and max heap. In a
+max heap, for any given node N, if P is a parent node of N, then the
+value of P is greater than or equal to the value of N.</p>
+<p>A heap is an implementation of another abstract data type; the priority
+queue. Priority queues are sometimes referred to as heaps, regardless of
+their implementation.</p>
+<p>A common implementation is the <strong>binary heap</strong>.</p>
+<h3 id="comparison-to-binary-search-trees">Comparison to binary search trees</h3>
+<p>Binary search trees follow a different kind of rule, such that the left
+and right child nodes of any given node are less than or greater than
+their parent, respectively. Meanwhile, a binary heap follows no such
+ordering, and has no implicit ordering for searches.</p>
+<h2 id="splay-trees">Splay trees</h2>
+<p>A binary search tree that provides the additional benefit that recently
+accessed elements will be fast to access again. Operations similar
+complete in O(log n) time similar to self-balancing binary search trees.
+For operations that are performed in a non-random pattern, it can
+complete in faster than logarithmic time, without requiring knowledge of
+the pattern.</p>
+<p>All operations are combined with one basic operation called splaying.
+Splaying the tree rearranges the tree so that the element is placed at
+the root of the tree. This requires tree rotations to move the element
+to the top. This allows all of the operations performed to move recently
+accessed elements closer to the root.</p>
+<p>It is possible for the structure of the tree to be pathological based on
+what element was most recently accessed, compared to a self-balancing
+tree which maintains an logarithmic lookup time.</p>
+<p>In short, a splay tree will reorganize based on most-recently used (MRU)
+elements, while a self-balancing tree will reorganize to optimize for
+random element searches.</p>
+<h1 id="k-nearest-neighbor">K-Nearest Neighbor</h1>
+<p>Determining the most similar data point in a dataset based on determined
+features.</p>
+<h2 id="examples">Examples</h2>
+<h3 id="distance-calculation">Distance calculation</h3>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#55859b;">from </span><span>math </span><span style="color:#55859b;">import </span><span>sqrt, ceil
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">calculate_distance</span><span>(</span><span style="color:#b16139;">x</span><span>, </span><span style="color:#b16139;">y</span><span>):
+</span><span>    </span><span style="color:#5f6d64;"># we can only compare the datapoints if they are equal in cardinality
+</span><span>    </span><span style="color:#55859b;">if </span><span>(</span><span style="color:#1c9aa0;">len</span><span>(x) != </span><span style="color:#1c9aa0;">len</span><span>(y)):
+</span><span>        </span><span style="color:#55859b;">return </span><span>-</span><span style="color:#9f713c;">1
+</span><span>
+</span><span>    </span><span style="color:#55859b;">return </span><span>(</span><span style="color:#b16139;">ceil</span><span>(</span><span style="color:#b16139;">sqrt</span><span>(</span><span style="color:#1c9aa0;">sum</span><span>([(x[i]-y[i]) ** </span><span style="color:#9f713c;">2 </span><span style="color:#55859b;">for </span><span>i </span><span style="color:#55859b;">in </span><span style="color:#1c9aa0;">range</span><span>(</span><span style="color:#1c9aa0;">len</span><span>(x))]))))
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">map_distances</span><span>(</span><span style="color:#b16139;">value</span><span>, </span><span style="color:#b16139;">dataset</span><span>):
+</span><span>    </span><span style="color:#55859b;">return </span><span>[</span><span style="color:#b16139;">calculate_distance</span><span>(value, datapoint) </span><span style="color:#55859b;">for </span><span>datapoint </span><span style="color:#55859b;">in </span><span>dataset]
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">k_nearest</span><span>(</span><span style="color:#b16139;">k</span><span>, </span><span style="color:#b16139;">value</span><span>, </span><span style="color:#b16139;">dataset</span><span>):
+</span><span>    </span><span style="color:#5f6d64;"># todo: stuff
+</span><span>
+</span><span>    </span><span style="color:#55859b;">return </span><span>[]
+</span></code></pre>
+<h3 id="bread">Bread</h3>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#5f6d64;">### bread data
+</span><span>dataset = [
+</span><span>    (</span><span style="color:#9f713c;">5</span><span>, </span><span style="color:#9f713c;">1</span><span>, </span><span style="color:#9f713c;">0</span><span>),
+</span><span>    (</span><span style="color:#9f713c;">3</span><span>, </span><span style="color:#9f713c;">1</span><span>, </span><span style="color:#9f713c;">1</span><span>),
+</span><span>    (</span><span style="color:#9f713c;">1</span><span>, </span><span style="color:#9f713c;">1</span><span>, </span><span style="color:#9f713c;">0</span><span>),
+</span><span>    (</span><span style="color:#9f713c;">4</span><span>, </span><span style="color:#9f713c;">0</span><span>, </span><span style="color:#9f713c;">1</span><span>),
+</span><span>    (</span><span style="color:#9f713c;">4</span><span>, </span><span style="color:#9f713c;">0</span><span>, </span><span style="color:#9f713c;">0</span><span>),
+</span><span>    (</span><span style="color:#9f713c;">2</span><span>, </span><span style="color:#9f713c;">0</span><span>, </span><span style="color:#9f713c;">0</span><span>),
+</span><span>]
+</span><span>coordinate = (</span><span style="color:#9f713c;">4</span><span>,</span><span style="color:#9f713c;">1</span><span>,</span><span style="color:#9f713c;">0</span><span>)
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(</span><span style="color:#b16139;">map_distances</span><span>(coordinate, dataset))
+</span><span>
+</span></code></pre>
+<h3 id="netflix-user-data">Netflix User Data</h3>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#5f6d64;">### netflix user data
+</span><span>dataset = [
+</span><span>    (</span><span style="color:#9f713c;">3</span><span>,</span><span style="color:#9f713c;">4</span><span>,</span><span style="color:#9f713c;">4</span><span>,</span><span style="color:#9f713c;">1</span><span>,</span><span style="color:#9f713c;">4</span><span>),
+</span><span>    (</span><span style="color:#9f713c;">4</span><span>,</span><span style="color:#9f713c;">3</span><span>,</span><span style="color:#9f713c;">5</span><span>,</span><span style="color:#9f713c;">1</span><span>,</span><span style="color:#9f713c;">5</span><span>),
+</span><span>]
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(</span><span style="color:#b16139;">calculate_distance</span><span>(*dataset))
+</span></code></pre>
+<h1 id="fourier-transform">Fourier Transform</h1>
+<h1 id="mapreduce">MapReduce</h1>
+<h1 id="scheduling-jobs">Scheduling Jobs</h1>
+<p>A common algorithmic problem is optimal scheduling in regards to time
+slots. There are various approaches that can be taken here, such as
+&quot;shortest job first&quot;, or &quot;earliest starting job first&quot;, which do not
+always yield the correct result. In the case of scheduling, there is a
+known, correct algorithm for this that is optimal:</p>
+<h2 id="earliest-ending-job">Earliest Ending Job</h2>
+<p>This works by finding the job that ends the earliest, as opposed to the
+job that starts the earliest. This job guarantees that less subsequent
+jobs will be blocked than any others. The algorithm for this can be
+defined as follows:</p>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#55859b;">class </span><span style="color:#a07e3b;">Job</span><span style="color:#ecf4ee;">:
+</span><span>    </span><span style="color:#55859b;">def </span><span style="color:#1c9aa0;">__init__</span><span>(</span><span style="color:#b16139;">self</span><span>, </span><span style="color:#b16139;">starts</span><span>, </span><span style="color:#b16139;">ends</span><span>, </span><span style="color:#b16139;">meta</span><span>={}):
+</span><span>        </span><span style="color:#b16139;">self</span><span>.starts = starts
+</span><span>        </span><span style="color:#b16139;">self</span><span>.ends = ends
+</span><span>        </span><span style="color:#b16139;">self</span><span>.meta = meta
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">pop_earliest_ending_job</span><span>(</span><span style="color:#b16139;">jobs</span><span>):
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Finding the earliest ending job</span><span>&quot;)
+</span><span>
+</span><span>    earliest_time = </span><span style="color:#b16139;">float</span><span>(&#39;</span><span style="color:#489963;">inf</span><span>&#39;)
+</span><span>    earliest_job = </span><span style="color:#9f713c;">None
+</span><span>
+</span><span>    </span><span style="color:#55859b;">for </span><span>job </span><span style="color:#55859b;">in </span><span>jobs:
+</span><span>         logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Checking if </span><span style="color:#9f713c;">{}</span><span style="color:#489963;"> ends earliest...</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(job.meta[&#39;</span><span style="color:#489963;">title</span><span>&#39;]))
+</span><span>         </span><span style="color:#55859b;">if </span><span>(job.ends &lt; earliest_time):
+</span><span>             logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Looks like it could be </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(job.meta[&#39;</span><span style="color:#489963;">title</span><span>&#39;]))
+</span><span>             earliest_job = job
+</span><span>             earliest_time = job.ends
+</span><span>
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">The earliest ending job was </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(job.meta[&#39;</span><span style="color:#489963;">title</span><span>&#39;]))
+</span><span>
+</span><span>    jobs.</span><span style="color:#b16139;">remove</span><span>(earliest_job)
+</span><span>
+</span><span>    </span><span style="color:#55859b;">return </span><span>earliest_job
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">remove_overlapping_jobs</span><span>(</span><span style="color:#b16139;">jobs</span><span>, </span><span style="color:#b16139;">end_time</span><span>):
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Removing jobs conflicting with end time </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(end_time))
+</span><span>
+</span><span>    </span><span style="color:#55859b;">for </span><span>job </span><span style="color:#55859b;">in </span><span>[j </span><span style="color:#55859b;">for </span><span>j </span><span style="color:#55859b;">in </span><span>jobs]:
+</span><span>        logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Checking whether to remove </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(job.meta[&#39;</span><span style="color:#489963;">title</span><span>&#39;]))
+</span><span>
+</span><span>        </span><span style="color:#55859b;">if </span><span>(job.starts &lt; end_time):
+</span><span>            logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Removing the job</span><span>&quot;)
+</span><span>            jobs.</span><span style="color:#b16139;">remove</span><span>(job)
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">optimal_scheduling</span><span>(</span><span style="color:#b16139;">jobs</span><span>):
+</span><span>    </span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">Actual print statement</span><span>&quot;)
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Creating empty schedule</span><span>&quot;)
+</span><span>
+</span><span>    optimal_jobs = </span><span style="color:#b16139;">set</span><span>()
+</span><span>
+</span><span>    </span><span style="color:#55859b;">while </span><span>(</span><span style="color:#1c9aa0;">len</span><span>(jobs) &gt; </span><span style="color:#9f713c;">0</span><span>):
+</span><span>        next_best_job = </span><span style="color:#b16139;">pop_earliest_ending_job</span><span>(jobs)
+</span><span>
+</span><span>        logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Next best job was </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(next_best_job.meta[&#39;</span><span style="color:#489963;">title</span><span>&#39;]))
+</span><span>
+</span><span>        </span><span style="color:#55859b;">if </span><span>(next_best_job is </span><span style="color:#9f713c;">None</span><span>):
+</span><span>            </span><span style="color:#55859b;">break
+</span><span>
+</span><span>        logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Adding to the optimal job schedule...</span><span>&quot;)
+</span><span>        optimal_jobs.</span><span style="color:#b16139;">add</span><span>(next_best_job)
+</span><span>
+</span><span>        logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Removing overlapping jobs</span><span>&quot;)
+</span><span>        </span><span style="color:#b16139;">remove_overlapping_jobs</span><span>(jobs, next_best_job.ends)
+</span><span>
+</span><span>    logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Found </span><span style="color:#9f713c;">{}</span><span style="color:#489963;"> job(s)!</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(</span><span style="color:#1c9aa0;">len</span><span>(optimal_jobs)))
+</span><span>
+</span><span>    </span><span style="color:#55859b;">return </span><span>optimal_jobs
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">Defined optimal scheduler</span><span>&quot;)
+</span></code></pre>
+<h3 id="examples-1">Examples</h3>
+<p>Take for example the following case of spending the day at the movie
+theatre, and you want to watch as many movies as you can in a day. Here
+are the showtimes:</p>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b16139;">set_debugging</span><span>(</span><span style="color:#9f713c;">False</span><span>)
+</span><span>
+</span><span>logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Creating set of showtimes...</span><span>&quot;)
+</span><span>
+</span><span>showtimes = </span><span style="color:#b16139;">set</span><span>([
+</span><span>    </span><span style="color:#b16139;">Job</span><span>(</span><span style="color:#9f713c;">9</span><span>, </span><span style="color:#9f713c;">12</span><span>, {&#39;</span><span style="color:#489963;">title</span><span>&#39;: &#39;</span><span style="color:#489963;">Mission Impossible</span><span>&#39;}),
+</span><span>    </span><span style="color:#b16139;">Job</span><span>(</span><span style="color:#9f713c;">10</span><span>, </span><span style="color:#9f713c;">14</span><span>, {&#39;</span><span style="color:#489963;">title</span><span>&#39;: &#39;</span><span style="color:#489963;">Fellowship of the Ring</span><span>&#39;}),
+</span><span>    </span><span style="color:#b16139;">Job</span><span>(</span><span style="color:#9f713c;">14</span><span>, </span><span style="color:#9f713c;">15</span><span>, {&#39;</span><span style="color:#489963;">title</span><span>&#39;: &#39;</span><span style="color:#489963;">Cars</span><span>&#39;}),
+</span><span>    </span><span style="color:#b16139;">Job</span><span>(</span><span style="color:#9f713c;">13</span><span>, </span><span style="color:#9f713c;">16</span><span>, {&#39;</span><span style="color:#489963;">title</span><span>&#39;: &#39;</span><span style="color:#489963;">Dragon Ball Z</span><span>&#39;}),
+</span><span>    </span><span style="color:#b16139;">Job</span><span>(</span><span style="color:#9f713c;">15</span><span>, </span><span style="color:#9f713c;">20</span><span>, {&#39;</span><span style="color:#489963;">title</span><span>&#39;: &#39;</span><span style="color:#489963;">Lion King</span><span>&#39;}),
+</span><span>])
+</span><span>
+</span><span>logger.</span><span style="color:#b16139;">debug</span><span>(&quot;</span><span style="color:#489963;">Created a set...</span><span>&quot;)
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">Generating the best showtime schedule...</span><span>&quot;)
+</span><span>
+</span><span>optimal_showtime_schedule = </span><span style="color:#b16139;">optimal_scheduling</span><span>(showtimes)
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">I was able to schedule </span><span style="color:#9f713c;">{}</span><span style="color:#489963;"> show(s)!</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(</span><span style="color:#1c9aa0;">len</span><span>(optimal_showtime_schedule)))
+</span><span>
+</span><span>shows_in_order = </span><span style="color:#1c9aa0;">sorted</span><span>(optimal_showtime_schedule, </span><span style="color:#b16139;">key</span><span>=</span><span style="color:#55859b;">lambda </span><span style="color:#b16139;">s</span><span>: s.starts, </span><span style="color:#b16139;">reverse</span><span>=</span><span style="color:#9f713c;">False</span><span>)
+</span><span>
+</span><span style="color:#55859b;">for </span><span>show </span><span style="color:#55859b;">in </span><span>shows_in_order:
+</span><span>    </span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#9f713c;">{}</span><span style="color:#489963;">, starting at </span><span style="color:#9f713c;">{}</span><span style="color:#489963;"> and ending at </span><span style="color:#9f713c;">{}</span><span>&quot;.</span><span style="color:#b16139;">format</span><span>(show.meta[&#39;</span><span style="color:#489963;">title</span><span>&#39;], show.starts, show.ends))
+</span><span>
+</span><span style="color:#1c9aa0;">print</span><span>(&quot;</span><span style="color:#489963;">All done</span><span>&quot;)
+</span><span>
+</span></code></pre>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/algorithms/">algorithms</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/swe/">swe</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

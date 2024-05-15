@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - observability</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/observability/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-05-15T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/observability/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Datadog and StatsD for Serverless</title>
+        <published>2024-05-15T00:00:00+00:00</published>
+        <updated>2024-05-15T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/datadog-statsd-serverless/"/>
+        <id>https://blog.carrio.dev/blog/datadog-statsd-serverless/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/datadog-statsd-serverless/">&lt;h2 id=&quot;tl-dr&quot;&gt;tl;dr&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Do not use StatsD metrics with Datadog for serverless applications.&lt;&#x2F;strong&gt; Instead, utilize the &lt;code&gt;distribution&lt;&#x2F;code&gt; metric type available in DogStatsD.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;You will save yourself many hours or even days of lost time trying to get it to work. The &lt;code&gt;distribution&lt;&#x2F;code&gt; metric type is specifically designed for serverless applications and is more resilient to data loss and function termination.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;monitoring-types&quot;&gt;Monitoring Types&lt;&#x2F;h2&gt;
+&lt;p&gt;A quick review of available types of monitoring in applications:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Logging&lt;&#x2F;li&gt;
+&lt;li&gt;Metrics&lt;&#x2F;li&gt;
+&lt;li&gt;Tracing&lt;&#x2F;li&gt;
+&lt;li&gt;Profiling&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The focus of this article is on &lt;strong&gt;metrics&lt;&#x2F;strong&gt;, specifically the use of StatsD metrics with Datadog for serverless applications.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;serverless-architecture&quot;&gt;Serverless Architecture&lt;&#x2F;h2&gt;
+&lt;p&gt;Serverless architecture is a cloud computing model that allows developers to build and run applications and services without having to manage infrastructure. Serverless applications are composed of one or more functions that are triggered by events such as HTTP requests, database events, or file uploads. These functions are typically short-lived and stateless, and are executed in response to events.&lt;&#x2F;p&gt;
+&lt;p&gt;A serverless architecture is a great way to build scalable, cost-effective applications that can respond to events in real-time. However, monitoring serverless applications can be challenging due to the ephemeral nature of the functions and the lack of visibility into the underlying infrastructure.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;statsd-architecture&quot;&gt;StatsD Architecture&lt;&#x2F;h2&gt;
+&lt;p&gt;StatsD is a simple, lightweight network daemon that listens for statistics, like counters and timers, sent over UDP or TCP and sends aggregates to one or more pluggable backend services (e.g., Graphite, Datadog, etc.). StatsD is commonly used to collect and aggregate metrics from applications and services and send them to a monitoring system for analysis and visualization.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;datadog-and-statsd-dogstatsd&quot;&gt;Datadog and StatsD: DogStatsD&lt;&#x2F;h2&gt;
+&lt;p&gt;Datadog is a popular monitoring and observability platform that provides a wide range of features for monitoring applications and infrastructure. Datadog supports StatsD metrics natively, allowing you to send metrics from your applications to Datadog using the StatsD protocol.&lt;&#x2F;p&gt;
+&lt;p&gt;There is an embedded component in the Datadog agent called DogStatsD. This is a StatsD-compatible server that listens for metrics and forwards them to the Datadog backend. It supports a superset of the StatsD protocol, including additional metric types like &lt;code&gt;distribution&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If you are using a Datadog Agent, you can send metrics to DogStatsD using the StatsD protocol. This allows you to leverage the full power of Datadog&#x27;s monitoring and alerting capabilities with your serverless applications.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;dogstatsd-and-serverless&quot;&gt;DogStatsD and Serverless&lt;&#x2F;h2&gt;
+&lt;p&gt;When using DogStatsD with serverless applications, it is important to be aware of the limitations of the StatsD protocol. The StatsD protocol was designed for traditional server-based applications and may not be well-suited for serverless applications due to the ephemeral nature of the functions. StatsD servers typically aggregate metrics in memory and flush them to the backend at regular intervals. The implications of this are two-fold:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;This can lead to data loss if the server is restarted or if the function is terminated before the metrics are flushed.&lt;&#x2F;li&gt;
+&lt;li&gt;The in-memory aggregation of metrics is necessary for the data to be handed off successfully to Datadog, relying on properties such as &lt;code&gt;host&lt;&#x2F;code&gt; in the agent.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;metrics-in-serverless-functions&quot;&gt;Metrics in Serverless Functions&lt;&#x2F;h2&gt;
+&lt;p&gt;Datadog provides capabilities for serverless monitoring including a Lambda Layer which provides an embedded Serverless Datadog Agent. This supports most of the same functionalities as the Datadog Agent in a traditional server environment.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ Due to the second limitation of DogStatsD and Serverless though, it is important to use the &lt;code&gt;distribution&lt;&#x2F;code&gt; metric type instead of the &lt;code&gt;gauge&lt;&#x2F;code&gt; or &lt;code&gt;count&lt;&#x2F;code&gt; types.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;The &lt;code&gt;distribution&lt;&#x2F;code&gt; metric type is specifically designed for serverless applications and is more resilient to data loss and function termination. It does not rely on in-memory aggregation, and the data is sent directly to the Datadog backend.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;why-do-statsd-metrics-not-work-well-with-serverless&quot;&gt;Why do StatsD metrics not work well with serverless?&lt;&#x2F;h2&gt;
+&lt;p&gt;There are many components involved in the failure mode of StatsD metrics in serverless environments. Here are a few:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Data Loss&lt;&#x2F;strong&gt;: The ephemeral nature of serverless functions can lead to data loss if the function is terminated before the metrics are flushed to the backend.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;In-Memory Aggregation&lt;&#x2F;strong&gt;: StatsD servers typically aggregate metrics in memory and flush them to the backend at regular intervals. This can lead to data loss if the function is terminated before the metrics are flushed.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Host Dependency&lt;&#x2F;strong&gt;: The in-memory aggregation of metrics relies on properties such as &lt;code&gt;host&lt;&#x2F;code&gt; in the agent. This can lead to data loss if the function is terminated before the metrics are flushed.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;how-to-use-distribution-metrics-with-dogstatsd&quot;&gt;How to use &lt;code&gt;distribution&lt;&#x2F;code&gt; metrics with DogStatsD&lt;&#x2F;h2&gt;
+&lt;p&gt;To use the &lt;code&gt;distribution&lt;&#x2F;code&gt; metric type with DogStatsD, you need to send the metrics using the &lt;code&gt;distribution&lt;&#x2F;code&gt; method in the DogStatsD client. Here is an example of how to send a &lt;code&gt;distribution&lt;&#x2F;code&gt; metric in NodeJS:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;javascript&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;StatsD &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;hot-shots&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dogstatsd &lt;&#x2F;span&gt;&lt;span&gt;= new StatsD();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dogstatsd&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;distribution&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;metric.name&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;42&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This will send a &lt;code&gt;distribution&lt;&#x2F;code&gt; metric with the name &lt;code&gt;metric.name&lt;&#x2F;code&gt; and the value &lt;code&gt;42&lt;&#x2F;code&gt; to the DogStatsD server. Behind the scenes, the way DogStatsD passes this data along is different than the way it handles &lt;code&gt;gauge&lt;&#x2F;code&gt; or &lt;code&gt;count&lt;&#x2F;code&gt; metrics. It is raw, unaggregated data that is sent directly to the Datadog backend.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;When monitoring serverless applications with Datadog, it is important to use the &lt;code&gt;distribution&lt;&#x2F;code&gt; metric type instead of the &lt;code&gt;gauge&lt;&#x2F;code&gt; or &lt;code&gt;count&lt;&#x2F;code&gt; types. This will ensure that your metrics are resilient to data loss and function termination and will provide more accurate monitoring and alerting capabilities for your serverless applications.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>An Observability Starter</title>
+        <published>2023-07-26T00:00:00+00:00</published>
+        <updated>2023-07-26T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/observability-starter/"/>
+        <id>https://blog.carrio.dev/blog/observability-starter/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/observability-starter/">&lt;p&gt;Observability refers to how well the state of a system can be understood by external outputs. When a system is more observable, you can more quickly identify root causes of performance issues, business logic bugs, and more. In the software engineering space, Application Performance Monitoring (APM) tools help in assisting in the overall observability of a software stack. The ecosystem as a whole began to evolve as distributed computing gained popularity, monoliths were broken up into microservices, and horizontal pod autoscalers were introduced to Kubernetes. New tools around tracking metrics in your applications and distributed tracing across service-to-service communication has surfaced over the years, with some larger players at the forefront of the open source space such as &lt;a href=&quot;https:&#x2F;&#x2F;opentelemetry.io&#x2F;&quot;&gt;OpenTelemetry&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;statsd&#x2F;statsd&quot;&gt;StatsD&lt;&#x2F;a&gt;, and &lt;a href=&quot;https:&#x2F;&#x2F;openmetrics.io&#x2F;&quot;&gt;OpenMetrics&lt;&#x2F;a&gt;.
+A big part of these technologies is also collecting, indexing, and presenting them to users. In this regard, there are tons of commercial private and open source solutions, including Prometheus, Datadog, Dynatrace, and more. These tools capture observability signals from across your servers, network traffic, application code, and more to provide you as much insight into your code as possible. Some have core features that give them an edge over the rest of the market, such as Dynatrace&#x27;s AI-powered root cause analysis engine or Datadog&#x27;s user-friendly dashboarding and extensible generated metrics tooling. Some open source options like Zipkin support OpenTelemetry and allow you to quickly aggregate traces but do not support other observability constructs like logs or metrics.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-are-logs&quot;&gt;What are Logs&lt;&#x2F;h2&gt;
+&lt;p&gt;These are probably the most familiar of all of the observability constructs to any developer. From the most basic starter for any language, the Hello World, you are printing a string out to the console, thus generating a log. Logging in observability is a powerful too for understanding various decisions and state in a system. It can often be more expensive to track all logs compared to metrics and traces, particularly if context is injected into every log line. However, in combination with context, logs can serve as a vital tool in understanding which actions were taken within the context of a single trace. Most observability tools that support logs and traces will allow you to go from a log message with trace context to the specific trace in the system, as well as the opposite; allowing you to visualize all log messages related to a trace ID. Beyond this, they often boil down to just a string in the console, with perhaps some formal structure using JSON so you can provide not just a single message but additional context like error names and description, component names, and more.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-are-metrics&quot;&gt;What are Metrics&lt;&#x2F;h2&gt;
+&lt;p&gt;Metrics are numeric aggregations about your application or infrastructure. They can tell you information about the number of requests to your web service over a time period or a statistical breakdown of median, minimum, and maximum of data sets for latency. These metrics can be used to measure all sorts of information about your systems, and are often a cost-effective way of doing so. You can use metrics around your application and requests to build the foundation of basic signals in your system, and all of the &lt;a href=&quot;https:&#x2F;&#x2F;sre.google&#x2F;sre-book&#x2F;monitoring-distributed-systems&#x2F;#xref_monitoring_golden-signals&quot;&gt;four golden signals of monitoring in the Google Site Reliability Engineering book&lt;&#x2F;a&gt; can utilize metrics to easily capture these. Between the statistical measurement of request &lt;em&gt;Latency&lt;&#x2F;em&gt;, the total &lt;em&gt;Traffic&lt;&#x2F;em&gt; to an application with request counts, the number of &lt;em&gt;Errors&lt;&#x2F;em&gt; that are occurring, and the &lt;em&gt;Saturation&lt;&#x2F;em&gt; of an application or database, metrics either directly provide and assist in deducing these signals about your system. They can often be quite simple to implement internally as well (see StatsD).&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;statsd&quot;&gt;StatsD&lt;&#x2F;h3&gt;
+&lt;p&gt;StatsD is an open source project originally released by Etsy, which is a NodeJS service and accompanying specification for simple and powerful metric collection. StatsD clients are typically lightweight, requiring only some configuration for a target host and&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-are-traces&quot;&gt;What are Traces&lt;&#x2F;h2&gt;
+&lt;p&gt;Traces is a short-hand reference to distributed traces, which are graph data structures backed by some specification (OpenTelemetry, OpenTracing) that allow construct metadata about anything from database queries, HTTP requests, network calls and methods executing in your codebase. Any code execution, synchronous or asynchronous, can be visualized as a graph of spans. Spans are like the nodes of a graph, and by nature of the graph data structure there is no requirement to have a single parent node like in a tree. All spans have an implicit duration as a result of the span&#x27;s start time and end time. They also support naming of the resource and the operation being performed. These constructs collectively allow you to build a graph that effectively describes various types of network, software, and hardware actions being taken, information about them, and then construct visualizations of these that elegantly portray these distributed traces across systems or calculate metrics pertaining to various types of operations. Tracing is a powerful tool in the belt of any software engineer supporting their software in a production system.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;opentelemetry&quot;&gt;OpenTelemetry&lt;&#x2F;h3&gt;
+&lt;p&gt;This project defines standards around various observability constructs, including distributing tracing, metrics, and logging. In this way, OpenTelemetry provides a superset of functionality of various tools that preceded its release such as OpenCensus and OpenTracing. As a newer project, not all languages have stable releases, and certain features in the standard have progressed further than others. However, the project continues to gain traction as the open, vendor-agnostic solution for observability.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;opentracing&quot;&gt;OpenTracing&lt;&#x2F;h3&gt;
+&lt;p&gt;This is an open specification which provides support for distributed tracing exclusively. It has since been superseded by OpenTelemetry, but is still supported and in use by certain vendors in the ecosystem.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;what-metadata-do-i-include&quot;&gt;What Metadata Do I Include&lt;&#x2F;h3&gt;
+&lt;p&gt;There are some best practices defined, such as &lt;a href=&quot;https:&#x2F;&#x2F;opentelemetry.io&#x2F;docs&#x2F;concepts&#x2F;semantic-conventions&#x2F;&quot;&gt;OpenTelemetry&#x27;s Semantic Conventions&lt;&#x2F;a&gt; and &lt;a href=&quot;https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;ecs&#x2F;current&#x2F;index.html&quot;&gt;Elastic&#x27;s Common Schema&lt;&#x2F;a&gt;, which help to ensure consistent usage of span tags and other metadata on these spans based on their domain.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s take for example a span generated for an HTTP client&#x27;s request:
+&amp;gt; What HTTP method is the call?&lt;br &#x2F;&gt;
+&amp;gt; What headers or how many?&lt;br &#x2F;&gt;
+&amp;gt; What is the size of the payload?&lt;&#x2F;p&gt;
+&lt;p&gt;These standards help you define the metadata that answers these questions on the span in a way that&#x27;s consistent across systems.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;vendors&quot;&gt;Vendors&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ More to come here&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;datadog&quot;&gt;Datadog&lt;&#x2F;h3&gt;
+&lt;p&gt;Datadog&#x27;s dd-trace libraries are based on OpenTracing, and the clients in the package typically implement the OpenTracing client interface. OpenTracing itself is a deprecated project, but Datadog continues to base its tracing capabilities on this system. The backend for Datadog is proprietary, but their agents and dd-trace clients are all open source.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;dynatrace&quot;&gt;Dynatrace&lt;&#x2F;h3&gt;
+&lt;p&gt;Dynatrace is an APM company which centers around its AI-powered root cause analysis engine. It participated in the original inception of OpenTelemetry as a new direction for observability bringing its expertise on distributed tracing. Another core product feature is the OneAgent, which is an executable you can install on any server and it will automatically handle configuring trace and log instrumentation regardless of the system or software*.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

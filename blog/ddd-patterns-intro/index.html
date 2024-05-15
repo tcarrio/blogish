@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Domain-Driven Design Patterns: An Introduction</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>8 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-07-29
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ddd-patterns-intro/#reading-resources">Reading Resources</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ddd-patterns-intro/#identifying-the-structure-of-the-business-domain">Identifying the structure of the business domain</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/ddd-patterns-intro/#domain-objects">Domain Objects</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/ddd-patterns-intro/#applied-domain-patterns">Applied Domain Patterns</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <p>What this post is, and what is isn't.</p>
+<p>This post is:</p>
+<ul>
+<li>A brief intro to what <a href="https://martinfowler.com/bliki/DomainDrivenDesign.html">DDD</a> is.</li>
+<li>Covering some tactical design patterns for DDD.</li>
+</ul>
+<p>This post is not:</p>
+<ul>
+<li>Covering strategic design patterns, e.g. <a href="https://en.wikipedia.org/wiki/Event_storming">Event Storming</a></li>
+</ul>
+<p><a href="https://martinfowler.com/bliki/DomainDrivenDesign.html">Domain-driven design (DDD)</a> is an approach I've taken on various projects historical and one that I'm still not sure I've entirely <em>mastered</em>. There is a lot of nuance to DDD, namely the matter of buy-in from stakeholders across the organization, truly working hand-in-hand with domain experts, assuming you have them- and if you don't, then also building up that expertise in your team- and finally championing that mentality across all of the silos in your workplace. <em>Everyone</em> needs to be on board, and that's just from a <em>strategic</em> design standpoint. Practicing domain-driven design is hard, much like software engineering can be in general, but it's also a foreign concept to many developers out there.</p>
+<p>The core of domain-driven design, in my own words:</p>
+<blockquote>
+<p>Domain-driven design is about designing your software in the way the business domain is structured, from the terminology used by each context of your product to the naming of your programming constructs.</p>
+</blockquote>
+<p>By most DDD practicioners' standards: your domain experts should be able to understand what's happening in your code without being a programmer. This relates only to the domain portion of your code, and in many architectural approachs to software such as [hexagonal architecture], you would have that complete separation of the core domain logic from any application or infrastructure logic. These often pair well DDD, and there are many examples of implementing tactical DDD patterns online.</p>
+<h2 id="reading-resources">Reading Resources</h2>
+<p>The absolute classics are the original <a href="https://www.amazon.com/gp/product/0321125215">Eric Evans blue book, Domain-Driven Design: Tackling Complexity in the Heart of Software</a>, and the <a href="https://www.amazon.com/gp/product/0321834577">Vaughn Vernon red book Implementing Domain-Driven Design</a>.</p>
+<h2 id="identifying-the-structure-of-the-business-domain">Identifying the structure of the business domain</h2>
+<p>This is the part I mentioned this post would NOT be. I'll only cover some terminology that will be useful within this post:</p>
+<ul>
+<li><strong>Domain</strong>: Outside of DDD, this is defined as &quot;a specified sphere of activity or knowledge&quot;, which captures the essence well. This encapsulates both <em>what</em> your product does, and <em>how</em> it does it.</li>
+<li><strong>Subdomain</strong>: Your domain often will be split up into various subdomains, especially if it is as a whole a very broad concept. There are several types of subdomains, including <em>core</em>, <em>supporting</em>, and <em>generic</em> subdomains. The <em>core</em> subdomain would be the primary focus of your product and the value it offers that makes it great. A <em>supporting</em> subdomain is important for the product to succeed, but not the primary focus. A <em>generic</em> subdomain contains nothing <em>special</em> to the organization, but is necessary for the solution to work (think IAM or ERP platforms).</li>
+<li><strong><a href="https://martinfowler.com/bliki/UbiquitousLanguage.html">Ubiquitous Language</a></strong>: Specific to each bounded context, the language is agreed upon and standard for how to refer to each component in the system. Domain experts and software engineers can easily discuss features because the ubiquitous language is consistent from design to implementation. As you can imagine, this takes a lot of interaction between domain experts and the programmers building the software.</li>
+<li><strong><a href="https://martinfowler.com/bliki/BoundedContext.html">Bounded Context</a></strong>: This is a specific subset of the overall domain where ubiquitous language is consistent. Often times the best structure for bounded contexts is 1:1 with subdomains of your system, but like many things in SWE this is situational. Not only is this a specific context, but there is well defined boundary for the context. This separates the components of your system linguistically, so the same terminology such as &quot;Account&quot; may not mean the same thing between two contexts, such as &quot;Checkings&quot; context and &quot;Savings&quot; context for a &quot;Banking&quot; domain. </li>
+<li><strong>Context Map</strong>: These define what the boundaries of the various contexts are, how contexts will communicate, how mappings between entities and other constructs will be done between contexts (e.g. translating the ubiquoutous language), how to protect against unwanted changes in upstream contexts, or how to ensure stability for downstream contexts.</li>
+</ul>
+<p>That is a lot to gather without much <em>context</em>, and if you are interested in the strategic design elements you should read more on it from the <a href="https://www.amazon.com/gp/product/0321125215">blue book</a> and/or <a href="https://www.amazon.com/gp/product/0321834577">red book</a>.</p>
+<h2 id="domain-objects">Domain Objects</h2>
+<p>Even in 2003, Evans' <a href="https://martinfowler.com/bliki/EvansClassification.html">classified</a> some of the still relevant types of domain objects you'll find in domain-driven design. These classifications include:</p>
+<ul>
+<li><strong>Entities</strong>: A distinctly identifiable object.</li>
+<li><strong>Value Objects</strong>: An object that matters only as an combination of its properties. There is no identifier for a value object, only what it contains.</li>
+<li><strong>Services</strong>: Typically stateless, these can provide a standalone operation within the context your domain.</li>
+</ul>
+<p>Types from other patterns such as enterprise architecture, layered architecture, design patterns and more have been mostly adopted into domain-driven design as well, and you'll commonly see many of the following:</p>
+<ul>
+<li><strong>Aggregates</strong>: An entity that defines the transactional boundary of logical operations within a context. It controls the entities beneath it, exposes functionality to domain logic that can impact those entities, but does not allow access to those nested entities. When the aggregate is persisted, the operations of root aggregate entity and all of the related entities must all successfully complete or the transaction will be rolled back. In this way, aggregates are atomic.</li>
+<li><strong>Domain Events</strong>: Events that signify specific, important happenings within a bounded context. This is a common way to communicate across bounded contexts while also reducing coupling of services.</li>
+<li><strong>Repositories</strong>: An abstraction over a collection of domain entities. This typically follows a collection-like or persistence-based approach. The repository mediates between the domain and data-mapping layers of the system.</li>
+<li><strong>Factory</strong>: A creational design pattern, which in its simplest form is an object that creates other objects. There are more specific subsets of the Factory pattern that support polymorphic return types as well.</li>
+</ul>
+<p>Depending on which DDD tactical design patterns you implement, you may also end up seeing terminology like CQRS. We'll hold off on diving any deeper for now.</p>
+<h3 id="applied-domain-patterns">Applied Domain Patterns</h3>
+<p>The following adapts some of the code from a Destiny bot project a friend of mine was working on. The code was originally in JavaScript at the time and I thought I would convert it to utilize more domain-driven design patterns instead.</p>
+<blockquote>
+<p>By my standards, this is still a work in progress, but it's a start.</p>
+</blockquote>
+<pre data-lang="typescript" style="background-color:#171c19;color:#87928a;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#5f6d64;">/// Domain layer: Value Objects, Entities, Aggregates
+</span><span>
+</span><span style="color:#55859b;">export abstract class </span><span style="color:#a07e3b;">ValueObject</span><span style="color:#ecf4ee;">&lt;T&gt; {
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(</span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">value</span><span>: </span><span style="color:#ecf4ee;">T</span><span>) </span><span style="color:#ecf4ee;">{}
+</span><span style="color:#ecf4ee;">}
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">StringValueObject </span><span style="color:#55859b;">extends </span><span style="color:#489963;">ValueObject</span><span style="color:#ecf4ee;">&lt;string&gt; {}
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">NumberValueObject </span><span style="color:#55859b;">extends </span><span style="color:#489963;">ValueObject</span><span style="color:#ecf4ee;">&lt;number&gt; {}
+</span><span>
+</span><span>
+</span><span style="color:#55859b;">type </span><span>Hex = &#39;</span><span style="color:#489963;">0</span><span>&#39;|&#39;</span><span style="color:#489963;">1</span><span>&#39;|&#39;</span><span style="color:#489963;">2</span><span>&#39;|&#39;</span><span style="color:#489963;">3</span><span>&#39;|&#39;</span><span style="color:#489963;">4</span><span>&#39;|&#39;</span><span style="color:#489963;">5</span><span>&#39;|&#39;</span><span style="color:#489963;">6</span><span>&#39;|&#39;</span><span style="color:#489963;">7</span><span>&#39;|&#39;</span><span style="color:#489963;">8</span><span>&#39;|&#39;</span><span style="color:#489963;">9</span><span>&#39;|&#39;</span><span style="color:#489963;">a</span><span>&#39;|&#39;</span><span style="color:#489963;">b</span><span>&#39;|&#39;</span><span style="color:#489963;">c</span><span>&#39;|&#39;</span><span style="color:#489963;">d</span><span>&#39;|&#39;</span><span style="color:#489963;">e</span><span>&#39;|&#39;</span><span style="color:#489963;">f</span><span>&#39;;
+</span><span style="color:#55859b;">type </span><span>Hex2 = `</span><span style="color:#489963;">${</span><span style="color:#b16139;">Hex</span><span style="color:#489963;">}${</span><span style="color:#b16139;">Hex</span><span style="color:#489963;">}</span><span>`;
+</span><span style="color:#55859b;">type </span><span>Hex3 = `</span><span style="color:#489963;">${</span><span style="color:#b16139;">Hex2</span><span style="color:#489963;">}${</span><span style="color:#b16139;">Hex</span><span style="color:#489963;">}</span><span>`;
+</span><span style="color:#55859b;">type </span><span>Hex4 = `</span><span style="color:#489963;">${</span><span style="color:#b16139;">Hex2</span><span style="color:#489963;">}${</span><span style="color:#b16139;">Hex2</span><span style="color:#489963;">}</span><span>`;
+</span><span style="color:#55859b;">type </span><span>Hex8 = `</span><span style="color:#489963;">${</span><span style="color:#b16139;">Hex4</span><span style="color:#489963;">}${</span><span style="color:#b16139;">Hex4</span><span style="color:#489963;">}</span><span>`;
+</span><span style="color:#55859b;">type </span><span>Hex12 = `</span><span style="color:#489963;">${</span><span style="color:#b16139;">Hex8</span><span style="color:#489963;">}${</span><span style="color:#b16139;">Hex4</span><span style="color:#489963;">}</span><span>`;
+</span><span style="color:#55859b;">type </span><span>FOUR = &#39;</span><span style="color:#489963;">4</span><span>&#39;;
+</span><span style="color:#55859b;">type </span><span>AB89 = &#39;</span><span style="color:#489963;">a</span><span>&#39;|&#39;</span><span style="color:#489963;">b</span><span>&#39;|&#39;</span><span style="color:#489963;">8</span><span>&#39;|&#39;</span><span style="color:#489963;">9</span><span>&#39;;
+</span><span style="color:#55859b;">type </span><span>UuidV4 = `</span><span style="color:#489963;">${</span><span style="color:#b16139;">Hex8</span><span style="color:#489963;">}-${</span><span style="color:#b16139;">Hex4</span><span style="color:#489963;">}-${</span><span style="color:#b16139;">FOUR</span><span style="color:#489963;">}${</span><span style="color:#b16139;">Hex3</span><span style="color:#489963;">}-${</span><span style="color:#b16139;">AB89</span><span style="color:#489963;">}${</span><span style="color:#b16139;">HEX3</span><span style="color:#489963;">}-${</span><span style="color:#b16139;">HEX12</span><span style="color:#489963;">}</span><span>`;
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">Uuid </span><span style="color:#55859b;">extends </span><span style="color:#489963;">ValueObject</span><span style="color:#ecf4ee;">&lt;UuidV4&gt; {
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">private static readonly </span><span style="color:#b16139;">REGEX </span><span>= /</span><span style="color:#55859b;">^</span><span style="color:#9f713c;">[0-9a-f]</span><span>{8}</span><span style="color:#1c9aa0;">-</span><span style="color:#9f713c;">[0-9a-f]</span><span>{4}</span><span style="color:#1c9aa0;">-4</span><span style="color:#9f713c;">[0-9a-f]</span><span>{3}</span><span style="color:#1c9aa0;">-</span><span style="color:#9f713c;">[89ab][0-9a-f]</span><span>{3}</span><span style="color:#1c9aa0;">-</span><span style="color:#9f713c;">[0-9a-f]</span><span>{12}</span><span style="color:#55859b;">$</span><span>/</span><span style="color:#55859b;">i</span><span style="color:#ecf4ee;">;
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(</span><span style="color:#b16139;">value</span><span>: </span><span style="color:#ecf4ee;">UuidV4</span><span>) </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">super</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">value</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">validate</span><span style="color:#ecf4ee;">();
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">private </span><span style="color:#478c90;">validate</span><span>(): </span><span style="color:#ecf4ee;">void {
+</span><span style="color:#ecf4ee;">    </span><span style="color:#478c90;">assert</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">Uuid</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">REGEX</span><span style="color:#ecf4ee;">.</span><span style="color:#1c9aa0;">test</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.value), </span><span>&#39;</span><span style="color:#489963;">Value was not a valid Version 4 UUID</span><span>&#39;</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">}
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">Email </span><span style="color:#55859b;">extends </span><span style="color:#489963;">StringValueObject </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">private static readonly </span><span style="color:#b16139;">REGEX </span><span>= /</span><span style="color:#55859b;">^</span><span style="color:#9f713c;">[</span><span>^</span><span style="color:#9f713c;">@]</span><span>+</span><span style="color:#1c9aa0;">@</span><span style="color:#9f713c;">[</span><span>^</span><span style="color:#9f713c;">@]</span><span>+</span><span style="color:#55859b;">$</span><span>/</span><span style="color:#55859b;">i</span><span style="color:#ecf4ee;">;
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(</span><span style="color:#b16139;">value</span><span>: </span><span style="color:#ecf4ee;">Email</span><span>) </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">super</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">value</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">validate</span><span style="color:#ecf4ee;">();
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">private </span><span style="color:#478c90;">validate</span><span>(): </span><span style="color:#ecf4ee;">void {
+</span><span style="color:#ecf4ee;">    </span><span style="color:#478c90;">assert</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">Email</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">REGEX</span><span style="color:#ecf4ee;">.</span><span style="color:#1c9aa0;">test</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.value), </span><span>&#39;</span><span style="color:#489963;">Value was not a valid email address</span><span>&#39;</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">}
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">Username </span><span style="color:#55859b;">extends </span><span style="color:#489963;">StringValueObject </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">private static readonly </span><span style="color:#b16139;">REGEX </span><span>= /</span><span style="color:#55859b;">^</span><span style="color:#9f713c;">[</span><span>^</span><span style="color:#9f713c;">@]</span><span>+</span><span style="color:#1c9aa0;">@</span><span style="color:#9f713c;">[</span><span>^</span><span style="color:#9f713c;">@]</span><span>+</span><span style="color:#55859b;">$</span><span>/</span><span style="color:#55859b;">i</span><span style="color:#ecf4ee;">;
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(</span><span style="color:#b16139;">value</span><span>: </span><span style="color:#ecf4ee;">Username</span><span>) </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">super</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">value</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">validate</span><span style="color:#ecf4ee;">();
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">private </span><span style="color:#478c90;">validate</span><span>(): </span><span style="color:#ecf4ee;">void {
+</span><span style="color:#ecf4ee;">    </span><span style="color:#478c90;">assert</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">Username</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">REGEX</span><span style="color:#ecf4ee;">.</span><span style="color:#1c9aa0;">test</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.value), </span><span>&#39;</span><span style="color:#489963;">Value was not a valid email address</span><span>&#39;</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">}
+</span><span>
+</span><span style="color:#5f6d64;">// Entities &amp; Aggregates
+</span><span>
+</span><span style="color:#55859b;">export interface </span><span>Entity {
+</span><span>  </span><span style="color:#55859b;">public </span><span style="color:#b16139;">id</span><span>: Uuid;
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">Entity </span><span style="color:#55859b;">implements </span><span style="color:#489963;">Entity </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(</span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">id</span><span>: </span><span style="color:#ecf4ee;">Uuid</span><span>) </span><span style="color:#ecf4ee;">{}
+</span><span style="color:#ecf4ee;">}
+</span><span>
+</span><span style="color:#55859b;">export type </span><span>Aggregate = Entity;
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">Aggregate </span><span style="color:#55859b;">extends </span><span style="color:#489963;">Entity </span><span style="color:#ecf4ee;">{}
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">User </span><span style="color:#55859b;">implements </span><span style="color:#489963;">Aggregate </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">id</span><span>: </span><span style="color:#ecf4ee;">Uuid,
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">email</span><span>: </span><span style="color:#ecf4ee;">Email,
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">firstName</span><span>: </span><span style="color:#ecf4ee;">StringValueObject,
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">lastName</span><span>: </span><span style="color:#ecf4ee;">StringValueObject,
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">public readonly </span><span style="color:#b16139;">username</span><span>: </span><span style="color:#ecf4ee;">Username,
+</span><span style="color:#ecf4ee;">  </span><span>) </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">    </span><span style="color:#b16139;">super</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">id</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">}
+</span><span>
+</span><span style="color:#5f6d64;">/// Domain Repositories
+</span><span>
+</span><span style="color:#5f6d64;">// A collection-oriented repository:
+</span><span style="color:#55859b;">interface </span><span>Repository&lt;T </span><span style="color:#55859b;">extends </span><span>Entity&gt; {
+</span><span>  </span><span style="color:#478c90;">add</span><span>(</span><span style="color:#b16139;">model</span><span>: T): Promise&lt;void&gt;;
+</span><span>  </span><span style="color:#478c90;">update</span><span>(</span><span style="color:#b16139;">model</span><span>: T): Promise&lt;void&gt;;
+</span><span>  </span><span style="color:#478c90;">delete</span><span>(</span><span style="color:#b16139;">model</span><span>: T): Promise&lt;void&gt;;
+</span><span>}
+</span><span>
+</span><span style="color:#5f6d64;">// A collection-oriented repository:
+</span><span style="color:#55859b;">interface </span><span>PersistenceRepository&lt;T&gt; </span><span style="color:#55859b;">extends </span><span style="color:#489963;">Repository</span><span>&lt;T&gt; {
+</span><span>  </span><span style="color:#478c90;">persist</span><span>(): Promise&lt;void&gt;; 
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">interface </span><span>UserRepository </span><span style="color:#55859b;">extends </span><span style="color:#489963;">Repository</span><span>&lt;User&gt; {
+</span><span>  </span><span style="color:#478c90;">existsByUsername</span><span>(</span><span style="color:#b16139;">username</span><span>: string): Promise&lt;boolean&gt;;
+</span><span>}
+</span><span>
+</span><span style="color:#5f6d64;">/// Infrastructure layer: We implement our interfaces 
+</span><span>
+</span><span style="color:#55859b;">interface </span><span>MongooseSchema&lt;T&gt; {
+</span><span>  </span><span style="color:#478c90;">exists</span><span>(</span><span style="color:#b16139;">criteria</span><span>: Partial&lt;T&gt;): Command&lt;boolean&gt;;
+</span><span>  </span><span style="color:#478c90;">updateOne</span><span>(
+</span><span>    </span><span style="color:#b16139;">criteria</span><span>: Partial&lt;T&gt;,
+</span><span>    </span><span style="color:#b16139;">operation</span><span>: MongooseOperation&lt;T&gt;,
+</span><span>    </span><span style="color:#478c90;">callback</span><span>: (</span><span style="color:#b16139;">error</span><span>?: Error) </span><span style="color:#55859b;">=&gt; </span><span>any
+</span><span>  ): Promise&lt;void&gt;;
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">interface </span><span>MongooseOperation&lt;T&gt; {
+</span><span>  </span><span style="color:#b16139;">$set</span><span>: Partial&lt;T&gt;;
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">interface </span><span>Command&lt;T&gt; {
+</span><span>  </span><span style="color:#478c90;">exec</span><span>(): Promise&lt;T&gt;;
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">interface </span><span>UserSchema {
+</span><span>  </span><span style="color:#b16139;">id</span><span>: string,
+</span><span>  </span><span style="color:#b16139;">email</span><span>: string,
+</span><span>  </span><span style="color:#b16139;">firstName</span><span>: string,
+</span><span>  </span><span style="color:#b16139;">lastName</span><span>: string,
+</span><span>  </span><span style="color:#b16139;">username</span><span>: string,
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">interface </span><span>PersistenceObject {
+</span><span>  </span><span style="color:#478c90;">save</span><span>(): Promise&lt;void&gt;;
+</span><span>}
+</span><span>
+</span><span style="color:#55859b;">type </span><span>PersistenceObjectFactory&lt;T&gt; = (</span><span style="color:#b16139;">model</span><span>: T) </span><span style="color:#55859b;">=&gt; </span><span>PersistenceObject;
+</span><span>
+</span><span style="color:#55859b;">export class </span><span style="color:#a07e3b;">MongoUserRepository </span><span style="color:#55859b;">implements </span><span style="color:#489963;">UserRepository </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">constructor</span><span>(
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">private readonly </span><span style="color:#b16139;">schema</span><span>: </span><span style="color:#ecf4ee;">MongooseSchema&lt;UserSchema&gt;,
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">private readonly </span><span style="color:#b16139;">factory</span><span>: </span><span style="color:#ecf4ee;">PersistenceObjectFactory&lt;User&gt;,
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">private readonly </span><span style="color:#b16139;">logger</span><span>: </span><span style="color:#ecf4ee;">Logger,
+</span><span style="color:#ecf4ee;">  </span><span>) </span><span style="color:#ecf4ee;">{ }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">async </span><span style="color:#478c90;">add</span><span>(</span><span style="color:#b16139;">user</span><span>: </span><span style="color:#ecf4ee;">User</span><span>): </span><span style="color:#ecf4ee;">Promise&lt;void&gt; {
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">const </span><span style="color:#b16139;">userModel </span><span>= </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">factory</span><span style="color:#ecf4ee;">(</span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">);
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">await </span><span style="color:#b16139;">userModel</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">save</span><span style="color:#ecf4ee;">();
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">async </span><span style="color:#478c90;">update</span><span>(</span><span style="color:#b16139;">user</span><span>: </span><span style="color:#ecf4ee;">User</span><span>): </span><span style="color:#ecf4ee;">Promise&lt;void&gt; {
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">const </span><span style="color:#b16139;">updateModel </span><span>= </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">      email: </span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">email</span><span style="color:#ecf4ee;">,
+</span><span style="color:#ecf4ee;">      firstName: </span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">firstName</span><span style="color:#ecf4ee;">,
+</span><span style="color:#ecf4ee;">      lastName: </span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">lastName</span><span style="color:#ecf4ee;">,
+</span><span style="color:#ecf4ee;">      username: </span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">username</span><span style="color:#ecf4ee;">,
+</span><span style="color:#ecf4ee;">    };
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">return </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">schema</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">updateOne</span><span style="color:#ecf4ee;">(
+</span><span style="color:#ecf4ee;">      { id: </span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">.id },
+</span><span style="color:#ecf4ee;">      { $set: </span><span style="color:#b16139;">updateModel </span><span style="color:#ecf4ee;">},
+</span><span style="color:#ecf4ee;">    )
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">async </span><span style="color:#478c90;">delete</span><span>(</span><span style="color:#b16139;">user</span><span>: </span><span style="color:#ecf4ee;">User</span><span>) </span><span style="color:#ecf4ee;">{
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">return </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">schema</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">deleteOne</span><span style="color:#ecf4ee;">({ id: </span><span style="color:#b16139;">user</span><span style="color:#ecf4ee;">.id });
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">
+</span><span style="color:#ecf4ee;">  </span><span style="color:#55859b;">async </span><span style="color:#478c90;">existsByUsername</span><span>(</span><span style="color:#b16139;">username</span><span>: </span><span style="color:#ecf4ee;">string</span><span>): </span><span style="color:#ecf4ee;">Promise&lt;boolean&gt; {
+</span><span style="color:#ecf4ee;">    </span><span style="color:#55859b;">return </span><span style="color:#b16139;">this</span><span style="color:#ecf4ee;">.</span><span style="color:#b16139;">schema</span><span style="color:#ecf4ee;">.</span><span style="color:#478c90;">exists</span><span style="color:#ecf4ee;">({ </span><span style="color:#b16139;">username </span><span style="color:#ecf4ee;">}).</span><span style="color:#1c9aa0;">exec</span><span style="color:#ecf4ee;">() </span><span>? </span><span style="color:#9f713c;">true </span><span>: </span><span style="color:#9f713c;">false</span><span style="color:#ecf4ee;">;
+</span><span style="color:#ecf4ee;">  }
+</span><span style="color:#ecf4ee;">}
+</span></code></pre>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/coding/">coding</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/swe/">swe</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/ddd/">ddd</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

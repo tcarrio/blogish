@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Recovering Access to Synology DSM</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>3 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-07-24
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/synology-dsm-access-recovery/#update-your-dsm-permissions">Update your DSM permissions</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/synology-dsm-access-recovery/#reset-your-nas-a-destructive-action">Reset your NAS (a destructive action)</a>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <p>I'll paint the landscape. Suppose you happened to have just applied some new permissions in your system an the effort to minimize permissions and otherwise improve the security footprint of your Synology NAS. You fly through rules on AFS, NFS, rsync, DSM, FTP- knocking off these services that you don't use (or don't think you do). Now your system has every user blocked from DSM by default. So what was DSM again?</p>
+<p>Oh, right. It's the web UI for your Synology NAS. You're locked out and can't administrate your server anymore. What do you do? Well, there are a couple of options depending on what access you have left. The worst case scenario is </p>
+<h2 id="update-your-dsm-permissions">Update your DSM permissions</h2>
+<p>If you still have SSH permissions and sudo privileges on the user, you can take this approach.</p>
+<p>First, connect to your Synology NAS via SSH:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">ssh</span><span> username@synology_hostname
+</span></code></pre>
+<p>Next, get the user ID of your user by username:</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">id</span><span> username
+</span><span>
+</span><span style="color:#5f6d64;"># uid=1026(username) gid=100(users) groups=100(users),101(administrators)
+</span></code></pre>
+<p>You'll have to take note of the ID (in the command output as <code>uid=$id($username)</code>, e.g. 1026).</p>
+<p>The next step is modifying the SQLite database. Synology maintains its application-level privileges in a SQLite database at <code>/etc/synoappprvilege.db</code>. You can modify this in order to provide yourself permissions. Just to be safe, make a copy of the database. In case you decide to truncate a table.</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#5f6d64;"># copies the file to the same name with a `.bak` extension
+</span><span style="color:#b16139;">sudo</span><span> cp /etc/synoappprivilege.db{,.bak}
+</span></code></pre>
+<p>Now open the database using</p>
+<pre data-lang="bash" style="background-color:#171c19;color:#87928a;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b16139;">sudo</span><span> sqlite3 /etc/synoappprivilege.db
+</span><span style="color:#5f6d64;"># SQLite version 3.40.0 2022-11-16 12:10:08
+</span><span style="color:#5f6d64;"># Enter &quot;.help&quot; for usage hints.
+</span><span style="color:#5f6d64;"># sqlite&gt;
+</span></code></pre>
+<p>The table we'll need to update is <code>AppPrivRule</code>. I prefer to double-check all commands before I run them, especially for things like modifying a database. The SQL <code>INSERT</code> query itself relies on the structure of your <code>VALUES</code> matching that of the table schema. You can output the table schema in SQLite by calling:</p>
+<pre data-lang="sql" style="background-color:#171c19;color:#87928a;" class="language-sql "><code class="language-sql" data-lang="sql"><span>PRAGMA table_info(AppPrivRule);
+</span><span>
+</span><span style="color:#5f6d64;">-- 0|Type|INTEGER|0||0
+</span><span style="color:#5f6d64;">-- 1|ID|INTEGER|0||0
+</span><span style="color:#5f6d64;">-- 2|App|varchar(50)|0||0
+</span><span style="color:#5f6d64;">-- 3|AllowIP|TEXT|0||0
+</span><span style="color:#5f6d64;">-- 4|AllowIPStd|TEXT|0||0
+</span><span style="color:#5f6d64;">-- 5|DenyIP|TEXT|0||0
+</span><span style="color:#5f6d64;">-- 6|DenyIPStd|TEXT|0||0
+</span></code></pre>
+<p>So the syntax in this case for inserting into the table will be <code>INSERT INTO AppPrivRule VALUES (Type: INTEGER, ID: INTEGER, App: VARCHAR(50), AllowIP: TEXT, AllowIPStd: TEXT, DenyIP: TEXT, DenyIPStd: TEXT);</code></p>
+<p>The permission to access DSM (at the time of writing) was <code>'SYNO.Desktop'</code>.</p>
+<p>As such, you'd run the following query (to allow all IPs, block none, for the $id from earlier):</p>
+<pre data-lang="sql" style="background-color:#171c19;color:#87928a;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#55859b;">INSERT INTO</span><span> AppPrivRule
+</span><span style="color:#55859b;">VALUES</span><span> (
+</span><span>  </span><span style="color:#9f713c;">0</span><span>,                                         </span><span style="color:#5f6d64;">-- Type
+</span><span>  </span><span style="color:#9f713c;">1026</span><span>,                                      </span><span style="color:#5f6d64;">-- ID
+</span><span>  &#39;</span><span style="color:#489963;">SYNO.Desktop</span><span>&#39;,                            </span><span style="color:#5f6d64;">-- App
+</span><span>  &#39;</span><span style="color:#489963;">0.0.0.0</span><span>&#39;,                                 </span><span style="color:#5f6d64;">-- AllowIP
+</span><span>  &#39;</span><span style="color:#489963;">0000:0000:0000:0000:0000:FFFF:0000:0000</span><span>&#39;, </span><span style="color:#5f6d64;">-- AllowIPStd
+</span><span>  &#39;&#39;,                                        </span><span style="color:#5f6d64;">-- DenyIP
+</span><span>  &#39;&#39;                                         </span><span style="color:#5f6d64;">-- DenyIPStd
+</span><span>);
+</span></code></pre>
+<p>At this point you should be able to go through your usual login flow into the DSM web UI.</p>
+<h2 id="reset-your-nas-a-destructive-action">Reset your NAS (a destructive action)</h2>
+<p>Synology already provides a guide on this which you can find <a href="https://kb.synology.com/en-us/DSM/tutorial/How_do_I_log_in_if_I_forgot_the_admin_password">here</a>.</p>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/sysadmin/">sysadmin</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/synology/">synology</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/nas/">nas</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/linux/">linux</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

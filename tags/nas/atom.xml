@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - nas</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/nas/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-07-24T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/nas/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Recovering Access to Synology DSM</title>
+        <published>2023-07-24T00:00:00+00:00</published>
+        <updated>2023-07-24T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/synology-dsm-access-recovery/"/>
+        <id>https://blog.carrio.dev/blog/synology-dsm-access-recovery/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/synology-dsm-access-recovery/">&lt;p&gt;I&#x27;ll paint the landscape. Suppose you happened to have just applied some new permissions in your system an the effort to minimize permissions and otherwise improve the security footprint of your Synology NAS. You fly through rules on AFS, NFS, rsync, DSM, FTP- knocking off these services that you don&#x27;t use (or don&#x27;t think you do). Now your system has every user blocked from DSM by default. So what was DSM again?&lt;&#x2F;p&gt;
+&lt;p&gt;Oh, right. It&#x27;s the web UI for your Synology NAS. You&#x27;re locked out and can&#x27;t administrate your server anymore. What do you do? Well, there are a couple of options depending on what access you have left. The worst case scenario is &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;update-your-dsm-permissions&quot;&gt;Update your DSM permissions&lt;&#x2F;h2&gt;
+&lt;p&gt;If you still have SSH permissions and sudo privileges on the user, you can take this approach.&lt;&#x2F;p&gt;
+&lt;p&gt;First, connect to your Synology NAS via SSH:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ssh&lt;&#x2F;span&gt;&lt;span&gt; username@synology_hostname
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Next, get the user ID of your user by username:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt; username
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# uid=1026(username) gid=100(users) groups=100(users),101(administrators)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;You&#x27;ll have to take note of the ID (in the command output as &lt;code&gt;uid=$id($username)&lt;&#x2F;code&gt;, e.g. 1026).&lt;&#x2F;p&gt;
+&lt;p&gt;The next step is modifying the SQLite database. Synology maintains its application-level privileges in a SQLite database at &lt;code&gt;&#x2F;etc&#x2F;synoappprvilege.db&lt;&#x2F;code&gt;. You can modify this in order to provide yourself permissions. Just to be safe, make a copy of the database. In case you decide to truncate a table.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# copies the file to the same name with a `.bak` extension
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; cp &#x2F;etc&#x2F;synoappprivilege.db{,.bak}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now open the database using&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; sqlite3 &#x2F;etc&#x2F;synoappprivilege.db
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# SQLite version 3.40.0 2022-11-16 12:10:08
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Enter &amp;quot;.help&amp;quot; for usage hints.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# sqlite&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The table we&#x27;ll need to update is &lt;code&gt;AppPrivRule&lt;&#x2F;code&gt;. I prefer to double-check all commands before I run them, especially for things like modifying a database. The SQL &lt;code&gt;INSERT&lt;&#x2F;code&gt; query itself relies on the structure of your &lt;code&gt;VALUES&lt;&#x2F;code&gt; matching that of the table schema. You can output the table schema in SQLite by calling:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sql&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sql &quot;&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span&gt;PRAGMA table_info(AppPrivRule);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 0|Type|INTEGER|0||0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 1|ID|INTEGER|0||0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 2|App|varchar(50)|0||0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 3|AllowIP|TEXT|0||0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 4|AllowIPStd|TEXT|0||0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 5|DenyIP|TEXT|0||0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- 6|DenyIPStd|TEXT|0||0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;So the syntax in this case for inserting into the table will be &lt;code&gt;INSERT INTO AppPrivRule VALUES (Type: INTEGER, ID: INTEGER, App: VARCHAR(50), AllowIP: TEXT, AllowIPStd: TEXT, DenyIP: TEXT, DenyIPStd: TEXT);&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The permission to access DSM (at the time of writing) was &lt;code&gt;&#x27;SYNO.Desktop&#x27;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;As such, you&#x27;d run the following query (to allow all IPs, block none, for the $id from earlier):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sql&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sql &quot;&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;INSERT INTO&lt;&#x2F;span&gt;&lt;span&gt; AppPrivRule
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;VALUES&lt;&#x2F;span&gt;&lt;span&gt; (
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;,                                         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- Type
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1026&lt;&#x2F;span&gt;&lt;span&gt;,                                      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- ID
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;SYNO.Desktop&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;,                            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- App
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0.0.0.0&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;,                                 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- AllowIP
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0000:0000:0000:0000:0000:FFFF:0000:0000&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- AllowIPStd
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;#39;&amp;#39;,                                        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- DenyIP
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;#39;&amp;#39;                                         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;-- DenyIPStd
+&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;At this point you should be able to go through your usual login flow into the DSM web UI.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;reset-your-nas-a-destructive-action&quot;&gt;Reset your NAS (a destructive action)&lt;&#x2F;h2&gt;
+&lt;p&gt;Synology already provides a guide on this which you can find &lt;a href=&quot;https:&#x2F;&#x2F;kb.synology.com&#x2F;en-us&#x2F;DSM&#x2F;tutorial&#x2F;How_do_I_log_in_if_I_forgot_the_admin_password&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

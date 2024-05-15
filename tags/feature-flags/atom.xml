@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - feature flags</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/feature-flags/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-08-07T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/feature-flags/atom.xml</id>
+    <entry xml:lang="en">
+        <title>OpenFeature Introduction</title>
+        <published>2023-08-07T00:00:00+00:00</published>
+        <updated>2023-08-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/openfeature-introduction/"/>
+        <id>https://blog.carrio.dev/blog/openfeature-introduction/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/openfeature-introduction/">&lt;h2 id=&quot;what-are-feature-flags&quot;&gt;What Are Feature Flags&lt;&#x2F;h2&gt;
+&lt;p&gt;Feature flags are a way to dynamically control the capabilities of software, often with granularity to specific users, regions, and more. Flagging empowers companies to experiment with new features, and companies like Spotify, Duolingo, and Google use these heavily to prove out their hypotheses around generating better user experiences and products. It can be as simple as flipping the title of a landing page to an entire suite of features in the product- the possibilities are almost endless.&lt;&#x2F;p&gt;
+&lt;p&gt;This is often times pretty simple, and in the code could be done with a basic &lt;code&gt;if&#x2F;else&lt;&#x2F;code&gt; block:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;tsx&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-tsx &quot;&gt;&lt;code class=&quot;language-tsx&quot; data-lang=&quot;tsx&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;flagService&lt;&#x2F;span&gt;&lt;span&gt;} = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;useContext&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;FeatureFlagging&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;isNewExperience &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;flagService&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;isOn&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;new-experience&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;isNewExperience&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;NewComponent &lt;&#x2F;span&gt;&lt;span style=&quot;color:#867469;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;props&lt;&#x2F;span&gt;&lt;span style=&quot;color:#867469;&quot;&gt;} &lt;&#x2F;span&gt;&lt;span&gt;&#x2F;&amp;gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Component &lt;&#x2F;span&gt;&lt;span style=&quot;color:#867469;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;props&lt;&#x2F;span&gt;&lt;span style=&quot;color:#867469;&quot;&gt;} &lt;&#x2F;span&gt;&lt;span&gt;&#x2F;&amp;gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And there you have it. You now have a dynamically response interface based on logic determined by your feature flagging service. None of the above code related to any existing tool in particular, but what this post will do is get you acquainted with a new open source project called OpenFeature which you can get started with today.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-is-openfeature&quot;&gt;What is OpenFeature&lt;&#x2F;h2&gt;
+&lt;p&gt;OpenFeature is a project that defines an &lt;strong&gt;open specification&lt;&#x2F;strong&gt; for feature flagging SDK behaviors to support consistent developer experiences backed by any feature flagging vendor in the ecosystem. The project provides an open source, vendor-agnostic SDK for many languages, which vendors can support with &lt;strong&gt;providers&lt;&#x2F;strong&gt; to back the flagging logic and &lt;strong&gt;hooks&lt;&#x2F;strong&gt; to enhance with various capabilities in the feature flagging lifecycle. The SDK is an implementation upon the OpenFeature specification, and can be configured against any one of the available providers for that language. If you&#x27;re interested, take a look on their &lt;a href=&quot;https:&#x2F;&#x2F;openfeature.dev&#x2F;ecosystem&quot;&gt;ecosystem&lt;&#x2F;a&gt; page, which lets you search across different types like server-side and client-side, technologies like Go, JavaScript, and PHP, Vendors like Split and CloudBees, and more.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;providers&quot;&gt;Providers&lt;&#x2F;h3&gt;
+&lt;p&gt;OpenFeature itself is a specification with vendor-agnostic open source packages for various languages. The vendors provide the feature flag evaluation component of the architecture though- and you&#x27;ll need one. These can be backed by open source projects, companies&#x27; SDKs like LaunchDarkly and Split, or an in-house flagging system. You can develop your application against the OpenFeature interfaces and swap out providers across environments- easily allowing your local dev system utilize environment variable configurations where production is backed by an enterprise solution. Find out more on providers &lt;a href=&quot;https:&#x2F;&#x2F;openfeature.dev&#x2F;specification&#x2F;sections&#x2F;hooks&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;hooks&quot;&gt;Hooks&lt;&#x2F;h3&gt;
+&lt;p&gt;The flag evaluation lifecyle is well documented in OpenFeature, and supports &lt;em&gt;hooks&lt;&#x2F;em&gt;, which can enhance or augment a flag evaluation. Perhaps you want to inject a logger in staging or provide tracing capabilities with OpenTelemetry. All of this is easily doable by utilizing a hooks package or writing your own hook against the interface. You can read more on the hooks lifecycle &lt;a href=&quot;https:&#x2F;&#x2F;openfeature.dev&#x2F;specification&#x2F;sections&#x2F;hooks&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;getting-started&quot;&gt;Getting Started&lt;&#x2F;h2&gt;
+&lt;p&gt;This will depend on your language of choice, so I&#x27;ll provide a couple of examples. The first will be JavaScript, with a focus on client-side use cases. The next will be a server-side reference with PHP. You can find more samples in the &lt;a href=&quot;https:&#x2F;&#x2F;openfeature.dev&#x2F;docs&#x2F;reference&#x2F;technologies&#x2F;&quot;&gt;technologies&lt;&#x2F;a&gt; page as well.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;client-side-javascript&quot;&gt;Client-side JavaScript&lt;&#x2F;h3&gt;
+&lt;p&gt;These utilize a pattern in OpenFeature called &lt;em&gt;static context&lt;&#x2F;em&gt;. What this amounts to is that there is just the current user, the one interacting with the web client, so there doesn&#x27;t need to be as highly dynamic of a flag evaluation system backing the OpenFeature client.&lt;&#x2F;p&gt;
+&lt;p&gt;Start off by installing the package to your project. Here I&#x27;ll use &lt;code&gt;yarn&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn&lt;&#x2F;span&gt;&lt;span&gt; add @openfeature&#x2F;js-sdk
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now you can start working with the SDK by coding the following:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ts&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-ts &quot;&gt;&lt;code class=&quot;language-ts&quot; data-lang=&quot;ts&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;OpenFeature &lt;&#x2F;span&gt;&lt;span&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;@openfeature&#x2F;js-sdk&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;OpenFeature&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;getClient&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;isNewExperience &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;await &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;getBooleanValue&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;new-experience&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;isNewExperience&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This is very similar to the above example, but needs the magic sauce to actually &lt;em&gt;provide&lt;&#x2F;em&gt; the logic- an OpenFeature &lt;strong&gt;provider&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;wire-up-a-provider&quot;&gt;Wire Up A Provider&lt;&#x2F;h4&gt;
+&lt;p&gt;You need a provider to back the flag evaluation in the OpenFeature SDK. These are pluggable, and anything that adheres to the defined Provider interface can fulfill this contract. I&#x27;ll pull in a specific provider, just as an example. In my case I&#x27;ll use the [Split] provider. The Split provider has a peer dependency on the Split SDK as well, so I will install them both with:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn&lt;&#x2F;span&gt;&lt;span&gt; add @splitsoftware&#x2F;openfeature-js-split-provider @splitsoftware&#x2F;splitio
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now that we have a provider, we can update our code example above accordingly:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ts&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-ts &quot;&gt;&lt;code class=&quot;language-ts&quot; data-lang=&quot;ts&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;OpenFeature &lt;&#x2F;span&gt;&lt;span&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;@openfeature&#x2F;js-sdk&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;SplitFactory &lt;&#x2F;span&gt;&lt;span&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;@splitsoftware&#x2F;splitio&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;OpenFeatureSplitProvider &lt;&#x2F;span&gt;&lt;span&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;@splitsoftware&#x2F;openfeature-js-split-provider&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; The key that authorizes the Split client to connect to the Split API
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;SPLIT_AUTHORIZATION_KEY &lt;&#x2F;span&gt;&lt;span&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;your-split-auth-key&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;OpenFeature&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;getClient&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;splitClient &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;SplitFactory&lt;&#x2F;span&gt;&lt;span&gt;({core: {&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;authorizationKey&lt;&#x2F;span&gt;&lt;span&gt;}}).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;provider &lt;&#x2F;span&gt;&lt;span&gt;= new OpenFeatureSplitProvider({&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;splitClient&lt;&#x2F;span&gt;&lt;span&gt;});
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;OpenFeature&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;setProvider&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;provider&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; With the provider set, let&amp;#39;s get to work
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;isNewExperience &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;await &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;getBooleanValue&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;new-experience&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;isNewExperience&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;server-side-php&quot;&gt;Server-side PHP&lt;&#x2F;h3&gt;
+&lt;p&gt;As mentioned, several languages are supported, including .NET, Go, and more. In this example we&#x27;ll utilize the PHP SDK since I wrote it.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s assume you&#x27;re using &lt;code&gt;composer&lt;&#x2F;code&gt; like every other PHP project- then you would install the SDK by running:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;composer&lt;&#x2F;span&gt;&lt;span&gt; require open-feature&#x2F;sdk
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This will pull in the package and update your &lt;code&gt;composer.json&lt;&#x2F;code&gt; and &lt;code&gt;composer.lock&lt;&#x2F;code&gt; accordingly.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, to utilize the SDK, you will simply retrieve an instance from the SDK:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;php&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-php &quot;&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span style=&quot;color:#867469;&quot;&gt;&amp;lt;?php
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;Api\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Controller&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;Api\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Method&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;Api\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Route&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;OpenFeature\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;OpenFeatureClient&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;#[Route(&amp;quot;&#x2F;cats&amp;quot;)]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;class &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;CatsController &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;extends &lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Controller
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;public function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;__construct&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;(
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;private readonly OpenFeatureClient &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;  ) {}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;#[Method\Get]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;public function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;actionFavorite&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;(): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;UI
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;  {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userId &lt;&#x2F;span&gt;&lt;span&gt;= $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getUserIdFromRequest&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;favoriteCat &lt;&#x2F;span&gt;&lt;span&gt;= $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getStringValue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;favorite-cat&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Nebelung&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;, [
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;user-id&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; =&amp;gt; $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userId&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    ]);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;[
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;favoriteCat&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; =&amp;gt; $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;favoriteCat&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;    ];
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now when the OpenFeature client evaluates the flag for the request, it&#x27;ll pass some evaluation context as well, which includes the user&#x27;s ID if it exists. The provider will utilize this to determine what the correct value to return will be, which allows us to provide consistent experiences at the user-level. As long as the same user is accessing the API, they will receive the same behavior.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: This example removed the steps of instantiating a provider and instead utilized inversion of control to allow the framework to provide the necessary OpenFeature client instead. The process is similar to that shown in the JS SDK.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;hooks-manual-instrumentation&quot;&gt;Hooks Manual Instrumentation&lt;&#x2F;h3&gt;
+&lt;p&gt;Just like you can set a provider in your OpenFeature SDK, you can also add hooks. The hooks are executed in a particular ordered defined by the specification, such that you can expect the behavior in the JavaScript SDK to be identical to that of the PHP SDK, Go SDK, etc.&lt;&#x2F;p&gt;
+&lt;p&gt;When adding hooks, you can do so at any level of the OpenFeature SDK: API, Client, Provider, and invocation. How these are each evaluated is defined in the &lt;a href=&quot;https:&#x2F;&#x2F;openfeature.dev&#x2F;specification&#x2F;sections&#x2F;hooks#requirement-441&quot;&gt;hook ordering&lt;&#x2F;a&gt; specification.&lt;&#x2F;p&gt;
+&lt;p&gt;Here we will add the &lt;a href=&quot;https:&#x2F;&#x2F;packagist.org&#x2F;packages&#x2F;open-feature&#x2F;validators-hook&quot;&gt;validators&lt;&#x2F;a&gt; hook for PHP, available in the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;open-feature&#x2F;php-sdk-contrib&quot;&gt;php-sdk-contrib&lt;&#x2F;a&gt; repository:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;composer&lt;&#x2F;span&gt;&lt;span&gt; require open-feature&#x2F;validators-hook
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And we can utilize the hook at each of the mentioned levels by doing:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;php&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-php &quot;&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span style=&quot;color:#867469;&quot;&gt;&amp;lt;?php
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;OpenFeature\Hooks\Validators\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;RegexpValidatorHook&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;OpenFeature\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;OpenFeatureAPI&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Custom hook
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;hexadecimalValidator &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;new &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;RegexpValidatorHook&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;^&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;[0-9a-f]&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; API
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;api &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;OpenFeatureAPI&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getInstance&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;api&lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;addHooks&lt;&#x2F;span&gt;&lt;span&gt;($&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;hexadecimalValidator&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Client
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client &lt;&#x2F;span&gt;&lt;span&gt;= $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;api&lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getClient&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;hooks-test&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;addHooks&lt;&#x2F;span&gt;&lt;span&gt;($&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;hexadecimalValidator&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Provider
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;provider &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;new &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;ExampleProvider&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;provider&lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;addHooks&lt;&#x2F;span&gt;&lt;span&gt;($&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;hexadecimalValidator&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Invocation
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;resolveStringValue&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;test-flag&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;new &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;EvaluationOptions&lt;&#x2F;span&gt;&lt;span&gt;([$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;hexadecimalValidator&lt;&#x2F;span&gt;&lt;span&gt;]));
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Easy as that! The higher up you place the hook, the more &lt;em&gt;universal&lt;&#x2F;em&gt; it becomes across your application. Make sure to keep this in mind as applying something at the API-level will impact &lt;em&gt;every evaluation&lt;&#x2F;em&gt; in the entire application.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;hooks-observability-with-opentelemetry&quot;&gt;Hooks: Observability with OpenTelemetry&lt;&#x2F;h3&gt;
+&lt;p&gt;Something that you might find useful as a developer pushing code to production is how the behavior of the feature flagging system may impact your users. Perhaps you want to know whether the evaluation in the provider, or what value was determined for a given request. Well, you can utilize observability tools like OpenTelemetry to accomplish that.&lt;&#x2F;p&gt;
+&lt;p&gt;There are a couple of observability hooks already provided, and both of them utilize the PSR-4 autoloader functionality for PHP. The convenience of this is that all it takes is having the package &lt;em&gt;installed&lt;&#x2F;em&gt; and you&#x27;ll get the hook set at the API-level to trace &lt;em&gt;all&lt;&#x2F;em&gt; evaluations, following the standard practices defined in e.g. OpenTelemetry&#x27;s Semantic Conventions.&lt;&#x2F;p&gt;
+&lt;p&gt;So, install the package:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;composer&lt;&#x2F;span&gt;&lt;span&gt; require open-feature&#x2F;otel-hook
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And autoload as you normally would! This example follows the standard practice of autoloading at the entrypoint of your PHP application:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;php&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-php &quot;&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span style=&quot;color:#867469;&quot;&gt;&amp;lt;?php
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;declare&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;strict_types&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;OpenFeature\&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;OpenFeatureAPI&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_PHP_AUTOLOAD_ENABLED=true&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_TRACES_EXPORTER=otlp&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_EXPORTER_OTLP_PROTOCOL=grpc&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_METRICS_EXPORTER=otlp&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=grpc&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_EXPORTER_OTLP_ENDPOINT=http:&#x2F;&#x2F;collector:4317&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_PHP_TRACES_PROCESSOR=batch&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;putenv&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;OTEL_PROPAGATORS=b3,baggage,tracecontext&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;autoloading SDK example starting...&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; . PHP_EOL;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&#x2F;&#x2F; Composer autoloader will execute SDK&#x2F;_autoload.php which will register global instrumentation from environment configuration
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;dirname&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;__DIR__&lt;&#x2F;span&gt;&lt;span&gt;) . &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;vendor&#x2F;autoload.php&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;OpenFeatureAPI&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getInstance&lt;&#x2F;span&gt;&lt;span&gt;()-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getClient&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;dev.openfeature.contrib.php.demo&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;1.0.0&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;version &lt;&#x2F;span&gt;&lt;span&gt;= $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;client&lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;getStringValue&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;dev.openfeature.contrib.php.version-value&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;unknown&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Version is &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; . $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;version&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;As you can see, there were no &lt;strong&gt;explicit actions&lt;&#x2F;strong&gt; necessary. However, the OpenTelemetry hook is set up at the API-level and providing tracing based on the configuration of your OTel exporter.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - security</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/security/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2022-02-21T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/security/atom.xml</id>
+    <entry xml:lang="en">
+        <title>SSH Key Management</title>
+        <published>2022-02-21T00:00:00+00:00</published>
+        <updated>2022-02-21T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/ssh-key-management/"/>
+        <id>https://blog.carrio.dev/blog/ssh-key-management/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/ssh-key-management/">&lt;h2 id=&quot;table-of-contents&quot;&gt;Table of Contents:&lt;&#x2F;h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.carrio.dev&#x2F;blog&#x2F;ssh-key-management&#x2F;#checking-for-existing-ssh-keys&quot;&gt;Checking for existings keys&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.carrio.dev&#x2F;blog&#x2F;ssh-key-management&#x2F;#generating-a-new-ssh-key&quot;&gt;Generating a new SSH key&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.carrio.dev&#x2F;blog&#x2F;ssh-key-management&#x2F;#adding-your-ssh-key-to-the-ssh-agent&quot;&gt;Adding your SSH key to the ssh-agent&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;checking-for-existing-ssh-keys&quot;&gt;Checking for existing SSH keys&lt;&#x2F;h2&gt;
+&lt;p&gt;Before you generate an SSH key, you can check to see if you have any existing SSH keys.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Open Git Bash.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Enter &lt;code&gt;ls -al ~&#x2F;.ssh&lt;&#x2F;code&gt; to see if existing SSH keys are present:&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Lists the files in your .ssh directory, if they exist
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ls -al ~&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;.ssh
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;Check the directory listing to see if you already have a public SSH key.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;By default, the filenames of the public keys are one of the following, based on the SSH key type:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;id_dsa.pub&lt;&#x2F;li&gt;
+&lt;li&gt;id_ecdsa.pub&lt;&#x2F;li&gt;
+&lt;li&gt;id_ed25519.pub&lt;&#x2F;li&gt;
+&lt;li&gt;id_rsa.pub&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;If you don&#x27;t have an existing public and private key pair, or don&#x27;t wish to use any that are available to connect to GitHub, then generate a new SSH key.
+If you see an existing public and private key pair listed (for example id_rsa.pub and id_rsa) that you would like to use to connect to GitHub, you can add your SSH key to the ssh-agent.&lt;&#x2F;p&gt;
+&lt;p&gt;After you&#x27;ve checked that you don&#x27;t have an existing SSH key or you simply want a new one, you can generate a new SSH key to use for authentication, then add it to the ssh-agent.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;generating-a-new-ssh-key&quot;&gt;Generating a new SSH key&lt;&#x2F;h2&gt;
+&lt;p&gt;This will generate a key that is generally compatible with most system to date while using a more state of the art algorithm, ED25519. &lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Open Terminal.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Paste the text below, substituting in your GitHub email address.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Creates a new ssh key, using the provided email as a label
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ssh-keygen&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -t&lt;&#x2F;span&gt;&lt;span&gt; ed25519&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -b&lt;&#x2F;span&gt;&lt;span&gt; 4096&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -C &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;your_email@example.com&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; Generating &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;public&#x2F;private&lt;&#x2F;span&gt;&lt;span&gt; ed25519 key pair.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;When you&#x27;re prompted to &amp;quot;Enter a file in which to save the key,&amp;quot; press Enter. This accepts the default file location.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span&gt;&amp;gt; Enter &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt; file in which to save the key (&#x2F;Users&#x2F;you&#x2F;.ssh&#x2F;id_ed25519)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;Press enter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;4&quot;&gt;
+&lt;li&gt;At the prompt, type a secure passphrase. For more information, see &amp;quot;Working with SSH key passphrases&amp;quot;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span&gt;&amp;gt; Enter &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;passphrase&lt;&#x2F;span&gt;&lt;span&gt; (empty for no passphrase)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;Type a passphrase&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; Enter &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;same&lt;&#x2F;span&gt;&lt;span&gt; passphrase again: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;Type passphrase again&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;adding-your-ssh-key-to-the-ssh-agent&quot;&gt;Adding your SSH key to the ssh-agent&lt;&#x2F;h2&gt;
+&lt;p&gt;Before adding a new SSH key to the ssh-agent, you should have checked for existing SSH keys and generated a new SSH key.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Ensure ssh-agent is enabled:&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# start the ssh-agent in the background
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; eval &amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ssh-agent -s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; Agent &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pid&lt;&#x2F;span&gt;&lt;span&gt; 59566
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;Add your SSH key to the ssh-agent. If you used an existing SSH key rather than generating a new SSH key, you&#x27;ll need to replace id_ed25519 in the command with the name of your existing private key file.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ssh-add &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;.ssh&#x2F;id_ed25519
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you will be using this for GitHub, continue. Otherwise, enjoy your new ssh key.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;adding-your-key-to-your-github-account&quot;&gt;Adding your key to your GitHub Account&lt;&#x2F;h2&gt;
+&lt;p&gt;Visit &lt;a href=&quot;https:&#x2F;&#x2F;help.github.com&#x2F;articles&#x2F;adding-a-new-ssh-key-to-your-github-account&quot;&gt;this GitHub article&lt;&#x2F;a&gt;. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;help.github.com&#x2F;articles&#x2F;generating-an-ssh-key&#x2F;&quot;&gt;Github: Generating an SSH key&lt;&#x2F;a&gt;
+&lt;a href=&quot;https:&#x2F;&#x2F;ed25519.cr.yp.to&#x2F;&quot;&gt;ED25519&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>MS Teams SameSite Scramble</title>
+        <published>2020-02-11T00:00:00+00:00</published>
+        <updated>2020-02-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/teams-samesite-scramble/"/>
+        <id>https://blog.carrio.dev/blog/teams-samesite-scramble/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/teams-samesite-scramble/">&lt;h2 id=&quot;microsoft-teams&quot;&gt;Microsoft Teams&lt;&#x2F;h2&gt;
+&lt;p&gt;Microsoft released their Teams chat application in 2017, but the platform didn&#x27;t pick up for some time and particularly gained traction after certain &lt;em&gt;bundles&lt;&#x2F;em&gt; with other software such as Office and Windows Server setups for businesses. This is an [Electron] app, so at its core it&#x27;s really an embedded Chrome instance running a web application with hooks into certain native functionalities, window management, and more. But you can consider MS Teams to effectively behave like Chrome when it comes to web standards.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;samesite&quot;&gt;SameSite&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;developer.mozilla.org&#x2F;en-US&#x2F;docs&#x2F;Web&#x2F;HTTP&#x2F;Headers&#x2F;Set-Cookie#samesitesamesite-value&quot;&gt;SameSite&lt;&#x2F;a&gt; refers to a cookie attribute that control the security behaviors around cookies across domains. When cookies are set, they can have a SameSite property set to one of several values: &lt;code&gt;Strict&lt;&#x2F;code&gt;, &lt;code&gt;Lax&lt;&#x2F;code&gt;, and &lt;code&gt;None&lt;&#x2F;code&gt;. The &lt;&#x2F;p&gt;
+&lt;p&gt;To quote from MDN what each of these values mean:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Strict&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Means that the browser sends the cookie only for same-site requests, that is, requests originating from the same site that set the cookie. If a request originates from a different domain or scheme (even with the same domain), no cookies with the SameSite=Strict attribute are sent.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Lax&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Means that the cookie is not sent on cross-site requests, such as on requests to load images or frames, but is sent when a user is navigating to the origin site from an external site (for example, when following a link). This is the default behavior if the SameSite attribute is not specified.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;None&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;means that the browser sends the cookie with both cross-site and same-site requests. The Secure attribute must also be set when setting this value, like so SameSite=None; Secure. If Secure is missing an error will be logged&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;As browser&#x27;s increase their security rules to protect their users, defaults around these types of configurations shift.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-incompatibility&quot;&gt;The Incompatibility&lt;&#x2F;h2&gt;
+&lt;p&gt;The issue came up as a console log in the application that indicated what went wrong and suggestions for how to resolve it:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Because a cookie&#x27;s SameSite attribute was not set or is invalid, it defaults to SameSite=Lax, which will prevents the cookie from being set in a cross-site context in a future version of the browser. This behavior protects user data from accidentally leaking to third parties and cross-site request forgery.&lt;&#x2F;p&gt;
+&lt;p&gt;Resolve this issue by updating the attributes of the cookie:&lt;&#x2F;p&gt;
+&lt;p&gt;Specify SameSite=None and Secure if the cookie is intended to be set in cross-site contexts. Note that only cookies sent over &lt;&#x2F;p&gt;
+&lt;p&gt;HTTPS may use the Secure attribute.&lt;&#x2F;p&gt;
+&lt;p&gt;Specify SameSite=Strict or SameSite=Lax if the cookie should not be set by cross-site requests&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;The root cause of this was a change in behavior for how Google Chrome handled the &lt;code&gt;SameSite=None&lt;&#x2F;code&gt; cookie attributes in version 67. Because a MS Teams app needs to be able a large range of browsers, just like a traditional web app. Since this change made it incompatible with the SameSite behavior of older versions of Chrome and other browsers, it had to be accounted for dynamically. Effectively, all versions of Chrome between 51.x and 67.x exhibited this issue.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-solution&quot;&gt;The Solution&lt;&#x2F;h2&gt;
+&lt;p&gt;A JavaScript function that validates the current browser and checks whether the UserAgent matches a Microsoft Teams desktop clients with older Chromium versions incorrectly handle cookies with the SameSite=None property. We check for Teams clients with Chrome versions &amp;gt;= &lt;code&gt;51.x&lt;&#x2F;code&gt; &amp;lt; &lt;code&gt;67.x&lt;&#x2F;code&gt;. This method returns true if an invalid user agent is not found. Cases that are not known may fall through, this was based on testing with macOS, Windows, and Linux clients for Microsoft Teams.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ts&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-ts &quot;&gt;&lt;code class=&quot;language-ts&quot; data-lang=&quot;ts&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;lowerIncompatibleVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;51&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;compatibleVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;67&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsChromePattern &lt;&#x2F;span&gt;&lt;span&gt;= &#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;(Teams&lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;MicrosoftTeams-Insiders)\&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;[\d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt; Chrome\&#x2F;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;[\d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;incompatible&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userAgent&lt;&#x2F;span&gt;&lt;span&gt;?: string | null) {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userAgent&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;match &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userAgent&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsChromePattern&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;try &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;majorVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;].&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;split&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;parseInt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;majorVersion&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;  } &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;catch &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;err&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;compatibleVersion &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;&amp;amp;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;lowerIncompatibleVersion
+&lt;&#x2F;span&gt;&lt;span&gt;  )
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With this function, we can detect an unsupported scenario for our security rules and then provide an alternative method of interacting with our app. In the scenario this was built around, our account linking process for the platform to a Microsoft Teams account was breaking due to this incompatibility, and this allowed us to externalize the process to another browser to continue the flow.&lt;&#x2F;p&gt;
+&lt;p&gt;The source code for this can be found on my GitHub under the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;msteams-samesite-compatibility-validator&quot;&gt;msteams-samesite-compatibility-validator&lt;&#x2F;a&gt; project.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

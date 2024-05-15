@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">NixOS Secrets with Agenix and Systemd</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>6 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-09-19
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#prologue-what-is-nixos">Prologue: What is NixOS?</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#managing-secrets-on-nixos">Managing Secrets on NixOS</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#age-and-agenix">Age and Agenix</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#where-does-systemd-come-into-play">Where Does Systemd Come Into Play?</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#generating-secrets-with-agenix">Generating secrets with agenix</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#secrets-nix">secrets.nix</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#tailscale-nix">tailscale.nix</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/#tl-dr">tl;dr</a>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h2 id="prologue-what-is-nixos">Prologue: What is NixOS?</h2>
+<p>I will assume that you're here to learn more about managing secrets on a NixOS system. If you want to learn more about NixOS itself, check out the <a href="https://nixos.org/manual/">NixOS manual</a>. There is a lot to catch up on.</p>
+<blockquote>
+<p>ℹ️ I may add more updates to this blog post, but I want it available in case others run into the same issue I did for utilizing <code>agenix</code> in Systemd service units.</p>
+</blockquote>
+<blockquote>
+<p>🎙️I do make use of voice to text tooling, but I try to correct as much as possible.</p>
+</blockquote>
+<h2 id="managing-secrets-on-nixos">Managing Secrets on NixOS</h2>
+<p>NixOS being an entirely automated system has to conquer some of the same battles fought by other tools in the same space- Terraform for example automates the provisioning of resources and systems, and needs a way to maintain secrets on those. These should be kept as safe as possible, and as such has primitives around secrets. NixOS similarly has many tools that can be used, some reused across the industry like <code>age</code> and <code>sops</code>. They provide a full comparison of these tools and their integration with the NixOS system <a href="https://nixos.wiki/wiki/Comparison_of_secret_managing_schemes">here</a>.</p>
+<h2 id="age-and-agenix">Age and Agenix</h2>
+<p>The tool <a href="https://age-encryption.org/">age</a> is a modern encryption tool designed to be simple to work with, requires no configuration out-of-the-box, and is designed to be composable. This makes it a great tool to use with Nix. The <a href="https://github.com/ryantm/agenix">agenix</a> project utilizes <code>age</code> in order to provide a pattern for managing secrets, and is separated into the CLI and the NixOS module. The CLI is used for interacting with secrets, and a <code>secrets.nix</code> file is provided in order to configure the target recipients for secret files, with these files existing in paths beneath the root directory of that <code>secrets.nix</code> file. Within your NixOS configuration, you can import the module, and then reference existing secrets and how they should be utilized in the system.</p>
+<h2 id="where-does-systemd-come-into-play">Where Does Systemd Come Into Play?</h2>
+<p>Well, I was building off an existing blog post by Tailscale on how to configure a NixOS server for Minecraft on a Tailnet. I'm mostly concerned on automatically wiring up a Tailscale service securely on my NixOS servers, so I wanted to apply the same principle while utilizing one of the secrets managing tools.</p>
+<p>So in this post, I'll demonstrate this in the way I implemented the NixOS configuration to utilize <code>agenix</code> for automatic Tailscale connection with a secret token, managed in code securely with <code>age</code> encryption.</p>
+<h2 id="generating-secrets-with-agenix">Generating secrets with agenix</h2>
+<p>First step degenerating secrets with <code>agenix</code> is by setting up a <code>secrets.nix</code> file this file should define the public SSH keys of hosts or users who are able to decrypt the secrets.</p>
+<blockquote>
+<p>This is a hint for those who are not familiar, but the system has its own SSH public and private keys in the <code>/etc</code> directory. If these exist then <code>agenix</code> will utilize those to decrypt the mounted secrets.</p>
+</blockquote>
+<h3 id="secrets-nix">secrets.nix</h3>
+<p>The output of the Nix expression is a map set. Each of these is a path, relative to the current directory of secrets.nix, and the public keys that the secret should be encrypted for. An example of the secrets.nix file:</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#55859b;">let
+</span><span>    </span><span style="color:#9f713c;">keys </span><span>= [ &quot;</span><span style="color:#489963;">ssh-rsa foobarbaz... host@system</span><span>&quot; ];
+</span><span style="color:#55859b;">in
+</span><span>{
+</span><span>    &quot;</span><span style="color:#489963;">tailscale.age</span><span>&quot;.</span><span style="color:#9f713c;">publicKeys </span><span>= </span><span style="color:#b16139;">keys</span><span>;
+</span><span>}
+</span></code></pre>
+<p>Once this file is defined, <code>agenix</code> now understands within the context of the directory how to encrypt secrets with <code>age</code>. So, you can execute the <code>agenix</code> command in order to open a terminal editor, determined by the configured <code>VISUAL</code> environment variables, in which you can then insert the content and after saving the buffer will be encrypted to the desired file location.</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>agenix -e tailscale.age
+</span></code></pre>
+<h3 id="tailscale-nix">tailscale.nix</h3>
+<p>I have broken out the tailscale.nix file into its own expression that can be imported by an exos configuration. It encapsulates all of the necessary configurations, namely installing the tailscale package, enabling the tailscale service, enabling port forwarding for the tailscale service, configuring a one-off Systemd unit file which references the agents mounted secret file. By referencing the content of that file in line within the Systemd unit script, the encrypted token is now available in plain text for the tailscale auto-configuration.</p>
+<p>The last important piece is that you must wait for the <code>run-agenix.d.mount</code> unit in this unit, otherwise there is the potential for a race condition where the <code>agenix</code> secret has not been decrypted to the secure location you are referencing, thus resulting in no content being passed for the token.</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6d64;"># tailscale.nix
+</span><span style="color:#478c90;">{ </span><span>config, pkgs, ... </span><span style="color:#478c90;">}</span><span>: {
+</span><span>    </span><span style="color:#5f6d64;"># the nix expression containing age secret configuration, enabling tailscale packages and service, networking rules, and the systemd autoconnect unit file
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># Here, we mount the token file
+</span><span>    </span><span style="color:#9f713c;">age</span><span>.</span><span style="color:#9f713c;">secrets</span><span>.</span><span style="color:#9f713c;">tailscale-token </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">file </span><span>= </span><span style="color:#489963;">./tailscale.age</span><span>;
+</span><span>        </span><span style="color:#9f713c;">owner </span><span>= &quot;</span><span style="color:#489963;">root</span><span>&quot;;
+</span><span>        </span><span style="color:#9f713c;">group </span><span>= &quot;</span><span style="color:#489963;">root</span><span>&quot;;
+</span><span>        </span><span style="color:#9f713c;">mode </span><span>= &quot;</span><span style="color:#489963;">600</span><span>&quot;;
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># We&#39;ll install the package to the system, enable the service, and set up some networking rules
+</span><span>    </span><span style="color:#9f713c;">environment</span><span>.</span><span style="color:#9f713c;">systemPackages </span><span>= </span><span style="color:#55859b;">with </span><span style="color:#b16139;">pkgs</span><span>; [ </span><span style="color:#b16139;">tailscale </span><span>];
+</span><span>    </span><span style="color:#9f713c;">services</span><span>.</span><span style="color:#9f713c;">tailscale</span><span>.</span><span style="color:#9f713c;">enable </span><span>= </span><span style="color:#9f713c;">true</span><span>;
+</span><span>    </span><span style="color:#9f713c;">networking </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">firewall </span><span>= {
+</span><span>            </span><span style="color:#9f713c;">checkReversePath </span><span>= &quot;</span><span style="color:#489963;">loose</span><span>&quot;;
+</span><span>            </span><span style="color:#9f713c;">allowedUDPPorts </span><span>= [ </span><span style="color:#b16139;">config</span><span>.</span><span style="color:#b16139;">services</span><span>.</span><span style="color:#b16139;">tailscale</span><span>.</span><span style="color:#b16139;">port </span><span>];
+</span><span>            </span><span style="color:#9f713c;">trustedInterfaces </span><span>= [ &quot;</span><span style="color:#489963;">tailscale0</span><span>&quot; ];
+</span><span>        };
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># Here is the magic, where we automatically connect with the tailscale CLI by passing our secret token, and ensure that agenix mounting was completed
+</span><span>    </span><span style="color:#9f713c;">systemd</span><span>.</span><span style="color:#9f713c;">services</span><span>.</span><span style="color:#9f713c;">tailscale-autoconnect </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">description </span><span>= &quot;</span><span style="color:#489963;">Automatic connection to Tailscale</span><span>&quot;;
+</span><span>
+</span><span>        </span><span style="color:#5f6d64;"># We must make sure that both the tailscale service and the agenix file mounting are running / complete before trying to connect to tailscale
+</span><span>        </span><span style="color:#9f713c;">after </span><span>= [ &quot;</span><span style="color:#489963;">network-pre.target</span><span>&quot; &quot;</span><span style="color:#489963;">tailscale.service</span><span>&quot; &quot;</span><span style="color:#489963;">run-agenix.d.mount</span><span>&quot; ];
+</span><span>        </span><span style="color:#9f713c;">wants </span><span>= [ &quot;</span><span style="color:#489963;">network-pre.target</span><span>&quot; &quot;</span><span style="color:#489963;">tailscale.service</span><span>&quot; &quot;</span><span style="color:#489963;">run-agenix.d.mount</span><span>&quot; ];
+</span><span>        </span><span style="color:#9f713c;">wantedBy </span><span>= [ &quot;</span><span style="color:#489963;">multi-user.target</span><span>&quot; ];
+</span><span>
+</span><span>        </span><span style="color:#5f6d64;"># Set this service as a oneshot job
+</span><span>        </span><span style="color:#9f713c;">serviceConfig</span><span>.</span><span style="color:#9f713c;">Type </span><span>= &quot;</span><span style="color:#489963;">oneshot</span><span>&quot;;
+</span><span>
+</span><span>        </span><span style="color:#5f6d64;"># Run the following shell script for the job, passing the mounted secret for the tailscale connection
+</span><span>        </span><span style="color:#9f713c;">script </span><span>= </span><span style="color:#55859b;">with </span><span style="color:#b16139;">pkgs</span><span>; &#39;&#39;
+</span><span style="color:#489963;">            # wait for tailscaled to settle
+</span><span style="color:#489963;">            sleep 2
+</span><span style="color:#489963;">
+</span><span style="color:#489963;">            # check if we are already authenticated to tailscale
+</span><span style="color:#489963;">            status=&quot;$(</span><span style="font-style:italic;color:#867469;">${</span><span style="font-style:italic;color:#b16139;">tailscale</span><span style="font-style:italic;color:#867469;">}</span><span style="color:#489963;">/bin/tailscale status -json | </span><span style="font-style:italic;color:#867469;">${</span><span style="font-style:italic;color:#b16139;">jq</span><span style="font-style:italic;color:#867469;">}</span><span style="color:#489963;">/bin/jq -r .BackendState)&quot;
+</span><span style="color:#489963;">            if [ $status = &quot;Running&quot; ]; then
+</span><span style="color:#489963;">                exit 0
+</span><span style="color:#489963;">            fi
+</span><span style="color:#489963;">
+</span><span style="color:#489963;">            # otherwise authenticate with tailscale
+</span><span style="color:#489963;">            </span><span style="font-style:italic;color:#867469;">${</span><span style="font-style:italic;color:#b16139;">tailscale</span><span style="font-style:italic;color:#867469;">}</span><span style="color:#489963;">/bin/tailscale up -authkey &quot;$(cat &quot;</span><span style="font-style:italic;color:#867469;">${</span><span style="font-style:italic;color:#b16139;">config</span><span style="font-style:italic;color:#87928a;">.</span><span style="font-style:italic;color:#b16139;">age</span><span style="font-style:italic;color:#87928a;">.</span><span style="font-style:italic;color:#b16139;">secrets</span><span style="font-style:italic;color:#87928a;">.</span><span style="font-style:italic;color:#b16139;">tailscale-token</span><span style="font-style:italic;color:#87928a;">.</span><span style="font-style:italic;color:#b16139;">path</span><span style="font-style:italic;color:#867469;">}</span><span style="color:#489963;">&quot;)&quot;
+</span><span style="color:#489963;">        </span><span>&#39;&#39;;
+</span><span>    };
+</span><span>}
+</span></code></pre>
+<h2 id="tl-dr">tl;dr</h2>
+<p>Agenix itself mounts files with Systemd in the <code>run-agenix.mount</code> unit. As such, you can utilize the mechanism of Systemd service definitions, namely <code>after</code> and <code>wants</code>, in order to ensure that the <code>agenix</code> secret mounts have been completed prior to starting your service. In this way, you can be sure that the secret is available.</p>
+<p>If you want to read more on NixOS configuration, you can check out my <a href="https://github.com/tcarrio/nix-config">nix-config</a> repository which maintains several of my systems.</p>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/nix/">nix</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/open-source/">open source</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/secrets/">secrets</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/sysadmin/">sysadmin</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

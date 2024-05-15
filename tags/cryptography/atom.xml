@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - cryptography</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/cryptography/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-08-06T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/cryptography/atom.xml</id>
+    <entry xml:lang="en">
+        <title>JSON Web Tokens: The Full Picture</title>
+        <published>2023-08-06T00:00:00+00:00</published>
+        <updated>2023-08-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/jwt-the-full-picture-jose/"/>
+        <id>https://blog.carrio.dev/blog/jwt-the-full-picture-jose/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/jwt-the-full-picture-jose/">&lt;p&gt;JSON Web Tokens, commonly abbreviated as JWTs, are a standard that is a part of the JSON Object Signing and Encryption (JOSE) set of standards. There is a lot to break down here, depending on what you want to accomplish. JWTs are often conflated with a combination of these standards, which include:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7518&quot;&gt;JSON Web Algorithms (JWA)&lt;&#x2F;a&gt;: Defines &lt;strong&gt;cryptographic algorithms&lt;&#x2F;strong&gt; and &lt;strong&gt;identifiers&lt;&#x2F;strong&gt; used across JOSE standards.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7517&quot;&gt;JSON Web Keys (JWK)&lt;&#x2F;a&gt;: Defines the JSON representation format for &lt;strong&gt;cryptographic keys&lt;&#x2F;strong&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7516&quot;&gt;JSON Web Encryption (JWE)&lt;&#x2F;a&gt;: Defines the JSON structure for representing &lt;strong&gt;encrypted&lt;&#x2F;strong&gt; content using JWA.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7515&quot;&gt;JSON Web Signatures (JWS)&lt;&#x2F;a&gt;: Defines the JSON structure for representing &lt;strong&gt;cryptographical veriable signatures&lt;&#x2F;strong&gt; of content using JWA.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7519&quot;&gt;JSON Web Tokens (JWT)&lt;&#x2F;a&gt;: Defines subject claims using JSON structures. These claims can be optionally protected via JWE or JWS.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;That is a mouthful to say the least, but maybe you&#x27;re starting to see how there is a lot more to JWTs than you might originally think, especially when you go to a site like &lt;a href=&quot;https:&#x2F;&#x2F;jwt.io&quot;&gt;jwt.io&lt;&#x2F;a&gt; that provides an opinionated example of a JSON Web Token protected with a JSON Web Signature. In fact, that page doesn&#x27;t even allow you to showcase an example of an unprotected JSON Web Token (e.g. &lt;code&gt;&amp;quot;alg&amp;quot;: &amp;quot;none&amp;quot;&lt;&#x2F;code&gt; in the header), so you can sort of understand just how JWTs have been adopted (and it has &lt;em&gt;something&lt;&#x2F;em&gt; to do with security).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-simple-jwt-starting-with-a-basic-example&quot;&gt;A Simple JWT: Starting with a Basic Example&lt;&#x2F;h2&gt;
+&lt;p&gt;A JSON Web Token can optionally utilize no other JOSE protection (JWS&#x2F;JWE)- which is the simplest use case. The additional protections sort of build on top of this. To start, a JSON Web Token consists of a &lt;strong&gt;header&lt;&#x2F;strong&gt;, in the form of a JSON Web Key, and a &lt;strong&gt;payload&lt;&#x2F;strong&gt;, a JSON object which contains subject claims. The JWK header defines what algorithm is used for the JWT, and the basic case is that there is none.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;header: { &amp;quot;alg&amp;quot;: &amp;quot;none&amp;quot; }
+&lt;&#x2F;span&gt;&lt;span&gt;payload: { &amp;quot;sub&amp;quot;: &amp;quot;user@example.test&amp;quot; }
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now, while technically JSON is used to define all of the structured data in JSON Web Tokens, the delivery format is entirely URL safe. Each of the parts of a JWT are encoded in a common manner:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;base64UrlEncode&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;utf8Encode&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;    JSONObject
+&lt;&#x2F;span&gt;&lt;span&gt;  )
+&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: Binary data formats within the payload need to be worked around in their own way, and are not covered as part of the specification.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;That encoding mechanism is applied individually to the header and payload, and the end result of each concatenated with &lt;code&gt;.&lt;&#x2F;code&gt;s.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span&gt;header  = &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;{&amp;quot;alg&amp;quot;:&amp;quot;none&amp;quot;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;payload = &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;{&amp;quot;sub&amp;quot;:&amp;quot;user@example.test&amp;quot;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;{&amp;quot;alg&amp;quot;:&amp;quot;none&amp;quot;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; =&amp;gt; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;eyJhbGciOiJub25lIn0K&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;{&amp;quot;sub&amp;quot;:&amp;quot;user@example.test&amp;quot;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; =&amp;gt; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;eyJzdWIiOiJ1c2VyQGV4YW1wbGUudGVzdCJ9Cg&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;jwt = &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;eyJhbGciOiJub25lIn0K.eyJzdWIiOiJ1c2VyQGV4YW1wbGUudGVzdCJ9Cg&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;## encoded header ## ########### encoded payload ##########    
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;As you can see, there are only two parts to this. This differs from a JWT you might see used in OpenID Connect OAuth flows, which will typically construct JWTs with some type of &lt;em&gt;secret&lt;&#x2F;em&gt; to support &lt;em&gt;validation&lt;&#x2F;em&gt; of tokens, a functionality of JSON Web Signatures. Let&#x27;s start to put together the building blocks to these cryptographic components of the JOSE standards.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;json-web-algorithms-or-definitions-we-ll-need-for-everything-else-really&quot;&gt;JSON Web Algorithms, or &amp;quot;Definitions We&#x27;ll Need For Everything Else, Really&amp;quot;&lt;&#x2F;h2&gt;
+&lt;p&gt;Somewhere we need to define what &lt;code&gt;&amp;quot;alg&amp;quot;&lt;&#x2F;code&gt; and &lt;code&gt;&amp;quot;enc&amp;quot;&lt;&#x2F;code&gt; and all of these header keys &lt;em&gt;mean&lt;&#x2F;em&gt;. That&#x27;s what JWA, JSON Web Algorithms, defines. The header is primarily reserved for all of the cryptographic functionality, and being able to read this metadata to determine how to decrypt or validate tokens is one of the strong suits of JWTs.&lt;&#x2F;p&gt;
+&lt;p&gt;The standard is defined in &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7518&quot;&gt;RFC-7518&lt;&#x2F;a&gt;, and that will provide all of the information you need on various supported algorithms, but I&#x27;ll give a few examples here to cover the use cases I&#x27;ll preset across this document.&lt;&#x2F;p&gt;
+&lt;p&gt;As we&#x27;ll get to later, these definitions support the functionality of JSON Web Signatures (JWS) and JSON Web Encryption (JWE). The RFC is similarly broken down to cover each of these cases:&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;json-web-signatures-jws&quot;&gt;JSON Web Signatures (JWS)&lt;&#x2F;h2&gt;
+&lt;p&gt;JWS is focused on providing &lt;em&gt;verifiable&lt;&#x2F;em&gt; data. The metadata in the header will dictate how to verify the payload of the JWT using the &lt;em&gt;signature&lt;&#x2F;em&gt; appended to it.&lt;&#x2F;p&gt;
+&lt;p&gt;You can provide the following (case-insensitive) values for &lt;code&gt;&amp;quot;alg&amp;quot;&lt;&#x2F;code&gt; keys in the header, which will apply a cryptographic signature utilizing the described algorithm:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;HS256&lt;&#x2F;strong&gt;: HMAC using SHA-256&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;HS384&lt;&#x2F;strong&gt;: HMAC using SHA-384&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;HS512&lt;&#x2F;strong&gt;: HMAC using SHA-512&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;RS256&lt;&#x2F;strong&gt;: RSASSA-PKCS1-v1_5 using SHA-256&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;RS384&lt;&#x2F;strong&gt;: RSASSA-PKCS1-v1_5 using SHA-384&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;RS512&lt;&#x2F;strong&gt;: RSASSA-PKCS1-v1_5 using SHA-512&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ES256&lt;&#x2F;strong&gt;: ECDSA using P-256 and SHA-256&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ES384&lt;&#x2F;strong&gt;: ECDSA using P-384 and SHA-384&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ES512&lt;&#x2F;strong&gt;: ECDSA using P-521 and SHA-512&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;PS256&lt;&#x2F;strong&gt;: RSASSA-PSS using SHA-256 and MGF1 with SHA-256&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;PS384&lt;&#x2F;strong&gt;: RSASSA-PSS using SHA-384 and MGF1 with SHA-384&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;PS512&lt;&#x2F;strong&gt;: RSASSA-PSS using SHA-512 and MGF1 with SHA-512&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;none&lt;&#x2F;strong&gt;: No digital signature or MAC performed&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;symmetric-hashing&quot;&gt;Symmetric Hashing&lt;&#x2F;h3&gt;
+&lt;p&gt;HMAC, Hash-based Message Authentication Codes, are useful when you can utilize &lt;em&gt;shared&lt;&#x2F;em&gt; secrets. That is, the party creating the JWT and the party consuming the JWT both know of a secret value that is used to generate the signature and later verify it. When both parties are familiar with the secret and have communicated this securely, this form of cryptography is still hardened against man-in-the-middle attacks, since any intercepting party cannot manipulate the token and pass it on- once the body has changed the signature would no longer be valid. This is true outside of the very, &lt;em&gt;very&lt;&#x2F;em&gt; small probability of a hash collision. In the example of the weakest encryption suggested, which is SHA-256, that relates to 256 bits. In terms of how big a number that equates to, well, to quote Douglas Adams:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You just won&#x27;t believe how vastly, hugely, mind-bogglingly big it is.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;But if you &lt;em&gt;must&lt;&#x2F;em&gt; know, &lt;code&gt;2^256 = 115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457,584,007,913,129,639,936&lt;&#x2F;code&gt;, which happens to be a &lt;em&gt;mind-boggingly big&lt;&#x2F;em&gt; number.&lt;&#x2F;p&gt;
+&lt;p&gt;A SHA-256 collision is about as likely as getting one Powerball ticket &lt;strong&gt;four&lt;&#x2F;strong&gt; weeks in a row and winning the maximum jackpot &lt;strong&gt;every time&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;I think it&#x27;s landed by now, and I&#x27;m just having fun with numbers now so I digress..&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;asymmetric-hashing&quot;&gt;Asymmetric Hashing&lt;&#x2F;h3&gt;
+&lt;p&gt;Also known as public-private key cryptography, asymmetric hashing allows you to have a party whose familiar with a &lt;em&gt;generative&lt;&#x2F;em&gt; secret, and the consuming parties can be configured with a &lt;em&gt;validation&lt;&#x2F;em&gt; secret. This approach is hardened not just against man-in-the-middle (MITM) attacks but also disallows the consumer to manipulate the JWT in any way either.&lt;&#x2F;p&gt;
+&lt;p&gt;You will often see approaches like this utilized in OAuth systems since you can&#x27;t allow an OAuth client to not just validate access tokens but &lt;em&gt;manipulate&lt;&#x2F;em&gt; them in any way they would like.&lt;&#x2F;p&gt;
+&lt;p&gt;Asymmetric algorithms power many tools we make use of today; it enables a &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc8446&quot;&gt;secure TLS handshake&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc4253&quot;&gt;secure shells&lt;&#x2F;a&gt;, extends and protects &lt;a href=&quot;https:&#x2F;&#x2F;gnupg.org&#x2F;&quot;&gt;email communication&lt;&#x2F;a&gt;, and more.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;no-hashing&quot;&gt;No Hashing&lt;&#x2F;h3&gt;
+&lt;p&gt;Like we had shown in our example above, you can also specify not to use any algorithm. This would amount to no signature being generated at all, so you&#x27;re just passing a base64 encoded JSON object with some additional JSON metadata.&lt;&#x2F;p&gt;
+&lt;p&gt;If you&#x27;re using this approach, you &lt;em&gt;probably&lt;&#x2F;em&gt; shouldn&#x27;t even be using JWTs, unless that&#x27;s an imposed requirement and you are &lt;strong&gt;absolutely certain&lt;&#x2F;strong&gt; there are no security requirements on the exchanged data.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;json-web-encryption-jwe&quot;&gt;JSON Web Encryption (JWE)&lt;&#x2F;h2&gt;
+&lt;p&gt;In contrast to JWS, JWE is focused on protecting the data in transit. Where JWS protects your data from being manipulated in transit, JWE also protects your data from being &lt;strong&gt;read&lt;&#x2F;strong&gt; in transit. Only someone who has the necessary secrets to perform the decryption described by the metadata in the header will be able to do this.&lt;&#x2F;p&gt;
+&lt;p&gt;In the header, the &lt;code&gt;&amp;quot;alg&amp;quot;&lt;&#x2F;code&gt; field will be used to describe the encryption algorithm, each respective one may include additional header fields accordingly. See the full specification under the JWE section of the JWA specification &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7518#section-4&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;RSA1_5&lt;&#x2F;strong&gt;: RSAES-PKCS1-v1_5&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;RSA-OAEP&lt;&#x2F;strong&gt;: RSAES OAEP using default parameters&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;RSA-OAEP-256&lt;&#x2F;strong&gt;: RSAES OAEP using SHA-256 and MGF1 with SHA-256&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;A128KW&lt;&#x2F;strong&gt;: AES Key Wrap with default initial value using 128-bit key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;A192KW&lt;&#x2F;strong&gt;: AES Key Wrap with default initial value using 192-bit key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;A256KW&lt;&#x2F;strong&gt;: AES Key Wrap with default initial value using 256-bit key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;dir&lt;&#x2F;strong&gt;: Direct use of a shared symmetric key as the CEK&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ECDH-ES&lt;&#x2F;strong&gt;: Elliptic Curve key agreement using Concat KDF&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ECDH-ES+A128KW&lt;&#x2F;strong&gt;: ECDH-ES using Concat KDF and CEK wrapped with A128KW&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ECDH-ES+A192KW&lt;&#x2F;strong&gt;: ECDH-ES using Concat KDF and CEK wrapped with A192KW&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ECDH-ES+A256KW&lt;&#x2F;strong&gt;: ECDH-ES using Concat KDF and CEK wrapped with A256KW&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;A128GCMKW&lt;&#x2F;strong&gt;: Key wrapping with AES GCM using 128-bit key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;A192GCMKW&lt;&#x2F;strong&gt;: Key wrapping with AES GCM using 192-bit key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;A256GCMKW&lt;&#x2F;strong&gt;: Key wrapping with AES GCM using 256-bit key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;PBES2-HS256+A128KW&lt;&#x2F;strong&gt;: PBES2 with HMAC SHA-256 and &amp;quot;A128KW&amp;quot; wrapping&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;PBES2-HS384+A192KW&lt;&#x2F;strong&gt;: PBES2 with HMAC SHA-384 and &amp;quot;A192KW&amp;quot; wrapping&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;PBES2-HS512+A256KW&lt;&#x2F;strong&gt;: PBES2 with HMAC SHA-512 and &amp;quot;A256KW&amp;quot; wrapping&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;I won&#x27;t dive much farther into these, the important note here is that the header metadata maintains the definition for how these encryptions are applied, thus how the client would understand how to decrypt them.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-structure-of-a-jwt&quot;&gt;The Structure of a JWT&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Required&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Header (defines whether to use JWS&#x2F;JWE&#x2F;none)&lt;&#x2F;li&gt;
+&lt;li&gt;Payload&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;Optional&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Signature (JWS)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;header&quot;&gt;Header&lt;&#x2F;h3&gt;
+&lt;p&gt;The header of a JSON Web Token defines the cryptographic mechanism, as discussed in JWS&#x2F;JWE. This can be based on HMAC in combination with a common hashing algorithm like SHA-512 or asymmetric key cryptography such as RSA. The former allows for an opaque secret value to be used for generating the JWT signature which is also used to verify it. The latter utilizes public&#x2F;private key cryptography that allows you to generate a secret with a private key and utilize a public key, one that can be known by anyone without risking security around the tokens, to verify the signature of the JSON Web Token.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;payload&quot;&gt;Payload&lt;&#x2F;h3&gt;
+&lt;p&gt;The payload of a JSON Web Token can contain any valid json object, Jwt&#x27;s do not have any further intrinsic limitations, but standards that build upon JWTs such as OpenID Connect use JWTs to provide stateless context in an access or identity token that can be utilized by resource servers or OAuth clients.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;signature&quot;&gt;Signature&lt;&#x2F;h3&gt;
+&lt;p&gt;Looking back at the header, we can reference the utilized &lt;strong&gt;algorithm&lt;&#x2F;strong&gt; and &lt;strong&gt;token type&lt;&#x2F;strong&gt;. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;json-web-keys&quot;&gt;JSON Web Keys&lt;&#x2F;h2&gt;
+&lt;p&gt;These specify how to define cryptographic keys, typically used in combination with JWS&#x2F;JWE. This builds upon specification for JWA, and can be utilized to provide JSON Web Key Sets, which consumers of secured JWTs can reach out to in order to retrieve metadata for verifying tokens, as an example.&lt;&#x2F;p&gt;
+&lt;p&gt;The RFC for for JSON Web Key includes &lt;a href=&quot;https:&#x2F;&#x2F;www.rfc-editor.org&#x2F;rfc&#x2F;rfc7517#appendix-A&quot;&gt;an example in Appendix A&lt;&#x2F;a&gt;, which offers both elliptic curve and RSA &lt;em&gt;public&lt;&#x2F;em&gt; keys for validating a JWT against its signature by the defined header metadata.&lt;&#x2F;p&gt;
+&lt;p&gt;This piece of magic provides the mechanism for verification of JWS-secured JWTs with OAuth &#x2F; OpenID Connect.&lt;&#x2F;p&gt;
+&lt;p&gt;An example of this in the wild would be Auth0&#x27;s JWKS. One is exposed for every customer, but because of the security provided by asymmetric cryptography, this &lt;em&gt;public&lt;&#x2F;em&gt; key serves no special purpose outside of verification of tokens. You cannot construct a JWT with a public key that can be verified by other consumers using that public key, so it&#x27;s still secure against attack vectors such as MITM.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;additional-reading&quot;&gt;Additional reading&lt;&#x2F;h2&gt;
+&lt;p&gt;You can dig more into the official specification of JSON Web Tokens in IETF&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7519&quot;&gt;RFC-7519&lt;&#x2F;a&gt;. The JWT specification builds upon two other important standards, which are JSON Web Signatures (JWS) defined in &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7515&quot;&gt;RFC-7515&lt;&#x2F;a&gt; and JSON Web Encryption (JWE) defined in &lt;a href=&quot;https:&#x2F;&#x2F;datatracker.ietf.org&#x2F;doc&#x2F;html&#x2F;rfc7516&quot;&gt;RFC-7516&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;A great playground space for messing around with JWT&#x27;s is &lt;a href=&quot;https:&#x2F;&#x2F;jwt.io&quot;&gt;jwt.io&lt;&#x2F;a&gt;. They have an interactive JSON Web Token editor that shows the raw JWT and a breakdown of its parts, even so far as allowing you to verify signatures.&lt;&#x2F;p&gt;
+&lt;p&gt;There is a short&#x2F;long summary of the JOSE standards on StackOverflow &lt;a href=&quot;https:&#x2F;&#x2F;stackoverflow.com&#x2F;questions&#x2F;74257560&#x2F;what-is-the-difference-between-jose-jwa-jwe-jwk-jws-and-jwt&quot;&gt;here&lt;&#x2F;a&gt; as well, which I also found helpful when RFCs got a bit too boring.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

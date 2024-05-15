@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - dev</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/dev/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-09-21T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/dev/atom.xml</id>
+    <entry xml:lang="en">
+        <title>direnv magic: instant project environments</title>
+        <published>2023-09-21T00:00:00+00:00</published>
+        <updated>2023-09-21T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/direnv-magic/"/>
+        <id>https://blog.carrio.dev/blog/direnv-magic/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/direnv-magic/">&lt;h1 id=&quot;direnv-magic&quot;&gt;direnv magic&lt;&#x2F;h1&gt;
+&lt;p&gt;A very popular project for managing environment variables in projects today is &lt;code&gt;dotenv&lt;&#x2F;code&gt;. There are packages for various languages, like NodeJS and PHP. They are built on a simple principle: to load environment variables from a &lt;code&gt;.env&lt;&#x2F;code&gt; file located in the project root.&lt;&#x2F;p&gt;
+&lt;p&gt;When it comes to the 12 Factor App, managing environment variables in source control is generally discouraged. Instead, environment variables should be set externally, like via the OS or a container orchestrator. However, &lt;code&gt;dotenv&lt;&#x2F;code&gt; packages rely on the application loading the &lt;code&gt;.env&lt;&#x2F;code&gt; file itself, which means that the application must process a file in order to retrieve its environment configuration.&lt;&#x2F;p&gt;
+&lt;p&gt;As a whole, this practice is convenient for local development, but does not lend well to the Config principle of the 12 Factor App.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;an-alternative-approach&quot;&gt;an alternative approach&lt;&#x2F;h2&gt;
+&lt;p&gt;The &lt;code&gt;direnv&lt;&#x2F;code&gt; tool allows environment variables to be set based on the directory. With &lt;code&gt;direnv&lt;&#x2F;code&gt;, you can define environment variables in a &lt;code&gt;.envrc&lt;&#x2F;code&gt; file that will be loaded automatically when entering that directory. This avoids embedding environment configuration in the application code&#x2F;source control, and makes variables configurable on a per-directory basis. It also entirely avoids having dependencies on files and the entirety of the &lt;code&gt;dotenv&lt;&#x2F;code&gt; package itself in a production application. You don&#x27;t have to conditionally load files - the environment is configured automatically by the shell in local development environments, and configured by the orchestrator in production, like Kubernetes, in the exact same manner: &lt;strong&gt;the environment variables&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-behavior&quot;&gt;the behavior&lt;&#x2F;h2&gt;
+&lt;p&gt;Working with &lt;code&gt;direnv&lt;&#x2F;code&gt;, you gain the ability to not only define environment variables in a &lt;code&gt;.envrc&lt;&#x2F;code&gt; file per directory, but also automatically configure your shell environment based on that file in other means. For example, you can automatically execute scripts or enter a Nix flake dev shell.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;automated-secure-shell-environments&quot;&gt;automated, secure shell environments&lt;&#x2F;h2&gt;
+&lt;p&gt;Due to the simple approach of a &lt;code&gt;.envrc&lt;&#x2F;code&gt; file and automatic nature of &lt;code&gt;direnv&lt;&#x2F;code&gt;, it provides a streamlined solution for automatically entering development environments in a snap. It also requires that you permit a directory before &lt;code&gt;direnv&lt;&#x2F;code&gt; will load variables or execute scripts, preventing accidental exposure in untrusted directories.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;an-example-with-nix-flakes&quot;&gt;an example with Nix flakes&lt;&#x2F;h2&gt;
+&lt;p&gt;Suppose we have a Nix flake in our project repository that defines a development shell environment. With &lt;code&gt;direnv&lt;&#x2F;code&gt;, we can automatically enter this shell whenever we cd into the project directory. We&#x27;ll start with this project&#x27;s Nix flake, which provides a shell with the necessary tools to build and develop the blog.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;description &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0xc dev shell&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;nixpkgs-unstable&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells&lt;&#x2F;span&gt;&lt;span&gt;.&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;x86_64-linux&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;; [
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;git
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;zola
+&lt;&#x2F;span&gt;&lt;span&gt;      ];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;PROJECT_NAME &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0xc&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;shellHook &lt;&#x2F;span&gt;&lt;span&gt;= &amp;#39;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo $ Started devshell for $PROJECT_NAME
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        uname -v
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        git --version
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo &amp;quot;zola version $(zola --version)&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That ensures that I can access both &lt;code&gt;git&lt;&#x2F;code&gt; and &lt;code&gt;zola&lt;&#x2F;code&gt; in my dev shell.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;direnv&lt;&#x2F;code&gt; tool has native support for Nix flakes, so enabling this is a single line in our &lt;code&gt;.envrc&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;use flake
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That&#x27;s it! Now in the project, you&#x27;ll have to permit &lt;code&gt;direnv&lt;&#x2F;code&gt; once:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;direnv&lt;&#x2F;span&gt;&lt;span&gt; allow
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now you are ready to automatically enter your desired shell environment.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;graceful-departures&quot;&gt;graceful departures&lt;&#x2F;h2&gt;
+&lt;p&gt;Not only does &lt;code&gt;direnv&lt;&#x2F;code&gt; work well when navigating around projects, it also handles exiting an environment smoothly. Dependencies you may not have had that the Nix flake included in the dev shell, such as &lt;code&gt;zola&lt;&#x2F;code&gt;, will no longer be available after leaving the project directory.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[ ~&#x2F;Code&#x2F;blog ]: which zola
+&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;nix&#x2F;store&#x2F;qsaq50z4hln6f86ymvp5f5j01wqg21c3-zola-0.17.2&#x2F;bin&#x2F;zola
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;[ ~&#x2F;Code&#x2F;blog ]: cd ..
+&lt;&#x2F;span&gt;&lt;span&gt;direnv: unloading
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;[ ~&#x2F;Code ]: which zola
+&lt;&#x2F;span&gt;&lt;span&gt;which: no zola in (&#x2F;nix&#x2F;store&#x2F;16d7k6ljgy635fz5jn1flnvpx1gnx9cp-glib-2.76.4-bin&#x2F;bin:&#x2F;run&#x2F;wrappers&#x2F;bin:&#x2F;home&#x2F;tcarrio&#x2F;.local&#x2F;share&#x2F;flatpak&#x2F;exports&#x2F;bin:&#x2F;var&#x2F;lib&#x2F;flatpak&#x2F;exports&#x2F;bin:&#x2F;home&#x2F;tcarrio&#x2F;.nix-profile&#x2F;bin:&#x2F;etc&#x2F;profiles&#x2F;per-user&#x2F;tcarrio&#x2F;bin:&#x2F;nix&#x2F;var&#x2F;nix&#x2F;profiles&#x2F;default&#x2F;bin:&#x2F;run&#x2F;current-system&#x2F;sw&#x2F;bin:&#x2F;home&#x2F;tcarrio&#x2F;.local&#x2F;bin)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+</feed>

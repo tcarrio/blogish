@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">DVD Backups on Linux</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>4 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-12-27
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#dvd-backup">DVD Backup</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#background-the-hardware">Background: The Hardware</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#backing-up-dvds-with-dvdbackup">Backing up DVDs with dvdbackup</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#splicing-the-video-files">Splicing the video files</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#syncing-to-the-sftp-server">Syncing to the SFTP server</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#converting-from-vob-to-mp4">Converting from VOB to MP4</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/dvd-backups-on-linux/#enhancements">Enhancements</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h1 id="dvd-backup">DVD Backup</h1>
+<p>I recently went through the process up backing up a series of DVDs from my partners childhood. Since this process entailed multiple systems and both CPU and GPU hardware for video rendering, I figured I would capture some the steps at a high level that I took to accomplish the task.</p>
+<h2 id="background-the-hardware">Background: The Hardware</h2>
+<p>During this run-through I utilized a number of systems. Namely, I pulled out my <a href="https://github.com/tcarrio/nix-config/blob/main/nixos/workstation/t510/default.nix">Lenovo T510</a> to make use of the DVD bay, my DiskStation 420 for intermediate network storage and backup of the DVD and MP4 files, and <a href="https://github.com/tcarrio/nix-config/blob/main/nixos/workstation/glass/default.nix">my personal desktop</a> with both an AMD Ryzen and GTX 1080Ti- both come into play in the following.</p>
+<h2 id="backing-up-dvds-with-dvdbackup">Backing up DVDs with dvdbackup</h2>
+<p>Unsurprisingly, the tool <code>dvdbackup</code> exists as a means to backup DVDs. It mostly retains the same filesystem structure as the mounted DVD, but it's a useful tool for inspecting and saving videos from a DVD.</p>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#5f6d64;"># CWD must be where you want to save your DVD backup
+</span><span style="color:#b16139;">dvdbackup -i</span><span> /dev/sr0</span><span style="color:#b16139;"> -o</span><span> .</span><span style="color:#b16139;"> -M
+</span></code></pre>
+<p>What you'll end up with is the main feature of the DVD but in the typical hierarchy of the original DVD itself, had you mounted <code>/dev/sr0</code> directly.</p>
+<blockquote>
+<p>ℹ️ If you need to recover a damaged disk, you may need to use a tool like <code>dvdisaster</code> or <code>ddrescue</code>. There is no guarantee your data is recoverable.</p>
+</blockquote>
+<h2 id="splicing-the-video-files">Splicing the video files</h2>
+<p>The VOB files can be directly concatenated, and is this is exactly how you would perform a splicing of the video content before conversion.</p>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b16139;">cat</span><span> VTS_01_*.VOB &gt; video.vob
+</span></code></pre>
+<blockquote>
+<p>⚠️ If you include the <code>VIDEOTS.VOB</code> file you may encounter audio issues with your spliced video. </p>
+</blockquote>
+<h2 id="syncing-to-the-sftp-server">Syncing to the SFTP server</h2>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b16139;">scp</span><span> ./video.vob 0xc@nas-ds418-00:/path/to/target/video.vob
+</span></code></pre>
+<p>All of your operations from here <em>can</em> be entirely remote, if you utilize a filesystem mount for the SFTP server, and have a stable connection. In one case I encountered a packet failure and resorted to copying to and from my local system responsible for the conversions going forward.</p>
+<blockquote>
+<p>ℹ️ For hostnames, I'm utilizing <strong>[tailscale]</strong> for both private P2P networking <strong>and</strong> DNS resolution of private hosts.</p>
+</blockquote>
+<h2 id="converting-from-vob-to-mp4">Converting from VOB to MP4</h2>
+<p>This was done in two separate modes: CPU and GPU. I'm on NixOS, so for me I dropped into separate shells of non-NVENC-supported ffmpeg and an NVENC-supported ffmpeg.</p>
+<p>One key component is that for the DVD videos (which are 420p) the best (the most 1:1 comparatively) format to target is <code>yuv420p</code>.</p>
+<h3 id="on-network-conversion">On-network conversion</h3>
+<p>Suppose you have an SFTP server, you can mount that locally and then perform the following conversions directly in the network share.</p>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#1c9aa0;">cd</span><span> /run/user/1000/gvfs/sftp</span><span style="color:#1c9aa0;">\:</span><span>host</span><span style="color:#1c9aa0;">\=</span><span>nas-ds418-00</span><span style="color:#1c9aa0;">\,</span><span>user</span><span style="color:#1c9aa0;">\=</span><span>0xc/path/to/target
+</span></code></pre>
+<p>Now, within the network share, you could run the following instructions for CPU/GPU.</p>
+<blockquote>
+<p>ℹ️ Alternatively, <code>scp</code> the VOB files to the local machine first</p>
+</blockquote>
+<h3 id="cpu-acceleration">CPU acceleration</h3>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#5f6d64;"># without NVENC support
+</span><span>
+</span><span style="color:#b16139;">ffmpeg -i</span><span> video.vob</span><span style="color:#b16139;"> -vf</span><span> format=yuv420p video.mp4
+</span></code></pre>
+<h3 id="gpu-acceleration">GPU acceleration</h3>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b16139;">nix-shell -p</span><span> ffmpeg-full
+</span><span>
+</span><span style="color:#5f6d64;"># in the subshell
+</span><span>
+</span><span style="color:#b16139;">ffmpeg -hwaccel_device</span><span> 0</span><span style="color:#b16139;"> -hwaccel</span><span> cuda</span><span style="color:#b16139;"> -i</span><span> video.vob</span><span style="color:#b16139;"> -c</span><span>:v h264_nvenc</span><span style="color:#b16139;"> -vf</span><span> format=yuv420p video.mp4
+</span></code></pre>
+<h2 id="enhancements">Enhancements</h2>
+<p>A project I was considering toying around with that might have made it simpler to work is the <a href="https://nbd.sourceforge.io/">Network Block Device (NBD) project</a>. This exists as a user-space tool for interacting with block devices that are mounted over the network. As an example, a T510 with a DVD disk drive accessible over the network could expose the disk device via NBD, and my desktop could mount it. This would save me from having to switch back and forth between the two systems.</p>
+<p>With NixOS, this is directly supported as a <em>service</em>:</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span>_:
+</span><span>
+</span><span>{
+</span><span>  </span><span style="color:#9f713c;">services</span><span>.</span><span style="color:#9f713c;">nbd</span><span>.</span><span style="color:#9f713c;">server </span><span>= {
+</span><span>    </span><span style="color:#9f713c;">enable </span><span>= </span><span style="color:#9f713c;">true</span><span>;
+</span><span>    </span><span style="color:#9f713c;">listenAddress </span><span>= &quot;</span><span style="color:#489963;">0.0.0.0</span><span>&quot;;
+</span><span>
+</span><span>    </span><span style="color:#9f713c;">exports </span><span>= {
+</span><span>      </span><span style="color:#9f713c;">dvd-drive </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">path </span><span>= &quot;</span><span style="color:#489963;">/dev/sr0</span><span>&quot;;
+</span><span>        </span><span style="color:#9f713c;">allowAddresses </span><span>= [ &quot;</span><span style="color:#489963;">10.0.0.0/8</span><span>&quot; ];
+</span><span>      };
+</span><span>    };
+</span><span>  };
+</span><span>}
+</span></code></pre>
+<p>Then, mount the share from another system with</p>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#5f6d64;"># as root
+</span><span style="color:#b16139;">nbd-client</span><span> t510</span><span style="color:#b16139;"> -N</span><span> dvd-drive /dev/sr0
+</span></code></pre>
+<p>Now you can open the network-attached DVD via VLC as though it were a local device:</p>
+<pre data-lang="sh" style="background-color:#171c19;color:#87928a;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b16139;">vlc</span><span> /dev/sr0
+</span></code></pre>
+<p>Next, enjoy T2: Judgement Day 👋</p>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/nix/">nix</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/dvd/">dvd</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/backup/">backup</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/linux/">linux</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - web</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/web/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2020-02-11T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/web/atom.xml</id>
+    <entry xml:lang="en">
+        <title>MS Teams SameSite Scramble</title>
+        <published>2020-02-11T00:00:00+00:00</published>
+        <updated>2020-02-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/teams-samesite-scramble/"/>
+        <id>https://blog.carrio.dev/blog/teams-samesite-scramble/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/teams-samesite-scramble/">&lt;h2 id=&quot;microsoft-teams&quot;&gt;Microsoft Teams&lt;&#x2F;h2&gt;
+&lt;p&gt;Microsoft released their Teams chat application in 2017, but the platform didn&#x27;t pick up for some time and particularly gained traction after certain &lt;em&gt;bundles&lt;&#x2F;em&gt; with other software such as Office and Windows Server setups for businesses. This is an [Electron] app, so at its core it&#x27;s really an embedded Chrome instance running a web application with hooks into certain native functionalities, window management, and more. But you can consider MS Teams to effectively behave like Chrome when it comes to web standards.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;samesite&quot;&gt;SameSite&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;developer.mozilla.org&#x2F;en-US&#x2F;docs&#x2F;Web&#x2F;HTTP&#x2F;Headers&#x2F;Set-Cookie#samesitesamesite-value&quot;&gt;SameSite&lt;&#x2F;a&gt; refers to a cookie attribute that control the security behaviors around cookies across domains. When cookies are set, they can have a SameSite property set to one of several values: &lt;code&gt;Strict&lt;&#x2F;code&gt;, &lt;code&gt;Lax&lt;&#x2F;code&gt;, and &lt;code&gt;None&lt;&#x2F;code&gt;. The &lt;&#x2F;p&gt;
+&lt;p&gt;To quote from MDN what each of these values mean:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Strict&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Means that the browser sends the cookie only for same-site requests, that is, requests originating from the same site that set the cookie. If a request originates from a different domain or scheme (even with the same domain), no cookies with the SameSite=Strict attribute are sent.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Lax&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Means that the cookie is not sent on cross-site requests, such as on requests to load images or frames, but is sent when a user is navigating to the origin site from an external site (for example, when following a link). This is the default behavior if the SameSite attribute is not specified.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;None&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;means that the browser sends the cookie with both cross-site and same-site requests. The Secure attribute must also be set when setting this value, like so SameSite=None; Secure. If Secure is missing an error will be logged&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;As browser&#x27;s increase their security rules to protect their users, defaults around these types of configurations shift.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-incompatibility&quot;&gt;The Incompatibility&lt;&#x2F;h2&gt;
+&lt;p&gt;The issue came up as a console log in the application that indicated what went wrong and suggestions for how to resolve it:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Because a cookie&#x27;s SameSite attribute was not set or is invalid, it defaults to SameSite=Lax, which will prevents the cookie from being set in a cross-site context in a future version of the browser. This behavior protects user data from accidentally leaking to third parties and cross-site request forgery.&lt;&#x2F;p&gt;
+&lt;p&gt;Resolve this issue by updating the attributes of the cookie:&lt;&#x2F;p&gt;
+&lt;p&gt;Specify SameSite=None and Secure if the cookie is intended to be set in cross-site contexts. Note that only cookies sent over &lt;&#x2F;p&gt;
+&lt;p&gt;HTTPS may use the Secure attribute.&lt;&#x2F;p&gt;
+&lt;p&gt;Specify SameSite=Strict or SameSite=Lax if the cookie should not be set by cross-site requests&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;The root cause of this was a change in behavior for how Google Chrome handled the &lt;code&gt;SameSite=None&lt;&#x2F;code&gt; cookie attributes in version 67. Because a MS Teams app needs to be able a large range of browsers, just like a traditional web app. Since this change made it incompatible with the SameSite behavior of older versions of Chrome and other browsers, it had to be accounted for dynamically. Effectively, all versions of Chrome between 51.x and 67.x exhibited this issue.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-solution&quot;&gt;The Solution&lt;&#x2F;h2&gt;
+&lt;p&gt;A JavaScript function that validates the current browser and checks whether the UserAgent matches a Microsoft Teams desktop clients with older Chromium versions incorrectly handle cookies with the SameSite=None property. We check for Teams clients with Chrome versions &amp;gt;= &lt;code&gt;51.x&lt;&#x2F;code&gt; &amp;lt; &lt;code&gt;67.x&lt;&#x2F;code&gt;. This method returns true if an invalid user agent is not found. Cases that are not known may fall through, this was based on testing with macOS, Windows, and Linux clients for Microsoft Teams.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ts&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-ts &quot;&gt;&lt;code class=&quot;language-ts&quot; data-lang=&quot;ts&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;lowerIncompatibleVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;51&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;compatibleVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;67&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsChromePattern &lt;&#x2F;span&gt;&lt;span&gt;= &#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;(Teams&lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;MicrosoftTeams-Insiders)\&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;[\d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt; Chrome\&#x2F;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;[\d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;export function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;incompatible&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userAgent&lt;&#x2F;span&gt;&lt;span&gt;?: string | null) {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userAgent&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;match &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;userAgent&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsChromePattern&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;try &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;majorVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;].&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;split&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;parseInt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;majorVersion&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;  } &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;catch &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;err&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;compatibleVersion &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;&amp;amp;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;teamsVersion &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;lowerIncompatibleVersion
+&lt;&#x2F;span&gt;&lt;span&gt;  )
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With this function, we can detect an unsupported scenario for our security rules and then provide an alternative method of interacting with our app. In the scenario this was built around, our account linking process for the platform to a Microsoft Teams account was breaking due to this incompatibility, and this allowed us to externalize the process to another browser to continue the flow.&lt;&#x2F;p&gt;
+&lt;p&gt;The source code for this can be found on my GitHub under the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;msteams-samesite-compatibility-validator&quot;&gt;msteams-samesite-compatibility-validator&lt;&#x2F;a&gt; project.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

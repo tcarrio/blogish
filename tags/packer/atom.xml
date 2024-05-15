@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - packer</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/packer/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-07-28T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/packer/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Contributing to Open Source: A Stab at Go</title>
+        <published>2023-07-28T00:00:00+00:00</published>
+        <updated>2023-07-28T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/open-source-a-go-story/"/>
+        <id>https://blog.carrio.dev/blog/open-source-a-go-story/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/open-source-a-go-story/">&lt;p&gt;In 2018, I had been diving further into Go, a relatively new language at the time from Google. I was interested in taking it a step further and contributing to a well known and professional open source project based in Go from a reputable team that could provide me reviews and advice. As a system admin and software engineer, I was already familiar with the tool &lt;a href=&quot;https:&#x2F;&#x2F;www.packer.io&#x2F;&quot;&gt;Packer&lt;&#x2F;a&gt; from HashiCorp and had used it personally on several occasions. Based on this, I decided to start there.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;finding-work&quot;&gt;Finding work&lt;&#x2F;h2&gt;
+&lt;p&gt;With open source code, and especially in a well maintained project, it is very straightforward to find feature requests and bugs that need help. So, I dug through their &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;hashicorp&#x2F;packer&#x2F;issues&quot;&gt;Issue List on GitHub&lt;&#x2F;a&gt;. I found a &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;hashicorp&#x2F;packer&#x2F;issues&#x2F;6464&quot;&gt;feature request&lt;&#x2F;a&gt; I thought was interesting regarding the &lt;a href=&quot;https:&#x2F;&#x2F;www.openstack.org&#x2F;&quot;&gt;OpenStack&lt;&#x2F;a&gt; integration for Packer.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Add support to select most recent source image when name is provided&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;This was something that felt very approachable to me, for the following reasons:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;An enhancement of existing code&lt;&#x2F;li&gt;
+&lt;li&gt;A feature that has been implemented for an existing integration&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;I wasn&#x27;t at the point of making large architectural decisions around these things with Go, so these provided me certain handrails to getting an initial change request proposal together.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;planning&quot;&gt;Planning&lt;&#x2F;h2&gt;
+&lt;p&gt;I discussed with other members of the community on the issue to determine further requirements and design strategy. After digging through the existing code for OpenStack, I discovered multiple components around this integration. I&#x27;ll go through each of the parts I had deemed necessary to research to scope out the required changes.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;researching-the-openstack-api&quot;&gt;Researching the OpenStack API&lt;&#x2F;h3&gt;
+&lt;p&gt;The OpenStack API was going to be the primary gateway to implementing this functionality- supposing they did not offer the adequate functionality to implement this it would be a non-starter. As such, I started there, in the &lt;a href=&quot;https:&#x2F;&#x2F;developer.openstack.org&#x2F;api-ref&quot;&gt;OpenStack API documentation&lt;&#x2F;a&gt;.
+The component responsible for serving images in OpenStack is [glance], an image service where users can upload and also discover assets. The image services support discovering, registering, and retrieving virtual machine images and exposes a REST API for both querying metadata and retrieving images. The &lt;a href=&quot;https:&#x2F;&#x2F;developer.openstack.org&#x2F;api-ref&#x2F;image&#x2F;v2&#x2F;&quot;&gt;OpenStack image v2 documentation&lt;&#x2F;a&gt; covered the available endpoints, including a &lt;a href=&quot;https:&#x2F;&#x2F;docs.openstack.org&#x2F;api-ref&#x2F;image&#x2F;v2&#x2F;?expanded=list-images-detail#list-images&quot;&gt;List Images API&lt;&#x2F;a&gt;.
+The image API allows for additional query parameters to be passed in to filter and sort results. The important query parameters I identified include &lt;code&gt;limit&lt;&#x2F;code&gt;, &lt;code&gt;sort_key&lt;&#x2F;code&gt;, and &lt;code&gt;sort_dir&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;With the following query, it would be possible to search by an image name and return at most one result, which would be the most recent image created with that name:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;url&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-url &quot;&gt;&lt;code class=&quot;language-url&quot; data-lang=&quot;url&quot;&gt;&lt;span&gt;?sort_key=created_at&amp;amp;sort_dir=desc&amp;amp;limit=1
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;scoping-out-packer-changes&quot;&gt;Scoping out Packer changes&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;api-calls&quot;&gt;API calls&lt;&#x2F;h4&gt;
+&lt;p&gt;OpenStack support was already built in to Packer, so this was already a solved problem. In terms of scoping out what changes would be necessary here, I primarily wanted to determine whether there was an internal implementation to Packer for calling and handling responses from the OpenStack API or if they were utilizing some library for accomplishing this. I found the &lt;a href=&quot;http:&#x2F;&#x2F;gophercloud.io&#x2F;&quot;&gt;gophercloud&lt;&#x2F;a&gt; package was being used in Packer already, so how I would interact with the API would be through that library. It also meant that if there was not support for the V2 API, I would likely be contributing a change to gophercloud in order to pull that update into Packer to support the OpenStack changes.&lt;&#x2F;p&gt;
+&lt;p&gt;My initial review of the gophercloud code led me to believe that the image v2 API was not supported, so I &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;gophercloud&#x2F;gophercloud&#x2F;issues&#x2F;1111&quot;&gt;opened an issue on their project&lt;&#x2F;a&gt;. In actuality it had implemented both the older compute API that allowed for listing images as well as the new glance service&#x27;s API, and &lt;code&gt;@jtopjian&lt;&#x2F;code&gt; was very helpful in pointing me to the correct code in the library for API v2. This library has a &lt;code&gt;ListOpts&lt;&#x2F;code&gt; struct which is passed to marshal the query string dynamically.&lt;&#x2F;p&gt;
+&lt;p&gt;Within the Packer issue, I was also getting good feedback around the gophercloud library and its capabilities for the image V2 API. With all of that squared away, I was assured in utilizing the existing library for this new feature.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;packer-configuration&quot;&gt;Packer configuration&lt;&#x2F;h4&gt;
+&lt;p&gt;Another required change to support this functionality would be in the configuration file schema and its handling in the Packer executable. The configuration file would need to provide support for a &lt;code&gt;source_image_filter&lt;&#x2F;code&gt; attribute that would allow dynamically generating the query, similar to the &lt;code&gt;source_ami_filter&lt;&#x2F;code&gt; implementation for AWS. The configuration file could be advanced and allow for a full &lt;code&gt;ListOpts&lt;&#x2F;code&gt; structure to be passed in or simplified with a &lt;code&gt;most_recent_image&lt;&#x2F;code&gt; boolean flag. I continued to vocalize my design ideas in the Packer issue, and while waiting on feedback I started off on the solution.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;implementation&quot;&gt;Implementation&lt;&#x2F;h3&gt;
+&lt;p&gt;The start of my work was on the configuration file updates. This would then be passed into the new functionality. After updating the structure, I began work on the &lt;code&gt;image_query.go&lt;&#x2F;code&gt; file. This was my first time working with the Reflection API in Go, and most languages provide some mechanism around this and it all falls under the umbrella of metaprogramming. My first pass in the PR was pretty rudimentary, and not having an OpenStack environment limited my ability to run a live test of my changes. All I had to go on were docs.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;testing&quot;&gt;Testing&lt;&#x2F;h4&gt;
+&lt;p&gt;Never forget to test your code. There are very few open source projects I have seen that do not have automated testing and test coverage &lt;em&gt;especially&lt;&#x2F;em&gt; those run by corporations. The software needs to work, and stay working. Refactoring should feel safe, and if a breaking change is included it should be detected without anyone manually running your code. With the advent of DevOps and automation came a bright new age for software engineering- and continuous integration in your project ensures that you detect code smells and bugs faster than ever.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;iteration&quot;&gt;Iteration&lt;&#x2F;h3&gt;
+&lt;p&gt;I prefaced this post with an important note: I was not a Go expert. In fact, I&#x27;m still not- it&#x27;s a tool I&#x27;ve used in a few scenarios over the past 5 years but it&#x27;s never been my primary language in open source or professional work. So, unsurprisingly, I had feedback on my changes. This is a very good thing, because getting feedback on our work is one of the greatest ways we learn. We receive insight into design patterns, functionality we didn&#x27;t know existed, or new topics we hadn&#x27;t dove into before. We don&#x27;t know what we don&#x27;t know, and someone being there to tell you what those things are is absolutely invaluable.&lt;&#x2F;p&gt;
+&lt;p&gt;I went through several iterations of the work over the next &lt;strong&gt;month&lt;&#x2F;strong&gt;. &lt;code&gt;@rickard-von-essen&lt;&#x2F;code&gt; was immensely helpful during this code review, and I received a lot of support from other team members at Packer throughout the entire process too. It was an absolute joy to work on, and I was very happy with the result. The code hooked into the &lt;code&gt;packer validate&lt;&#x2F;code&gt; functionality, worked smoothly with the Image V2 API, applied defensive tactics on inputs, was well tested, and provided clear documentation.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-final-work&quot;&gt;The final work&lt;&#x2F;h3&gt;
+&lt;p&gt;For reference, the full PR changes can be found &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;hashicorp&#x2F;packer&#x2F;pull&#x2F;6490&#x2F;files&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;diff go&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-diff go &quot;&gt;&lt;code class=&quot;language-diff go&quot; data-lang=&quot;diff go&quot;&gt;&lt;span&gt;commit 70cfafb75c09d5ea54dccffb699b3e487ea7320a
+&lt;&#x2F;span&gt;&lt;span&gt;Merge: bb319fb1e e2fe5cd77
+&lt;&#x2F;span&gt;&lt;span&gt;Author: Rickard von Essen &amp;lt;rickard.von.essen@gmail.com&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;Date:   Thu Aug 23 12:41:06 2018 +0200
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    Merge pull request #6490 from tcarrio&#x2F;most-recent-image-openstack
+&lt;&#x2F;span&gt;&lt;span&gt;    
+&lt;&#x2F;span&gt;&lt;span&gt;    OpenStack source image search filter
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;builder&#x2F;openstack&#x2F;builder.go b&#x2F;builder&#x2F;openstack&#x2F;builder.go
+&lt;&#x2F;span&gt;&lt;span&gt;index 2938d67c0..638dcc8ba 100644
+&lt;&#x2F;span&gt;&lt;span&gt;--- a&#x2F;builder&#x2F;openstack&#x2F;builder.go
+&lt;&#x2F;span&gt;&lt;span&gt;+++ b&#x2F;builder&#x2F;openstack&#x2F;builder.go
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -86,6 +86,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
+&lt;&#x2F;span&gt;&lt;span&gt; 			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+&lt;&#x2F;span&gt;&lt;span&gt; 			SSHAgentAuth:         b.config.RunConfig.Comm.SSHAgentAuth,
+&lt;&#x2F;span&gt;&lt;span&gt; 		},
+&lt;&#x2F;span&gt;&lt;span&gt;+		&amp;amp;StepSourceImageInfo{
+&lt;&#x2F;span&gt;&lt;span&gt;+			SourceImage:      b.config.RunConfig.SourceImage,
+&lt;&#x2F;span&gt;&lt;span&gt;+			SourceImageName:  b.config.RunConfig.SourceImageName,
+&lt;&#x2F;span&gt;&lt;span&gt;+			SourceImageOpts:  b.config.RunConfig.sourceImageOpts,
+&lt;&#x2F;span&gt;&lt;span&gt;+			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
+&lt;&#x2F;span&gt;&lt;span&gt;+		},
+&lt;&#x2F;span&gt;&lt;span&gt; 		&amp;amp;StepCreateVolume{
+&lt;&#x2F;span&gt;&lt;span&gt; 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
+&lt;&#x2F;span&gt;&lt;span&gt; 			SourceImage:            b.config.SourceImage,
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;builder&#x2F;openstack&#x2F;run_config.go b&#x2F;builder&#x2F;openstack&#x2F;run_config.go
+&lt;&#x2F;span&gt;&lt;span&gt;index b98b65ea8..ccc87dffc 100644
+&lt;&#x2F;span&gt;&lt;span&gt;--- a&#x2F;builder&#x2F;openstack&#x2F;run_config.go
+&lt;&#x2F;span&gt;&lt;span&gt;+++ b&#x2F;builder&#x2F;openstack&#x2F;run_config.go
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -4,6 +4,7 @@ import (
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;errors&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;fmt&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;gophercloud&#x2F;gophercloud&#x2F;openstack&#x2F;imageservice&#x2F;v2&#x2F;images&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;github.com&#x2F;hashicorp&#x2F;packer&#x2F;common&#x2F;uuid&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;github.com&#x2F;hashicorp&#x2F;packer&#x2F;helper&#x2F;communicator&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;github.com&#x2F;hashicorp&#x2F;packer&#x2F;template&#x2F;interpolate&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -18,21 +19,22 @@ type RunConfig struct {
+&lt;&#x2F;span&gt;&lt;span&gt; 	SSHInterface         string              `mapstructure:&amp;quot;ssh_interface&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt; 	SSHIPVersion         string              `mapstructure:&amp;quot;ssh_ip_version&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;-	SourceImage       string            `mapstructure:&amp;quot;source_image&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	SourceImageName   string            `mapstructure:&amp;quot;source_image_name&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	Flavor            string            `mapstructure:&amp;quot;flavor&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	AvailabilityZone  string            `mapstructure:&amp;quot;availability_zone&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	RackconnectWait   bool              `mapstructure:&amp;quot;rackconnect_wait&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	FloatingIPNetwork string            `mapstructure:&amp;quot;floating_ip_network&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	FloatingIP        string            `mapstructure:&amp;quot;floating_ip&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	ReuseIPs          bool              `mapstructure:&amp;quot;reuse_ips&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	SecurityGroups    []string          `mapstructure:&amp;quot;security_groups&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	Networks          []string          `mapstructure:&amp;quot;networks&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	Ports             []string          `mapstructure:&amp;quot;ports&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	UserData          string            `mapstructure:&amp;quot;user_data&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	UserDataFile      string            `mapstructure:&amp;quot;user_data_file&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	InstanceName      string            `mapstructure:&amp;quot;instance_name&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;-	InstanceMetadata  map[string]string `mapstructure:&amp;quot;instance_metadata&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceImage        string            `mapstructure:&amp;quot;source_image&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceImageName    string            `mapstructure:&amp;quot;source_image_name&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceImageFilters ImageFilter       `mapstructure:&amp;quot;source_image_filter&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	Flavor             string            `mapstructure:&amp;quot;flavor&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	AvailabilityZone   string            `mapstructure:&amp;quot;availability_zone&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	RackconnectWait    bool              `mapstructure:&amp;quot;rackconnect_wait&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	FloatingIPNetwork  string            `mapstructure:&amp;quot;floating_ip_network&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	FloatingIP         string            `mapstructure:&amp;quot;floating_ip&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	ReuseIPs           bool              `mapstructure:&amp;quot;reuse_ips&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	SecurityGroups     []string          `mapstructure:&amp;quot;security_groups&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	Networks           []string          `mapstructure:&amp;quot;networks&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	Ports              []string          `mapstructure:&amp;quot;ports&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	UserData           string            `mapstructure:&amp;quot;user_data&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	UserDataFile       string            `mapstructure:&amp;quot;user_data_file&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	InstanceName       string            `mapstructure:&amp;quot;instance_name&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	InstanceMetadata   map[string]string `mapstructure:&amp;quot;instance_metadata&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt; 	ConfigDrive bool `mapstructure:&amp;quot;config_drive&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -47,6 +49,52 @@ type RunConfig struct {
+&lt;&#x2F;span&gt;&lt;span&gt; 	&#x2F;&#x2F; Not really used, but here for BC
+&lt;&#x2F;span&gt;&lt;span&gt; 	OpenstackProvider string `mapstructure:&amp;quot;openstack_provider&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt; 	UseFloatingIp     bool   `mapstructure:&amp;quot;use_floating_ip&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	sourceImageOpts images.ListOpts
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+type ImageFilter struct {
+&lt;&#x2F;span&gt;&lt;span&gt;+	Filters    ImageFilterOptions `mapstructure:&amp;quot;filters&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	MostRecent bool               `mapstructure:&amp;quot;most_recent&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+type ImageFilterOptions struct {
+&lt;&#x2F;span&gt;&lt;span&gt;+	Name       string   `mapstructure:&amp;quot;name&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	Owner      string   `mapstructure:&amp;quot;owner&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	Tags       []string `mapstructure:&amp;quot;tags&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+	Visibility string   `mapstructure:&amp;quot;visibility&amp;quot;`
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+func (f *ImageFilterOptions) Empty() bool {
+&lt;&#x2F;span&gt;&lt;span&gt;+	return f.Name == &amp;quot;&amp;quot; &amp;amp;&amp;amp; f.Owner == &amp;quot;&amp;quot; &amp;amp;&amp;amp; len(f.Tags) == 0 &amp;amp;&amp;amp; f.Visibility == &amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+func (f *ImageFilterOptions) Build() (*images.ListOpts, error) {
+&lt;&#x2F;span&gt;&lt;span&gt;+	opts := images.ListOpts{}
+&lt;&#x2F;span&gt;&lt;span&gt;+	&#x2F;&#x2F; Set defaults for status, member_status, and sort
+&lt;&#x2F;span&gt;&lt;span&gt;+	opts.Status = images.ImageStatusActive
+&lt;&#x2F;span&gt;&lt;span&gt;+	opts.MemberStatus = images.ImageMemberStatusAccepted
+&lt;&#x2F;span&gt;&lt;span&gt;+	opts.Sort = &amp;quot;created_at:desc&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	var err error
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if f.Name != &amp;quot;&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		opts.Name = f.Name
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+	if f.Owner != &amp;quot;&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		opts.Owner = f.Owner
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+	if len(f.Tags) &amp;gt; 0 {
+&lt;&#x2F;span&gt;&lt;span&gt;+		opts.Tags = f.Tags
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+	if f.Visibility != &amp;quot;&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		v, err := getImageVisibility(f.Visibility)
+&lt;&#x2F;span&gt;&lt;span&gt;+		if err == nil {
+&lt;&#x2F;span&gt;&lt;span&gt;+			opts.Visibility = *v
+&lt;&#x2F;span&gt;&lt;span&gt;+		}
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	return &amp;amp;opts, err
+&lt;&#x2F;span&gt;&lt;span&gt; }
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt; func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -75,8 +123,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
+&lt;&#x2F;span&gt;&lt;span&gt; 		}
+&lt;&#x2F;span&gt;&lt;span&gt; 	}
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;-	if c.SourceImage == &amp;quot;&amp;quot; &amp;amp;&amp;amp; c.SourceImageName == &amp;quot;&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;-		errs = append(errs, errors.New(&amp;quot;Either a source_image or a source_image_name must be specified&amp;quot;))
+&lt;&#x2F;span&gt;&lt;span&gt;+	if c.SourceImage == &amp;quot;&amp;quot; &amp;amp;&amp;amp; c.SourceImageName == &amp;quot;&amp;quot; &amp;amp;&amp;amp; c.SourceImageFilters.Filters.Empty() {
+&lt;&#x2F;span&gt;&lt;span&gt;+		errs = append(errs, errors.New(&amp;quot;Either a source_image, a source_image_name, or source_image_filter must be specified&amp;quot;))
+&lt;&#x2F;span&gt;&lt;span&gt; 	} else if len(c.SourceImage) &amp;gt; 0 &amp;amp;&amp;amp; len(c.SourceImageName) &amp;gt; 0 {
+&lt;&#x2F;span&gt;&lt;span&gt; 		errs = append(errs, errors.New(&amp;quot;Only a source_image or a source_image_name can be specified, not both.&amp;quot;))
+&lt;&#x2F;span&gt;&lt;span&gt; 	}
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -111,5 +159,34 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
+&lt;&#x2F;span&gt;&lt;span&gt; 		}
+&lt;&#x2F;span&gt;&lt;span&gt; 	}
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;+	&#x2F;&#x2F; if neither ID or image name is provided outside the filter, build the filter
+&lt;&#x2F;span&gt;&lt;span&gt;+	if len(c.SourceImage) == 0 &amp;amp;&amp;amp; len(c.SourceImageName) == 0 {
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+		listOpts, filterErr := c.SourceImageFilters.Filters.Build()
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+		if filterErr != nil {
+&lt;&#x2F;span&gt;&lt;span&gt;+			errs = append(errs, filterErr)
+&lt;&#x2F;span&gt;&lt;span&gt;+		}
+&lt;&#x2F;span&gt;&lt;span&gt;+		c.sourceImageOpts = *listOpts
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt; 	return errs
+&lt;&#x2F;span&gt;&lt;span&gt; }
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+&#x2F;&#x2F; Retrieve the specific ImageVisibility using the exported const from images
+&lt;&#x2F;span&gt;&lt;span&gt;+func getImageVisibility(visibility string) (*images.ImageVisibility, error) {
+&lt;&#x2F;span&gt;&lt;span&gt;+	visibilities := [...]images.ImageVisibility{
+&lt;&#x2F;span&gt;&lt;span&gt;+		images.ImageVisibilityPublic,
+&lt;&#x2F;span&gt;&lt;span&gt;+		images.ImageVisibilityPrivate,
+&lt;&#x2F;span&gt;&lt;span&gt;+		images.ImageVisibilityCommunity,
+&lt;&#x2F;span&gt;&lt;span&gt;+		images.ImageVisibilityShared,
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	for _, v := range visibilities {
+&lt;&#x2F;span&gt;&lt;span&gt;+		if string(v) == visibility {
+&lt;&#x2F;span&gt;&lt;span&gt;+			return &amp;amp;v, nil
+&lt;&#x2F;span&gt;&lt;span&gt;+		}
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	return nil, fmt.Errorf(&amp;quot;Not a valid visibility: %s&amp;quot;, visibility)
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;builder&#x2F;openstack&#x2F;run_config_test.go b&#x2F;builder&#x2F;openstack&#x2F;run_config_test.go
+&lt;&#x2F;span&gt;&lt;span&gt;index 6ce0cf602..f660a4e82 100644
+&lt;&#x2F;span&gt;&lt;span&gt;--- a&#x2F;builder&#x2F;openstack&#x2F;run_config_test.go
+&lt;&#x2F;span&gt;&lt;span&gt;+++ b&#x2F;builder&#x2F;openstack&#x2F;run_config_test.go
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -4,7 +4,9 @@ import (
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;os&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;testing&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;gophercloud&#x2F;gophercloud&#x2F;openstack&#x2F;imageservice&#x2F;v2&#x2F;images&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; 	&amp;quot;github.com&#x2F;hashicorp&#x2F;packer&#x2F;helper&#x2F;communicator&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;mitchellh&#x2F;mapstructure&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt; )
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt; func init() {
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -127,3 +129,84 @@ func TestRunConfigPrepare_FloatingIPPoolCompat(t *testing.T) {
+&lt;&#x2F;span&gt;&lt;span&gt; 		t.Fatalf(&amp;quot;invalid value: %s&amp;quot;, c.FloatingIPNetwork)
+&lt;&#x2F;span&gt;&lt;span&gt; 	}
+&lt;&#x2F;span&gt;&lt;span&gt; }
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+&#x2F;&#x2F; This test case confirms that only allowed fields will be set to values
+&lt;&#x2F;span&gt;&lt;span&gt;+&#x2F;&#x2F; The checked values are non-nil for their target type
+&lt;&#x2F;span&gt;&lt;span&gt;+func TestBuildImageFilter(t *testing.T) {
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	filters := ImageFilterOptions{
+&lt;&#x2F;span&gt;&lt;span&gt;+		Name:       &amp;quot;Ubuntu 16.04&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		Visibility: &amp;quot;public&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		Owner:      &amp;quot;1234567890&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		Tags:       []string{&amp;quot;prod&amp;quot;, &amp;quot;ready&amp;quot;},
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	listOpts, err := filters.Build()
+&lt;&#x2F;span&gt;&lt;span&gt;+	if err != nil {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Building filter failed with: %s&amp;quot;, err)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if listOpts.Name != &amp;quot;Ubuntu 16.04&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Name did not build correctly: %s&amp;quot;, listOpts.Name)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if listOpts.Visibility != images.ImageVisibilityPublic {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Visibility did not build correctly: %s&amp;quot;, listOpts.Visibility)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if listOpts.Owner != &amp;quot;1234567890&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Owner did not build correctly: %s&amp;quot;, listOpts.Owner)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+func TestBuildBadImageFilter(t *testing.T) {
+&lt;&#x2F;span&gt;&lt;span&gt;+	filterMap := map[string]interface{}{
+&lt;&#x2F;span&gt;&lt;span&gt;+		&amp;quot;limit&amp;quot;:    &amp;quot;3&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		&amp;quot;size_min&amp;quot;: &amp;quot;25&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	filters := ImageFilterOptions{}
+&lt;&#x2F;span&gt;&lt;span&gt;+	mapstructure.Decode(filterMap, &amp;amp;filters)
+&lt;&#x2F;span&gt;&lt;span&gt;+	listOpts, err := filters.Build()
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if err != nil {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Error returned processing image filter: %s&amp;quot;, err.Error())
+&lt;&#x2F;span&gt;&lt;span&gt;+		return &#x2F;&#x2F; we cannot trust listOpts to not cause unexpected behaviour
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if listOpts.Limit == filterMap[&amp;quot;limit&amp;quot;] {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Limit was parsed into ListOpts: %d&amp;quot;, listOpts.Limit)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if listOpts.SizeMin != 0 {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;SizeMin was parsed into ListOpts: %d&amp;quot;, listOpts.SizeMin)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if listOpts.Sort != &amp;quot;created_at:desc&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Sort was not applied: %s&amp;quot;, listOpts.Sort)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if !filters.Empty() {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;The filters should be empty due to lack of input&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+&#x2F;&#x2F; Tests that the Empty method on ImageFilterOptions works as expected
+&lt;&#x2F;span&gt;&lt;span&gt;+func TestImageFiltersEmpty(t *testing.T) {
+&lt;&#x2F;span&gt;&lt;span&gt;+	filledFilters := ImageFilterOptions{
+&lt;&#x2F;span&gt;&lt;span&gt;+		Name:       &amp;quot;Ubuntu 16.04&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		Visibility: &amp;quot;public&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		Owner:      &amp;quot;1234567890&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+		Tags:       []string{&amp;quot;prod&amp;quot;, &amp;quot;ready&amp;quot;},
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if filledFilters.Empty() {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Expected filled filters to be non-empty: %v&amp;quot;, filledFilters)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	emptyFilters := ImageFilterOptions{}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if !emptyFilters.Empty() {
+&lt;&#x2F;span&gt;&lt;span&gt;+		t.Errorf(&amp;quot;Expected default filter to be empty: %v&amp;quot;, emptyFilters)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;builder&#x2F;openstack&#x2F;step_run_source_server.go b&#x2F;builder&#x2F;openstack&#x2F;step_run_source_server.go
+&lt;&#x2F;span&gt;&lt;span&gt;index e56218467..6bbb40eba 100644
+&lt;&#x2F;span&gt;&lt;span&gt;--- a&#x2F;builder&#x2F;openstack&#x2F;step_run_source_server.go
+&lt;&#x2F;span&gt;&lt;span&gt;+++ b&#x2F;builder&#x2F;openstack&#x2F;step_run_source_server.go
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -76,6 +76,12 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
+&lt;&#x2F;span&gt;&lt;span&gt; 		ServiceClient:    computeClient,
+&lt;&#x2F;span&gt;&lt;span&gt; 		Metadata:         s.InstanceMetadata,
+&lt;&#x2F;span&gt;&lt;span&gt; 	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	&#x2F;&#x2F; check if image filter returned a source image ID and replace
+&lt;&#x2F;span&gt;&lt;span&gt;+	if imageID, ok := state.GetOk(&amp;quot;source_image&amp;quot;); ok {
+&lt;&#x2F;span&gt;&lt;span&gt;+		serverOpts.ImageRef = imageID.(string)
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt; 	var serverOptsExt servers.CreateOptsBuilder
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt; 	&#x2F;&#x2F; Create root volume in the Block Storage service if required.
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;builder&#x2F;openstack&#x2F;step_source_image_info.go b&#x2F;builder&#x2F;openstack&#x2F;step_source_image_info.go
+&lt;&#x2F;span&gt;&lt;span&gt;new file mode 100644
+&lt;&#x2F;span&gt;&lt;span&gt;index 000000000..6cf3500ae
+&lt;&#x2F;span&gt;&lt;span&gt;--- &#x2F;dev&#x2F;null
+&lt;&#x2F;span&gt;&lt;span&gt;+++ b&#x2F;builder&#x2F;openstack&#x2F;step_source_image_info.go
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -0,0 +1,76 @@
+&lt;&#x2F;span&gt;&lt;span&gt;+package openstack
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+import (
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;context&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;fmt&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;log&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;gophercloud&#x2F;gophercloud&#x2F;openstack&#x2F;imageservice&#x2F;v2&#x2F;images&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;gophercloud&#x2F;gophercloud&#x2F;pagination&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;hashicorp&#x2F;packer&#x2F;helper&#x2F;multistep&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+	&amp;quot;github.com&#x2F;hashicorp&#x2F;packer&#x2F;packer&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;+)
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+type StepSourceImageInfo struct {
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceImage      string
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceImageName  string
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceImageOpts  images.ListOpts
+&lt;&#x2F;span&gt;&lt;span&gt;+	SourceMostRecent bool
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+&lt;&#x2F;span&gt;&lt;span&gt;+	config := state.Get(&amp;quot;config&amp;quot;).(Config)
+&lt;&#x2F;span&gt;&lt;span&gt;+	ui := state.Get(&amp;quot;ui&amp;quot;).(packer.Ui)
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if s.SourceImage != &amp;quot;&amp;quot; || s.SourceImageName != &amp;quot;&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		return multistep.ActionContinue
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	client, err := config.imageV2Client()
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	log.Printf(&amp;quot;Using Image Filters %v&amp;quot;, s.SourceImageOpts)
+&lt;&#x2F;span&gt;&lt;span&gt;+	image := &amp;amp;images.Image{}
+&lt;&#x2F;span&gt;&lt;span&gt;+	err = images.List(client, s.SourceImageOpts).EachPage(func(page pagination.Page) (bool, error) {
+&lt;&#x2F;span&gt;&lt;span&gt;+		i, err := images.ExtractImages(page)
+&lt;&#x2F;span&gt;&lt;span&gt;+		if err != nil {
+&lt;&#x2F;span&gt;&lt;span&gt;+			return false, err
+&lt;&#x2F;span&gt;&lt;span&gt;+		}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+		switch len(i) {
+&lt;&#x2F;span&gt;&lt;span&gt;+		case 1:
+&lt;&#x2F;span&gt;&lt;span&gt;+			*image = i[0]
+&lt;&#x2F;span&gt;&lt;span&gt;+			return false, nil
+&lt;&#x2F;span&gt;&lt;span&gt;+		default:
+&lt;&#x2F;span&gt;&lt;span&gt;+			if s.SourceMostRecent {
+&lt;&#x2F;span&gt;&lt;span&gt;+				*image = i[0]
+&lt;&#x2F;span&gt;&lt;span&gt;+				return false, nil
+&lt;&#x2F;span&gt;&lt;span&gt;+			}
+&lt;&#x2F;span&gt;&lt;span&gt;+			return false, fmt.Errorf(
+&lt;&#x2F;span&gt;&lt;span&gt;+				&amp;quot;Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %v&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+				s.SourceImageOpts)
+&lt;&#x2F;span&gt;&lt;span&gt;+		}
+&lt;&#x2F;span&gt;&lt;span&gt;+	})
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if err != nil {
+&lt;&#x2F;span&gt;&lt;span&gt;+		err := fmt.Errorf(&amp;quot;Error querying image: %s&amp;quot;, err)
+&lt;&#x2F;span&gt;&lt;span&gt;+		state.Put(&amp;quot;error&amp;quot;, err)
+&lt;&#x2F;span&gt;&lt;span&gt;+		ui.Error(err.Error())
+&lt;&#x2F;span&gt;&lt;span&gt;+		return multistep.ActionHalt
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	if image.ID == &amp;quot;&amp;quot; {
+&lt;&#x2F;span&gt;&lt;span&gt;+		err := fmt.Errorf(&amp;quot;No image was found matching filters: %v&amp;quot;, s.SourceImageOpts)
+&lt;&#x2F;span&gt;&lt;span&gt;+		state.Put(&amp;quot;error&amp;quot;, err)
+&lt;&#x2F;span&gt;&lt;span&gt;+		ui.Error(err.Error())
+&lt;&#x2F;span&gt;&lt;span&gt;+		return multistep.ActionHalt
+&lt;&#x2F;span&gt;&lt;span&gt;+	}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	ui.Message(fmt.Sprintf(&amp;quot;Found Image ID: %s&amp;quot;, image.ID))
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+	state.Put(&amp;quot;source_image&amp;quot;, image.ID)
+&lt;&#x2F;span&gt;&lt;span&gt;+	return multistep.ActionContinue
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+func (s *StepSourceImageInfo) Cleanup(state multistep.StateBag) {
+&lt;&#x2F;span&gt;&lt;span&gt;+	&#x2F;&#x2F; No cleanup required for backout
+&lt;&#x2F;span&gt;&lt;span&gt;+}
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;website&#x2F;source&#x2F;docs&#x2F;builders&#x2F;openstack.html.md b&#x2F;website&#x2F;source&#x2F;docs&#x2F;builders&#x2F;openstack.html.md
+&lt;&#x2F;span&gt;&lt;span&gt;index a05ce3d67..28566bd0d 100644
+&lt;&#x2F;span&gt;&lt;span&gt;--- a&#x2F;website&#x2F;source&#x2F;docs&#x2F;builders&#x2F;openstack.html.md
+&lt;&#x2F;span&gt;&lt;span&gt;+++ b&#x2F;website&#x2F;source&#x2F;docs&#x2F;builders&#x2F;openstack.html.md
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -70,6 +70,11 @@ builder.
+&lt;&#x2F;span&gt;&lt;span&gt;     is an alternative way of providing `source_image` and only either of them
+&lt;&#x2F;span&gt;&lt;span&gt;     can be specified.
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;+-   `source_image_filter` (map) - The search filters for determining the base
+&lt;&#x2F;span&gt;&lt;span&gt;+    image to use. This is an alternative way of providing `source_image` and
+&lt;&#x2F;span&gt;&lt;span&gt;+    only one of these methods can be used. `source_image` will override the
+&lt;&#x2F;span&gt;&lt;span&gt;+    filters.
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt; -   `username` or `user_id` (string) - The username or id used to connect to
+&lt;&#x2F;span&gt;&lt;span&gt;     the OpenStack service. If not specified, Packer will use the environment
+&lt;&#x2F;span&gt;&lt;span&gt;     variable `OS_USERNAME` or `OS_USERID`, if set. This is not required if
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -153,7 +158,7 @@ builder.
+&lt;&#x2F;span&gt;&lt;span&gt;     Defaults to false.
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt; -   `region` (string) - The name of the region, such as &amp;quot;DFW&amp;quot;, in which to
+&lt;&#x2F;span&gt;&lt;span&gt;-    launch the server to create the AMI. If not specified, Packer will use the
+&lt;&#x2F;span&gt;&lt;span&gt;+    launch the server to create the image. If not specified, Packer will use the
+&lt;&#x2F;span&gt;&lt;span&gt;     environment variable `OS_REGION_NAME`, if set.
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt; -   `reuse_ips` (boolean) - Whether or not to attempt to reuse existing
+&lt;&#x2F;span&gt;&lt;span&gt;@@ -166,6 +171,48 @@ builder.
+&lt;&#x2F;span&gt;&lt;span&gt; -   `security_groups` (array of strings) - A list of security groups by name to
+&lt;&#x2F;span&gt;&lt;span&gt;     add to this instance.
+&lt;&#x2F;span&gt;&lt;span&gt; 
+&lt;&#x2F;span&gt;&lt;span&gt;+-   `source_image_filter` (object) - Filters used to populate filter options.
+&lt;&#x2F;span&gt;&lt;span&gt;+    Example:
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+    ``` json
+&lt;&#x2F;span&gt;&lt;span&gt;+    {
+&lt;&#x2F;span&gt;&lt;span&gt;+        &amp;quot;source_image_filter&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;+            &amp;quot;filters&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;+                &amp;quot;name&amp;quot;: &amp;quot;ubuntu-16.04&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+                &amp;quot;visibility&amp;quot;: &amp;quot;protected&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+                &amp;quot;owner&amp;quot;: &amp;quot;d1a588cf4b0743344508dc145649372d1&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;+                &amp;quot;tags&amp;quot;: [&amp;quot;prod&amp;quot;, &amp;quot;ready&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;+            },
+&lt;&#x2F;span&gt;&lt;span&gt;+            &amp;quot;most_recent&amp;quot;: true
+&lt;&#x2F;span&gt;&lt;span&gt;+        }
+&lt;&#x2F;span&gt;&lt;span&gt;+    }
+&lt;&#x2F;span&gt;&lt;span&gt;+    ```
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+    This selects the most recent production Ubuntu 16.04 shared to you by the given owner.
+&lt;&#x2F;span&gt;&lt;span&gt;+    NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
+&lt;&#x2F;span&gt;&lt;span&gt;+    In the example of multiple returned images, `most_recent` will cause this to succeed by selecting
+&lt;&#x2F;span&gt;&lt;span&gt;+    the newest image of the returned images.
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+    -   `filters` (map of strings) - filters used to select a `source_image`.
+&lt;&#x2F;span&gt;&lt;span&gt;+        NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
+&lt;&#x2F;span&gt;&lt;span&gt;+        Of the filters described in [ImageService](https:&#x2F;&#x2F;developer.openstack.org&#x2F;api-ref&#x2F;image&#x2F;v2&#x2F;), the following
+&lt;&#x2F;span&gt;&lt;span&gt;+        are valid:
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+        - name (string)
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+        - owner (string)
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+        - tags (array of strings)
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+        - visibility (string)
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+    -   `most_recent` (boolean) - Selects the newest created image when true.
+&lt;&#x2F;span&gt;&lt;span&gt;+        This is most useful for selecting a daily distro build.
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt;+    You may set use this in place of `source_image` If `source_image_filter` is provided
+&lt;&#x2F;span&gt;&lt;span&gt;+    alongside `source_image`, the `source_image` will override the filter. The filter
+&lt;&#x2F;span&gt;&lt;span&gt;+    will not be used in this case.
+&lt;&#x2F;span&gt;&lt;span&gt;+
+&lt;&#x2F;span&gt;&lt;span&gt; -   `ssh_interface` (string) - The type of interface to connect via SSH. Values
+&lt;&#x2F;span&gt;&lt;span&gt;     useful for Rackspace are &amp;quot;public&amp;quot; or &amp;quot;private&amp;quot;, and the default behavior is
+&lt;&#x2F;span&gt;&lt;span&gt;     to connect via whichever is returned first from the OpenStack API.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - algorithms</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/algorithms/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-07-28T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/algorithms/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Notes on algorithms</title>
+        <published>2023-07-28T00:00:00+00:00</published>
+        <updated>2023-07-28T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/algorithms-notes/"/>
+        <id>https://blog.carrio.dev/blog/algorithms-notes/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/algorithms-notes/">&lt;p&gt;This was exported from an &lt;a href=&quot;https:&#x2F;&#x2F;orgmode.org&#x2F;&quot;&gt;org-mode&lt;&#x2F;a&gt; notebook documenting various
+algorithm knowledge, with some example code snippets here and there
+implementing and executing algorithms inline.&lt;&#x2F;p&gt;
+&lt;p&gt;Code is reused where possible, such as algorithm implementations being
+defined in one section with multiple data tests in others, referencing
+that function.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This post is a bit different, as I am documenting this for myself only- and I&#x27;m sorry if I lead you astray :)&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h1 id=&quot;preface&quot;&gt;Preface&lt;&#x2F;h1&gt;
+&lt;p&gt;Since this is an &lt;strong&gt;org-mode&lt;&#x2F;strong&gt; notebook, it&#x27;s actually possible to
+evaluate code using
+&lt;a href=&quot;https:&#x2F;&#x2F;orgmode.org&#x2F;worg&#x2F;org-contrib&#x2F;babel&#x2F;&quot;&gt;Babel&lt;&#x2F;a&gt;. As a bit of an
+org-mode novice, I&#x27;m not familiar with all of the capabilities, but it
+is possible to share sessions between source code snippets. Due to this,
+there are some shared functions I will define that will be reused across
+the notebook.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shared-code&quot;&gt;Shared code&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;swap_indices&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;array&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;j&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    array[i], array[j] = array[j], array[i]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;debug_state = {
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;enabled&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;False
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;class &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Logger&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;content&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(debug_state[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;enabled&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;]):
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(content)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;logger = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Logger&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;set_debugging&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;enabled&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    debug_state[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;enabled&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;] = enabled
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;algorithms-terminology&quot;&gt;Algorithms Terminology&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;cardinality&quot;&gt;Cardinality&lt;&#x2F;h2&gt;
+&lt;p&gt;The size of the data. For set, arrays, or tuples, it&#x27;s the number of
+elements stored in it.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;regression&quot;&gt;Regression&lt;&#x2F;h2&gt;
+&lt;p&gt;Predicting a response. An example of this is K-Nearest Neighbor.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;classification&quot;&gt;Classification&lt;&#x2F;h2&gt;
+&lt;p&gt;Categorization into a group. See features.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;feature&quot;&gt;Feature&lt;&#x2F;h2&gt;
+&lt;p&gt;Attributes or tangible data points that can be construed about the data
+set.&lt;&#x2F;p&gt;
+&lt;p&gt;Take for example, fruit, you might compare color and size.&lt;&#x2F;p&gt;
+&lt;p&gt;For another example, consider a pizza storefront. You might utilize a
+number of features, such as:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;The day of the week (Sunday is 0, Monday is 1, ... Saturday is 6)&lt;&#x2F;li&gt;
+&lt;li&gt;Weekend or holiday (Yes is 1, No is 0)&lt;&#x2F;li&gt;
+&lt;li&gt;Is it a game day (Yes is 1, No is 0)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;And so on. These could be used to guess what a likely outcome of another
+datapoint might be.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;heuristic&quot;&gt;Heuristic&lt;&#x2F;h2&gt;
+&lt;p&gt;Unlike an algorithm, which always produces a correct result, a heuristic
+usually does a godo job but does not provide any guarantees.&lt;&#x2F;p&gt;
+&lt;p&gt;To provide a more direct definition:&lt;&#x2F;p&gt;
+&lt;p&gt;&amp;gt; proceeding to a solution by trial and error or by rules that are only
+loosely defined.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;more-general-terms&quot;&gt;More general terms&lt;&#x2F;h2&gt;
+&lt;h1 id=&quot;arrays&quot;&gt;Arrays&lt;&#x2F;h1&gt;
+&lt;p&gt;Arrays are continugous data structures. They provide instant access
+(O(1)) to any element of the array by index. They are limited in
+removals and insertions though, requiring on average O(n) time to insert
+or delete elements from the array.&lt;&#x2F;p&gt;
+&lt;p&gt;For removals, this is because any element to the right of the element
+needs to be shifted left.&lt;&#x2F;p&gt;
+&lt;p&gt;For insertions, this is because any element to the right of the element
+needs to be shifted right.&lt;&#x2F;p&gt;
+&lt;p&gt;So on average, since (n + 0)&#x2F;2 or 1&#x2F;2 * n, this equates to O(n).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;sorting-algorithms&quot;&gt;Sorting algorithms&lt;&#x2F;h2&gt;
+&lt;p&gt;There are many sorting algorithms relevant to array data structures.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;insertion-sort&quot;&gt;Insertion sort&lt;&#x2F;h3&gt;
+&lt;p&gt;This is one of the more simple sorting algorithms, and has a complexity
+of O(n^2^). The logic for this is simple.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Start from the beginning of the array&lt;&#x2F;li&gt;
+&lt;li&gt;Step forward&lt;&#x2F;li&gt;
+&lt;li&gt;If the current element is less than the previous element&lt;&#x2F;li&gt;
+&lt;li&gt;If the current element is less than the previous element, walk
+backwards in the array until either you reach an element that is
+less than the current element, or the beginning of the list, and
+place it there&lt;&#x2F;li&gt;
+&lt;li&gt;If not at the end of the array, repeat from step 2&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;An example implementation for this would be:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;insertion_sort&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;array&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;False&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Starting from position 1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;    backwards_index = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Starting iterations...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;forwards_index &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(array)):
+&lt;&#x2F;span&gt;&lt;span&gt;        backwards_index = forwards_index
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Finding the best place for &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(array[forwards_index]))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span&gt;(backwards_index &amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;and array[backwards_index] &amp;lt; array[backwards_index-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;]):
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;            logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Swapping from position &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; to position &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(backwards_index, backwards_index-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# array[backwards_index], array[backwards_index-1] = array[backwards_index-1], array[backwards_index]
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;swap_indices&lt;&#x2F;span&gt;&lt;span&gt;(array, backwards_index, backwards_index-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;            backwards_index = backwards_index-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Found the resting place for &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(array[forwards_index]))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Examples&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;random
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;set_debugging&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;False&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# always generates a list from 1-13 with 4 instances of each integer
+&lt;&#x2F;span&gt;&lt;span&gt;arr = [x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;y &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;)]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;random.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;shuffle&lt;&#x2F;span&gt;&lt;span&gt;(arr)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;The randomized array&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(arr)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;insertion_sort&lt;&#x2F;span&gt;&lt;span&gt;(arr)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;The sorted array&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(arr)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;example&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-example &quot;&gt;&lt;code class=&quot;language-example&quot; data-lang=&quot;example&quot;&gt;&lt;span&gt;The sorted array
+&lt;&#x2F;span&gt;&lt;span&gt;[1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h1 id=&quot;lists&quot;&gt;Lists&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;graphs&quot;&gt;Graphs&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;trees&quot;&gt;Trees&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
+&lt;p&gt;Trees are a special type of graph. The properties of a tree are:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;A non-linear data structure&lt;&#x2F;li&gt;
+&lt;li&gt;Always has n-1 edges for n nodes&lt;&#x2F;li&gt;
+&lt;li&gt;Edges are always directed&lt;&#x2F;li&gt;
+&lt;li&gt;There is a root node&lt;&#x2F;li&gt;
+&lt;li&gt;A node can only have up to one parent&lt;&#x2F;li&gt;
+&lt;li&gt;There are no cycles&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;terminology&quot;&gt;Terminology&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Root node&lt;&#x2F;p&gt;
+&lt;p&gt;The topmost node in a tree. It has no parent, unlike the rest of the
+tree&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Parent&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, its parent is the node pointing to it&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Child&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, a child is a node it points to&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Leaf node&lt;&#x2F;p&gt;
+&lt;p&gt;A node that has no children. Also referred to as an external node&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Non-leaf node&lt;&#x2F;p&gt;
+&lt;p&gt;A node that does have children. Also referred to as an internal node&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Path&lt;&#x2F;p&gt;
+&lt;p&gt;A sequence of edges connecting a starting node to an end node.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Edge&lt;&#x2F;p&gt;
+&lt;p&gt;A link between two node, just like in a graph. This must be
+directed.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Ancestor&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, an ancestor is any node that is its parent,
+or a parent of its parent, and so on.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Descendant&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, a descendent is any node that is its child,
+or a child of its child, and so on.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Sibling&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, a sibling is any node that shares the same
+parent as it.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Degree&lt;&#x2F;p&gt;
+&lt;p&gt;The number of children a node has.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Depth of a node&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, this is the number of edges between the root
+node and it.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Height of a node&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, this is the longest path that exists between
+it and any of its descendant leaf nodes.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Level of a node&lt;&#x2F;p&gt;
+&lt;p&gt;In relation to a node, the number of edges that exist from the root
+node to it. Typically, depth of node + 1.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Rooted tree&lt;&#x2F;p&gt;
+&lt;p&gt;A binary tree that has a root node and every node has at most two
+children.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Full tree&lt;&#x2F;p&gt;
+&lt;p&gt;A binary tree in which every node has either 0 or 2 children.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Balanced tree&lt;&#x2F;p&gt;
+&lt;p&gt;A binary tree where the left and right subtrees of every node differ
+in height by no more than 1.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Degenerate &#x2F; Pathological tree&lt;&#x2F;p&gt;
+&lt;p&gt;A tree where each parent node has only one associated child node.&lt;&#x2F;p&gt;
+&lt;p&gt;This is essentially a linked list structure and provides no
+additional benefits over it.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;b-trees&quot;&gt;B-trees&lt;&#x2F;h2&gt;
+&lt;p&gt;These function by optimizing the number of reads that need to be
+performed in order to access data from a disk. These are often used in
+databases.&lt;&#x2F;p&gt;
+&lt;p&gt;In contrast to a binary tree which houses up to but not exceeding 2
+child nodes per node, this structures the maximum number of children per
+node in order to reach a full block size from the disk. In this way,
+each read maximally saturates the disk read operation and requires fewer
+reads from the disk in total to reach the desired data.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;red-black-trees&quot;&gt;Red-black trees&lt;&#x2F;h2&gt;
+&lt;p&gt;Red-black trees are a specialized type of binary tree which utilize a
+set of rule to automatically balance itself during insertions and
+deletions.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;properties&quot;&gt;Properties&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;Red&#x2F;Black property: Every node is colored. They can either be red or
+black.&lt;&#x2F;li&gt;
+&lt;li&gt;Root property: The root is black&lt;&#x2F;li&gt;
+&lt;li&gt;Leaf property: Every leaf (nil) is black&lt;&#x2F;li&gt;
+&lt;li&gt;Red property: If a red node has children, then the children are
+always black.&lt;&#x2F;li&gt;
+&lt;li&gt;Depth property: Every path from a given node to any of its leaf
+(nil) nodes has the same number of black nodes.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;rotation-rules&quot;&gt;Rotation rules&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;avl-trees&quot;&gt;AVL trees&lt;&#x2F;h2&gt;
+&lt;p&gt;AVL trees are named after its inventors, Adelson-Velsky and Landis. It
+is another specialized type of binary tree which is self-balancing.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;more-info&quot;&gt;More info&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;heaps&quot;&gt;Heaps&lt;&#x2F;h2&gt;
+&lt;p&gt;A specialized tree data structure, which satisfies the &lt;strong&gt;heap
+property&lt;&#x2F;strong&gt;. There are two types of heaps, min heap and max heap. In a
+max heap, for any given node N, if P is a parent node of N, then the
+value of P is greater than or equal to the value of N.&lt;&#x2F;p&gt;
+&lt;p&gt;A heap is an implementation of another abstract data type; the priority
+queue. Priority queues are sometimes referred to as heaps, regardless of
+their implementation.&lt;&#x2F;p&gt;
+&lt;p&gt;A common implementation is the &lt;strong&gt;binary heap&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;comparison-to-binary-search-trees&quot;&gt;Comparison to binary search trees&lt;&#x2F;h3&gt;
+&lt;p&gt;Binary search trees follow a different kind of rule, such that the left
+and right child nodes of any given node are less than or greater than
+their parent, respectively. Meanwhile, a binary heap follows no such
+ordering, and has no implicit ordering for searches.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;splay-trees&quot;&gt;Splay trees&lt;&#x2F;h2&gt;
+&lt;p&gt;A binary search tree that provides the additional benefit that recently
+accessed elements will be fast to access again. Operations similar
+complete in O(log n) time similar to self-balancing binary search trees.
+For operations that are performed in a non-random pattern, it can
+complete in faster than logarithmic time, without requiring knowledge of
+the pattern.&lt;&#x2F;p&gt;
+&lt;p&gt;All operations are combined with one basic operation called splaying.
+Splaying the tree rearranges the tree so that the element is placed at
+the root of the tree. This requires tree rotations to move the element
+to the top. This allows all of the operations performed to move recently
+accessed elements closer to the root.&lt;&#x2F;p&gt;
+&lt;p&gt;It is possible for the structure of the tree to be pathological based on
+what element was most recently accessed, compared to a self-balancing
+tree which maintains an logarithmic lookup time.&lt;&#x2F;p&gt;
+&lt;p&gt;In short, a splay tree will reorganize based on most-recently used (MRU)
+elements, while a self-balancing tree will reorganize to optimize for
+random element searches.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;k-nearest-neighbor&quot;&gt;K-Nearest Neighbor&lt;&#x2F;h1&gt;
+&lt;p&gt;Determining the most similar data point in a dataset based on determined
+features.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;examples&quot;&gt;Examples&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;distance-calculation&quot;&gt;Distance calculation&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;math &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;sqrt, ceil
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;calculate_distance&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# we can only compare the datapoints if they are equal in cardinality
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(x) != &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(y)):
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ceil&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;sqrt&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;sum&lt;&#x2F;span&gt;&lt;span&gt;([(x[i]-y[i]) ** &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;i &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;range&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(x))]))))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;map_distances&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dataset&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;calculate_distance&lt;&#x2F;span&gt;&lt;span&gt;(value, datapoint) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;datapoint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;dataset]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;k_nearest&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;k&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dataset&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# todo: stuff
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;[]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;bread&quot;&gt;Bread&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;### bread data
+&lt;&#x2F;span&gt;&lt;span&gt;dataset = [
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;coordinate = (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;map_distances&lt;&#x2F;span&gt;&lt;span&gt;(coordinate, dataset))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;netflix-user-data&quot;&gt;Netflix User Data&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;### netflix user data
+&lt;&#x2F;span&gt;&lt;span&gt;dataset = [
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;),
+&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;calculate_distance&lt;&#x2F;span&gt;&lt;span&gt;(*dataset))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;fourier-transform&quot;&gt;Fourier Transform&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;mapreduce&quot;&gt;MapReduce&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;scheduling-jobs&quot;&gt;Scheduling Jobs&lt;&#x2F;h1&gt;
+&lt;p&gt;A common algorithmic problem is optimal scheduling in regards to time
+slots. There are various approaches that can be taken here, such as
+&amp;quot;shortest job first&amp;quot;, or &amp;quot;earliest starting job first&amp;quot;, which do not
+always yield the correct result. In the case of scheduling, there is a
+known, correct algorithm for this that is optimal:&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;earliest-ending-job&quot;&gt;Earliest Ending Job&lt;&#x2F;h2&gt;
+&lt;p&gt;This works by finding the job that ends the earliest, as opposed to the
+job that starts the earliest. This job guarantees that less subsequent
+jobs will be blocked than any others. The algorithm for this can be
+defined as follows:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;class &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a07e3b;&quot;&gt;Job&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ecf4ee;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;__init__&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;starts&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ends&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;meta&lt;&#x2F;span&gt;&lt;span&gt;={}):
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.starts = starts
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.ends = ends
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.meta = meta
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;pop_earliest_ending_job&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;jobs&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Finding the earliest ending job&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    earliest_time = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;float&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;inf&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span&gt;    earliest_job = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;None
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;job &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;jobs:
+&lt;&#x2F;span&gt;&lt;span&gt;         logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Checking if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; ends earliest...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(job.meta[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;]))
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(job.ends &amp;lt; earliest_time):
+&lt;&#x2F;span&gt;&lt;span&gt;             logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Looks like it could be &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(job.meta[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;]))
+&lt;&#x2F;span&gt;&lt;span&gt;             earliest_job = job
+&lt;&#x2F;span&gt;&lt;span&gt;             earliest_time = job.ends
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;The earliest ending job was &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(job.meta[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;]))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    jobs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;remove&lt;&#x2F;span&gt;&lt;span&gt;(earliest_job)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;earliest_job
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;remove_overlapping_jobs&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;jobs&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;end_time&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Removing jobs conflicting with end time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(end_time))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;job &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;[j &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;j &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;jobs]:
+&lt;&#x2F;span&gt;&lt;span&gt;        logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Checking whether to remove &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(job.meta[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;]))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(job.starts &amp;lt; end_time):
+&lt;&#x2F;span&gt;&lt;span&gt;            logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Removing the job&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;            jobs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;remove&lt;&#x2F;span&gt;&lt;span&gt;(job)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;optimal_scheduling&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;jobs&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Actual print statement&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Creating empty schedule&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    optimal_jobs = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(jobs) &amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;        next_best_job = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pop_earliest_ending_job&lt;&#x2F;span&gt;&lt;span&gt;(jobs)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Next best job was &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(next_best_job.meta[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;]))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(next_best_job is &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;None&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;break
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Adding to the optimal job schedule...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;        optimal_jobs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;add&lt;&#x2F;span&gt;&lt;span&gt;(next_best_job)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Removing overlapping jobs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;remove_overlapping_jobs&lt;&#x2F;span&gt;&lt;span&gt;(jobs, next_best_job.ends)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Found &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; job(s)!&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(optimal_jobs)))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;optimal_jobs
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Defined optimal scheduler&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;examples-1&quot;&gt;Examples&lt;&#x2F;h3&gt;
+&lt;p&gt;Take for example the following case of spending the day at the movie
+theatre, and you want to watch as many movies as you can in a day. Here
+are the showtimes:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;set_debugging&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;False&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Creating set of showtimes...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;showtimes = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;([
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Job&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;9&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span&gt;, {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Mission Impossible&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Job&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span&gt;, {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Fellowship of the Ring&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Job&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;15&lt;&#x2F;span&gt;&lt;span&gt;, {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Cars&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Job&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;13&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;, {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Dragon Ball Z&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}),
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;Job&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;15&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;20&lt;&#x2F;span&gt;&lt;span&gt;, {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;: &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Lion King&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;}),
+&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;logger.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Created a set...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Generating the best showtime schedule...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;optimal_showtime_schedule = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;optimal_scheduling&lt;&#x2F;span&gt;&lt;span&gt;(showtimes)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;I was able to schedule &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; show(s)!&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;len&lt;&#x2F;span&gt;&lt;span&gt;(optimal_showtime_schedule)))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;shows_in_order = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;sorted&lt;&#x2F;span&gt;&lt;span&gt;(optimal_showtime_schedule, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;lambda &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;s&lt;&#x2F;span&gt;&lt;span&gt;: s.starts, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;reverse&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;False&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;show &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;shows_in_order:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;, starting at &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt; and ending at &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span&gt;(show.meta[&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;title&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;], show.starts, show.ends))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;All done&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Codility :: Sparse Integer Decomposition</title>
+        <published>2023-07-21T00:00:00+00:00</published>
+        <updated>2023-07-21T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/sparse-integer-decomposition/"/>
+        <id>https://blog.carrio.dev/blog/sparse-integer-decomposition/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/sparse-integer-decomposition/">&lt;p&gt;Awhile back I had worked on some Codility exercises, one of which was this case for sparse integer decomposition. This solution ended up snagging me a top 5 percentile in performance and I figured I would share the approach.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-task&quot;&gt;The Task&lt;&#x2F;h2&gt;
+&lt;p&gt;A non-negative integer N is called sparse if its binary representation does not contain two consecutive bits set to 1. For example, 41 is sparse, because its binary representation is &amp;quot;101001&amp;quot; and it does not contain two consecutive 1s. On the other hand, 26 is not sparse, because its binary representation is &amp;quot;11010&amp;quot; and it contains two consecutive 1s.&lt;&#x2F;p&gt;
+&lt;p&gt;Two non-negative integers P and Q are called a sparse decomposition of integer N if P and Q are sparse and N = P + Q.&lt;&#x2F;p&gt;
+&lt;p&gt;For example:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;    8 and 18 are a sparse decomposition of 26 (binary representation of 8 is &amp;quot;1000&amp;quot;, binary representation of 18 is &amp;quot;10010&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    9 and 17 are a sparse decomposition of 26 (binary representation of 9 is &amp;quot;1001&amp;quot;, binary representation of 17 is &amp;quot;10001&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    2 and 24 are not a sparse decomposition of 26; though 2 + 24 = 26, the binary representation of 24 is &amp;quot;11000&amp;quot;, which is not sparse.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Write a function:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;def solution(N)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;that, given a non-negative integer N, returns any integer that is one part of a sparse decomposition of N. The function should return −1 if there is no sparse decomposition of N.&lt;&#x2F;p&gt;
+&lt;p&gt;For example, given N = 26 the function may return 8, 9, 17 or 18, as explained in the example above. All other possible results for N = 26 are 5, 10, 16 and 21.&lt;&#x2F;p&gt;
+&lt;p&gt;Write an efficient algorithm for the following assumptions:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;    N is an integer within the range [0..1,000,000,000].
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;the-solution&quot;&gt;The Solution&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span&gt;math &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;ceil, log2
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;calculate_alternating_mask&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&amp;quot;&amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    calculate_alternating_mask determines a binary mask with a maximum
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    range based on the provided value, then iterates through each bit in
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    the mask, alternating the setting of that bit to 0.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    the end result is a mask with at most every other bit set to 1, in the
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    worst case scenario that all bits were 1 in the binary representation
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    of the input value.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    @example: calculate_alternating_mask(15) -&amp;gt; 0b1010
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    @example: calculate_alternating_mask(0b1111) -&amp;gt; 0b1010
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    @example: calculate_alternating_mask(0xf) -&amp;gt; 0b1010
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    @example: calculate_alternating_mask(255) -&amp;gt; 0b10101010
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    @example: calculate_alternating_mask(0b11111111) -&amp;gt; 0b10101010
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    @example: calculate_alternating_mask(0xff) -&amp;gt; 0b10101010
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    &amp;quot;&amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    binary_index = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ceil&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;log2&lt;&#x2F;span&gt;&lt;span&gt;(value))
+&lt;&#x2F;span&gt;&lt;span&gt;    alternating_mask = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2 &lt;&#x2F;span&gt;&lt;span&gt;** binary_index - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;    
+&lt;&#x2F;span&gt;&lt;span&gt;    zero_bit = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span&gt;binary_index &amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(zero_bit == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;            alternating_mask -= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2 &lt;&#x2F;span&gt;&lt;span&gt;** binary_index
+&lt;&#x2F;span&gt;&lt;span&gt;        
+&lt;&#x2F;span&gt;&lt;span&gt;        zero_bit ^= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;0b1
+&lt;&#x2F;span&gt;&lt;span&gt;        binary_index -= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;    
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;alternating_mask
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;solution&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;N&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;&amp;quot;&amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    solution will specially handle cases at the minimum range of valid
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    input values to return early. otherwise, an alternating mask will
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    be generated to calculate a sparse integer based on the value.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;    &amp;quot;&amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;N &amp;lt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;N
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;N &amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;calculate_alternating_mask&lt;&#x2F;span&gt;&lt;span&gt;(N)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;the-breakdown&quot;&gt;The Breakdown&lt;&#x2F;h2&gt;
+&lt;p&gt;The wording of the problem would seem to indicate that it&#x27;s possible to not find a sparse decomposition of a value, but generally speaking there will always be two components to derive from a single non-negative integer. The restrictions are only that the integer be part a sparse decomposition that has a corresponding but not reported sparse decomposition integer whose sums are the original value N. Since these decompositions are not limited by N &amp;gt; 0 or N &amp;gt; 1, this means we can break down any value M into N + P where 0 ≤ N ≤ M.&lt;&#x2F;p&gt;
+&lt;p&gt;With all of that in mind, the methodology here is to generate an alternating bitmask (1010101...) of equivalent binary order to the input number (4 = 0b100, mask = 0b101. 15 = 0b1111, mask = 0b1010). That is binary &lt;code&gt;AND&lt;&#x2F;code&gt;ed with the input number M to calculate a decomposition where there is never two successive 1s, as it&#x27;s mathematically impossible given the mask never has two successive 1s and the nature of the binary AND operation.&lt;&#x2F;p&gt;
+&lt;p&gt;This only works because of loose requirements. For example, if the requirements were instead 0 &amp;lt; N &amp;lt; M, we could not return 0 or M. This solution could be extended to cover scenarios where the initial bitmask (1010) AND returns 0 or M, where we could bitshift the mask (0101) and repeat the check. At this point, if the result still returns 0 or M, there is no sparse decomposition that fulfills 0 &amp;lt; N &amp;lt; M.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

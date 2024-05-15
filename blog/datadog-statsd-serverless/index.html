@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Datadog and StatsD for Serverless</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>5 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2024-05-15
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#tl-dr">tl;dr</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#monitoring-types">Monitoring Types</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#serverless-architecture">Serverless Architecture</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#statsd-architecture">StatsD Architecture</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#datadog-and-statsd-dogstatsd">Datadog and StatsD: DogStatsD</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#dogstatsd-and-serverless">DogStatsD and Serverless</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#metrics-in-serverless-functions">Metrics in Serverless Functions</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#why-do-statsd-metrics-not-work-well-with-serverless">Why do StatsD metrics not work well with serverless?</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#how-to-use-distribution-metrics-with-dogstatsd">How to use distribution metrics with DogStatsD</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/datadog-statsd-serverless/#conclusion">Conclusion</a>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h2 id="tl-dr">tl;dr</h2>
+<blockquote>
+<p><strong>Do not use StatsD metrics with Datadog for serverless applications.</strong> Instead, utilize the <code>distribution</code> metric type available in DogStatsD.</p>
+</blockquote>
+<p>You will save yourself many hours or even days of lost time trying to get it to work. The <code>distribution</code> metric type is specifically designed for serverless applications and is more resilient to data loss and function termination.</p>
+<h2 id="monitoring-types">Monitoring Types</h2>
+<p>A quick review of available types of monitoring in applications:</p>
+<ul>
+<li>Logging</li>
+<li>Metrics</li>
+<li>Tracing</li>
+<li>Profiling</li>
+</ul>
+<p>The focus of this article is on <strong>metrics</strong>, specifically the use of StatsD metrics with Datadog for serverless applications.</p>
+<h2 id="serverless-architecture">Serverless Architecture</h2>
+<p>Serverless architecture is a cloud computing model that allows developers to build and run applications and services without having to manage infrastructure. Serverless applications are composed of one or more functions that are triggered by events such as HTTP requests, database events, or file uploads. These functions are typically short-lived and stateless, and are executed in response to events.</p>
+<p>A serverless architecture is a great way to build scalable, cost-effective applications that can respond to events in real-time. However, monitoring serverless applications can be challenging due to the ephemeral nature of the functions and the lack of visibility into the underlying infrastructure.</p>
+<h2 id="statsd-architecture">StatsD Architecture</h2>
+<p>StatsD is a simple, lightweight network daemon that listens for statistics, like counters and timers, sent over UDP or TCP and sends aggregates to one or more pluggable backend services (e.g., Graphite, Datadog, etc.). StatsD is commonly used to collect and aggregate metrics from applications and services and send them to a monitoring system for analysis and visualization.</p>
+<h2 id="datadog-and-statsd-dogstatsd">Datadog and StatsD: DogStatsD</h2>
+<p>Datadog is a popular monitoring and observability platform that provides a wide range of features for monitoring applications and infrastructure. Datadog supports StatsD metrics natively, allowing you to send metrics from your applications to Datadog using the StatsD protocol.</p>
+<p>There is an embedded component in the Datadog agent called DogStatsD. This is a StatsD-compatible server that listens for metrics and forwards them to the Datadog backend. It supports a superset of the StatsD protocol, including additional metric types like <code>distribution</code>.</p>
+<p>If you are using a Datadog Agent, you can send metrics to DogStatsD using the StatsD protocol. This allows you to leverage the full power of Datadog's monitoring and alerting capabilities with your serverless applications.</p>
+<h2 id="dogstatsd-and-serverless">DogStatsD and Serverless</h2>
+<p>When using DogStatsD with serverless applications, it is important to be aware of the limitations of the StatsD protocol. The StatsD protocol was designed for traditional server-based applications and may not be well-suited for serverless applications due to the ephemeral nature of the functions. StatsD servers typically aggregate metrics in memory and flush them to the backend at regular intervals. The implications of this are two-fold:</p>
+<ol>
+<li>This can lead to data loss if the server is restarted or if the function is terminated before the metrics are flushed.</li>
+<li>The in-memory aggregation of metrics is necessary for the data to be handed off successfully to Datadog, relying on properties such as <code>host</code> in the agent.</li>
+</ol>
+<h2 id="metrics-in-serverless-functions">Metrics in Serverless Functions</h2>
+<p>Datadog provides capabilities for serverless monitoring including a Lambda Layer which provides an embedded Serverless Datadog Agent. This supports most of the same functionalities as the Datadog Agent in a traditional server environment.</p>
+<blockquote>
+<p>⚠️ Due to the second limitation of DogStatsD and Serverless though, it is important to use the <code>distribution</code> metric type instead of the <code>gauge</code> or <code>count</code> types.</p>
+</blockquote>
+<p>The <code>distribution</code> metric type is specifically designed for serverless applications and is more resilient to data loss and function termination. It does not rely on in-memory aggregation, and the data is sent directly to the Datadog backend.</p>
+<h2 id="why-do-statsd-metrics-not-work-well-with-serverless">Why do StatsD metrics not work well with serverless?</h2>
+<p>There are many components involved in the failure mode of StatsD metrics in serverless environments. Here are a few:</p>
+<ul>
+<li><strong>Data Loss</strong>: The ephemeral nature of serverless functions can lead to data loss if the function is terminated before the metrics are flushed to the backend.</li>
+<li><strong>In-Memory Aggregation</strong>: StatsD servers typically aggregate metrics in memory and flush them to the backend at regular intervals. This can lead to data loss if the function is terminated before the metrics are flushed.</li>
+<li><strong>Host Dependency</strong>: The in-memory aggregation of metrics relies on properties such as <code>host</code> in the agent. This can lead to data loss if the function is terminated before the metrics are flushed.</li>
+</ul>
+<h2 id="how-to-use-distribution-metrics-with-dogstatsd">How to use <code>distribution</code> metrics with DogStatsD</h2>
+<p>To use the <code>distribution</code> metric type with DogStatsD, you need to send the metrics using the <code>distribution</code> method in the DogStatsD client. Here is an example of how to send a <code>distribution</code> metric in NodeJS:</p>
+<pre data-lang="javascript" style="background-color:#171c19;color:#87928a;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#55859b;">const </span><span style="color:#b16139;">StatsD </span><span>= </span><span style="color:#1c9aa0;">require</span><span>(&quot;</span><span style="color:#489963;">hot-shots</span><span>&quot;);
+</span><span style="color:#55859b;">const </span><span style="color:#b16139;">dogstatsd </span><span>= new StatsD();
+</span><span>
+</span><span style="color:#b16139;">dogstatsd</span><span>.</span><span style="color:#478c90;">distribution</span><span>(&quot;</span><span style="color:#489963;">metric.name</span><span>&quot;, </span><span style="color:#9f713c;">42</span><span>);
+</span></code></pre>
+<p>This will send a <code>distribution</code> metric with the name <code>metric.name</code> and the value <code>42</code> to the DogStatsD server. Behind the scenes, the way DogStatsD passes this data along is different than the way it handles <code>gauge</code> or <code>count</code> metrics. It is raw, unaggregated data that is sent directly to the Datadog backend.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>When monitoring serverless applications with Datadog, it is important to use the <code>distribution</code> metric type instead of the <code>gauge</code> or <code>count</code> types. This will ensure that your metrics are resilient to data loss and function termination and will provide more accurate monitoring and alerting capabilities for your serverless applications.</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/monitoring/">monitoring</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/sre/">sre</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/observability/">observability</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/metrics/">metrics</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/statsd/">statsd</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/datadog/">datadog</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

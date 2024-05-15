@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - nix</title>
+    <link rel="self" type="application/atom+xml" href="https://blog.carrio.dev/tags/nix/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://blog.carrio.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-12-27T00:00:00+00:00</updated>
+    <id>https://blog.carrio.dev/tags/nix/atom.xml</id>
+    <entry xml:lang="en">
+        <title>DVD Backups on Linux</title>
+        <published>2023-12-27T00:00:00+00:00</published>
+        <updated>2023-12-27T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/dvd-backups-on-linux/"/>
+        <id>https://blog.carrio.dev/blog/dvd-backups-on-linux/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/dvd-backups-on-linux/">&lt;h1 id=&quot;dvd-backup&quot;&gt;DVD Backup&lt;&#x2F;h1&gt;
+&lt;p&gt;I recently went through the process up backing up a series of DVDs from my partners childhood. Since this process entailed multiple systems and both CPU and GPU hardware for video rendering, I figured I would capture some the steps at a high level that I took to accomplish the task.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;background-the-hardware&quot;&gt;Background: The Hardware&lt;&#x2F;h2&gt;
+&lt;p&gt;During this run-through I utilized a number of systems. Namely, I pulled out my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;nix-config&#x2F;blob&#x2F;main&#x2F;nixos&#x2F;workstation&#x2F;t510&#x2F;default.nix&quot;&gt;Lenovo T510&lt;&#x2F;a&gt; to make use of the DVD bay, my DiskStation 420 for intermediate network storage and backup of the DVD and MP4 files, and &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;nix-config&#x2F;blob&#x2F;main&#x2F;nixos&#x2F;workstation&#x2F;glass&#x2F;default.nix&quot;&gt;my personal desktop&lt;&#x2F;a&gt; with both an AMD Ryzen and GTX 1080Ti- both come into play in the following.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;backing-up-dvds-with-dvdbackup&quot;&gt;Backing up DVDs with dvdbackup&lt;&#x2F;h2&gt;
+&lt;p&gt;Unsurprisingly, the tool &lt;code&gt;dvdbackup&lt;&#x2F;code&gt; exists as a means to backup DVDs. It mostly retains the same filesystem structure as the mounted DVD, but it&#x27;s a useful tool for inspecting and saving videos from a DVD.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# CWD must be where you want to save your DVD backup
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;dvdbackup -i&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;dev&#x2F;sr0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -M
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;What you&#x27;ll end up with is the main feature of the DVD but in the typical hierarchy of the original DVD itself, had you mounted &lt;code&gt;&#x2F;dev&#x2F;sr0&lt;&#x2F;code&gt; directly.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ If you need to recover a damaged disk, you may need to use a tool like &lt;code&gt;dvdisaster&lt;&#x2F;code&gt; or &lt;code&gt;ddrescue&lt;&#x2F;code&gt;. There is no guarantee your data is recoverable.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;splicing-the-video-files&quot;&gt;Splicing the video files&lt;&#x2F;h2&gt;
+&lt;p&gt;The VOB files can be directly concatenated, and is this is exactly how you would perform a splicing of the video content before conversion.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;cat&lt;&#x2F;span&gt;&lt;span&gt; VTS_01_*.VOB &amp;gt; video.vob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ If you include the &lt;code&gt;VIDEOTS.VOB&lt;&#x2F;code&gt; file you may encounter audio issues with your spliced video. &lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;syncing-to-the-sftp-server&quot;&gt;Syncing to the SFTP server&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;scp&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;video.vob 0xc@nas-ds418-00:&#x2F;path&#x2F;to&#x2F;target&#x2F;video.vob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;All of your operations from here &lt;em&gt;can&lt;&#x2F;em&gt; be entirely remote, if you utilize a filesystem mount for the SFTP server, and have a stable connection. In one case I encountered a packet failure and resorted to copying to and from my local system responsible for the conversions going forward.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ For hostnames, I&#x27;m utilizing &lt;strong&gt;[tailscale]&lt;&#x2F;strong&gt; for both private P2P networking &lt;strong&gt;and&lt;&#x2F;strong&gt; DNS resolution of private hosts.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;converting-from-vob-to-mp4&quot;&gt;Converting from VOB to MP4&lt;&#x2F;h2&gt;
+&lt;p&gt;This was done in two separate modes: CPU and GPU. I&#x27;m on NixOS, so for me I dropped into separate shells of non-NVENC-supported ffmpeg and an NVENC-supported ffmpeg.&lt;&#x2F;p&gt;
+&lt;p&gt;One key component is that for the DVD videos (which are 420p) the best (the most 1:1 comparatively) format to target is &lt;code&gt;yuv420p&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;on-network-conversion&quot;&gt;On-network conversion&lt;&#x2F;h3&gt;
+&lt;p&gt;Suppose you have an SFTP server, you can mount that locally and then perform the following conversions directly in the network share.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;run&#x2F;user&#x2F;1000&#x2F;gvfs&#x2F;sftp&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\:&lt;&#x2F;span&gt;&lt;span&gt;host&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\=&lt;&#x2F;span&gt;&lt;span&gt;nas-ds418-00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\,&lt;&#x2F;span&gt;&lt;span&gt;user&lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;\=&lt;&#x2F;span&gt;&lt;span&gt;0xc&#x2F;path&#x2F;to&#x2F;target
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now, within the network share, you could run the following instructions for CPU&#x2F;GPU.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ Alternatively, &lt;code&gt;scp&lt;&#x2F;code&gt; the VOB files to the local machine first&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;cpu-acceleration&quot;&gt;CPU acceleration&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# without NVENC support
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ffmpeg -i&lt;&#x2F;span&gt;&lt;span&gt; video.vob&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -vf&lt;&#x2F;span&gt;&lt;span&gt; format=yuv420p video.mp4
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;gpu-acceleration&quot;&gt;GPU acceleration&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; ffmpeg-full
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# in the subshell
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;ffmpeg -hwaccel_device&lt;&#x2F;span&gt;&lt;span&gt; 0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -hwaccel&lt;&#x2F;span&gt;&lt;span&gt; cuda&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -i&lt;&#x2F;span&gt;&lt;span&gt; video.vob&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -c&lt;&#x2F;span&gt;&lt;span&gt;:v h264_nvenc&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -vf&lt;&#x2F;span&gt;&lt;span&gt; format=yuv420p video.mp4
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;enhancements&quot;&gt;Enhancements&lt;&#x2F;h2&gt;
+&lt;p&gt;A project I was considering toying around with that might have made it simpler to work is the &lt;a href=&quot;https:&#x2F;&#x2F;nbd.sourceforge.io&#x2F;&quot;&gt;Network Block Device (NBD) project&lt;&#x2F;a&gt;. This exists as a user-space tool for interacting with block devices that are mounted over the network. As an example, a T510 with a DVD disk drive accessible over the network could expose the disk device via NBD, and my desktop could mount it. This would save me from having to switch back and forth between the two systems.&lt;&#x2F;p&gt;
+&lt;p&gt;With NixOS, this is directly supported as a &lt;em&gt;service&lt;&#x2F;em&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;_:
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nbd&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;server &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;listenAddress &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0.0.0.0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;exports &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;dvd-drive &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;dev&#x2F;sr0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;allowAddresses &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;10.0.0.0&#x2F;8&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span&gt;      };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then, mount the share from another system with&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# as root
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nbd-client&lt;&#x2F;span&gt;&lt;span&gt; t510&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt; -N&lt;&#x2F;span&gt;&lt;span&gt; dvd-drive &#x2F;dev&#x2F;sr0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now you can open the network-attached DVD via VLC as though it were a local device:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;vlc&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;dev&#x2F;sr0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Next, enjoy T2: Judgement Day 👋&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Nvidia on NixOS</title>
+        <published>2023-11-15T00:00:00+00:00</published>
+        <updated>2023-11-15T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/nvidia-on-nixos/"/>
+        <id>https://blog.carrio.dev/blog/nvidia-on-nixos/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/nvidia-on-nixos/">&lt;h1 id=&quot;nvidia-on-nixos&quot;&gt;Nvidia on NixOS&lt;&#x2F;h1&gt;
+&lt;p&gt;NixOS is a really awesome Linux distribution. The declarative, functional approach of defining a configuration that applies consistently to your system is an amazing feat. I have worked with principles akin to this in my professional work for years now, applying infrastructure-as-code methodologies with Terraform &amp;amp; HCL, Pulumi, and Ansible. So, I have not only installed NixOS on my development workstations and home servers, but also on my personal desktop. This device has an Nvidia GTX 1080Ti, and this blog encompasses some of the journey- the highs and the lows- of setting this system up.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ This blog post will continue to evolve, as I document more shortcomings and friction in the NixOS journey with Nvidia.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;the-highs&quot;&gt;The Highs&lt;&#x2F;h2&gt;
+&lt;p&gt;Declarative configuration is often much more concise and hands-off than the more imperative tools. Offerings like Ansible get you much closer to this, but not all the way. NixOS is truly &lt;strong&gt;holistic&lt;&#x2F;strong&gt; in its approach- with everything being possible to manage with Nix expressions, with the help of &lt;a href=&quot;https:&#x2F;&#x2F;nix-community.github.io&#x2F;home-manager&quot;&gt;home-manager&lt;&#x2F;a&gt; particularly. These can be broken out and shared between systems. Custom packages can be defined in one place and reused across all of your NixOS systems. You can reference my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;nix-config&quot;&gt;nix-config&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-lows&quot;&gt;The Lows&lt;&#x2F;h2&gt;
+&lt;p&gt;Declarative has its downsides. The interface provided by the system for &lt;strong&gt;what you want&lt;&#x2F;strong&gt; is extremely important as to allow the implicit &lt;strong&gt;how we do it&lt;&#x2F;strong&gt; to be configurable. Suppose you have a system with an Nvidia graphics card- with NixOS, you can enable most of the behavior you&#x27;d like to have with this fairly easily. You include several lines such as which driver you want to use (proprietary vs open-source vs nouveau) as on example. The Nix expression is executed and determines the resulting system configuration.&lt;&#x2F;p&gt;
+&lt;p&gt;This is the catch- suppose that how the system is configured does not align with your desires, then you better hope that overriding this is easy or even possible based on what NixOS offers.&lt;&#x2F;p&gt;
+&lt;p&gt;In the case of this Nvidia example- many things &lt;em&gt;just work&lt;&#x2F;em&gt;, but there are a couple cases that &lt;em&gt;do not&lt;&#x2F;em&gt;, and these are the pain points that leave you stuck for weeks without a 100% functional system.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-history&quot;&gt;The History&lt;&#x2F;h2&gt;
+&lt;p&gt;I switched from an Arch Linux system to NixOS in the desire to more easily maintain my workstation in entirety. My Arch system was over 6 years old and had reached over 1000 packages installed. What were half of these? What had I done to configure them? What configurations could be cleaned up? The evidence is scattered across the filesystem, only clear to those most familiar with the configuration rules of each particular software I had. This was a situation I wanted to escape- so I could better understand everything I had and also to be better able to maintain that system over the long-term.&lt;&#x2F;p&gt;
+&lt;p&gt;Documentation separate from code tends to decay. Once it&#x27;s committed, the drift begins. Code &lt;strong&gt;as&lt;&#x2F;strong&gt; documentation breaks from this problem at its core- you don&#x27;t need to have entirely separate docs from your code- often times having a service enabled or configured in some way is &lt;strong&gt;clear as day&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;deathStar &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;enabled &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;customConfig &lt;&#x2F;span&gt;&lt;span&gt;= &amp;#39;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            something something dark side
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Even enabling Nvidia hardware is remarkably simple!&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;hardware&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nvidia &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;boot&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;kernelPackages&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nvidiaPackages&lt;&#x2F;span&gt;&lt;span&gt;; {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;package &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;stable&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The NixOS docs provide a list of which packages are available plainly &lt;a href=&quot;https:&#x2F;&#x2F;blog.carrio.dev&#x2F;blog&#x2F;nvidia-on-nixos&#x2F;nvidia-driver-versions&quot;&gt;here&lt;&#x2F;a&gt;. You can now readily switch out various Nvidia driver versions with just a few characters. Want to run the latest beta version?&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;hardware&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nvidia &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;boot&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;kernelPackages&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nvidiaPackages&lt;&#x2F;span&gt;&lt;span&gt;; {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;package &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;beta&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;software-rendering-not-how-i-would-have-done-it&quot;&gt;Software-rendering: Not HOW I would have done it&lt;&#x2F;h2&gt;
+&lt;p&gt;This is the moment that &lt;strong&gt;declarative&lt;&#x2F;strong&gt; configuration became a pain. As I mentioned before, I replaced my Arch Linux system. I had a few games installed: Overwatch on Lutris and Elder Scrolls IV: Oblivion. These were the only two I played much of.&lt;&#x2F;p&gt;
+&lt;p&gt;I installed Steam through my Nix config. Super easy.&lt;&#x2F;p&gt;
+&lt;p&gt;I installed Elder Scrolls IV: Oblivion. Turned on the compatibility mode for Proton. Super easy.&lt;&#x2F;p&gt;
+&lt;p&gt;Started up the game: 0.00000001 FPS.&lt;&#x2F;p&gt;
+&lt;p&gt;It would appear I&#x27;m using software rendering. But why? Why in the world would my system even want to use software rendering when it has a &lt;strong&gt;perfectly powerful discrete graphics card&lt;&#x2F;strong&gt;?&lt;&#x2F;p&gt;
+&lt;p&gt;Well, let&#x27;s see what&#x27;s available.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;vulkaninfo --summary
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This pops out a massive list of info, but the final section I&#x27;m including here is the most important piece:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;Devices:
+&lt;&#x2F;span&gt;&lt;span&gt;========
+&lt;&#x2F;span&gt;&lt;span&gt;GPU0:
+&lt;&#x2F;span&gt;&lt;span&gt;	apiVersion         = 1.3.260
+&lt;&#x2F;span&gt;&lt;span&gt;	driverVersion      = 545.29.2.0
+&lt;&#x2F;span&gt;&lt;span&gt;	vendorID           = 0x10de
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceID           = 0x1b06
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceType         = PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceName         = NVIDIA GeForce GTX 1080 Ti
+&lt;&#x2F;span&gt;&lt;span&gt;	driverID           = DRIVER_ID_NVIDIA_PROPRIETARY
+&lt;&#x2F;span&gt;&lt;span&gt;	driverName         = NVIDIA
+&lt;&#x2F;span&gt;&lt;span&gt;	driverInfo         = 545.29.02
+&lt;&#x2F;span&gt;&lt;span&gt;	conformanceVersion = 1.3.6.0
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceUUID         = 61ede7bb-89b8-5ef5-50a7-899e37452c5d
+&lt;&#x2F;span&gt;&lt;span&gt;	driverUUID         = aa471f58-d70e-5a93-a86b-06356da49d1c
+&lt;&#x2F;span&gt;&lt;span&gt;GPU1:
+&lt;&#x2F;span&gt;&lt;span&gt;	apiVersion         = 1.3.246
+&lt;&#x2F;span&gt;&lt;span&gt;	driverVersion      = 0.0.1
+&lt;&#x2F;span&gt;&lt;span&gt;	vendorID           = 0x10005
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceID           = 0x0000
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceType         = PHYSICAL_DEVICE_TYPE_CPU
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceName         = llvmpipe (LLVM 16.0.6, 256 bits)
+&lt;&#x2F;span&gt;&lt;span&gt;	driverID           = DRIVER_ID_MESA_LLVMPIPE
+&lt;&#x2F;span&gt;&lt;span&gt;	driverName         = llvmpipe
+&lt;&#x2F;span&gt;&lt;span&gt;	driverInfo         = Mesa 23.1.9 (LLVM 16.0.6)
+&lt;&#x2F;span&gt;&lt;span&gt;	conformanceVersion = 1.3.1.1
+&lt;&#x2F;span&gt;&lt;span&gt;	deviceUUID         = 6d657361-3233-2e31-2e39-000000000000
+&lt;&#x2F;span&gt;&lt;span&gt;	driverUUID         = 6c6c766d-7069-7065-5555-494400000000
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;It would appear that a &lt;code&gt;llvmpipe&lt;&#x2F;code&gt; device is automatically configured here. But why? I didn&#x27;t turn on Mesa myself, what is a Mesa driver doing here?&lt;&#x2F;p&gt;
+&lt;p&gt;Well- there are plenty of packages that may rely on Mesa. In fact, a large number of them will. So this is going to be a dependency in the system and automatically be installed.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;solution&quot;&gt;Solution?&lt;&#x2F;h3&gt;
+&lt;p&gt;Honestly, I&#x27;ve tried a number of things so far: from overlays and explicit configurations to not include mesa in the stack when configuring opengl.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll update the post with a &lt;strong&gt;Solved:&lt;&#x2F;strong&gt; tag once I make it there. For now, I suffer. 😭&lt;&#x2F;p&gt;
+&lt;!-- Reference --&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>direnv magic: instant project environments</title>
+        <published>2023-09-21T00:00:00+00:00</published>
+        <updated>2023-09-21T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/direnv-magic/"/>
+        <id>https://blog.carrio.dev/blog/direnv-magic/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/direnv-magic/">&lt;h1 id=&quot;direnv-magic&quot;&gt;direnv magic&lt;&#x2F;h1&gt;
+&lt;p&gt;A very popular project for managing environment variables in projects today is &lt;code&gt;dotenv&lt;&#x2F;code&gt;. There are packages for various languages, like NodeJS and PHP. They are built on a simple principle: to load environment variables from a &lt;code&gt;.env&lt;&#x2F;code&gt; file located in the project root.&lt;&#x2F;p&gt;
+&lt;p&gt;When it comes to the 12 Factor App, managing environment variables in source control is generally discouraged. Instead, environment variables should be set externally, like via the OS or a container orchestrator. However, &lt;code&gt;dotenv&lt;&#x2F;code&gt; packages rely on the application loading the &lt;code&gt;.env&lt;&#x2F;code&gt; file itself, which means that the application must process a file in order to retrieve its environment configuration.&lt;&#x2F;p&gt;
+&lt;p&gt;As a whole, this practice is convenient for local development, but does not lend well to the Config principle of the 12 Factor App.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;an-alternative-approach&quot;&gt;an alternative approach&lt;&#x2F;h2&gt;
+&lt;p&gt;The &lt;code&gt;direnv&lt;&#x2F;code&gt; tool allows environment variables to be set based on the directory. With &lt;code&gt;direnv&lt;&#x2F;code&gt;, you can define environment variables in a &lt;code&gt;.envrc&lt;&#x2F;code&gt; file that will be loaded automatically when entering that directory. This avoids embedding environment configuration in the application code&#x2F;source control, and makes variables configurable on a per-directory basis. It also entirely avoids having dependencies on files and the entirety of the &lt;code&gt;dotenv&lt;&#x2F;code&gt; package itself in a production application. You don&#x27;t have to conditionally load files - the environment is configured automatically by the shell in local development environments, and configured by the orchestrator in production, like Kubernetes, in the exact same manner: &lt;strong&gt;the environment variables&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-behavior&quot;&gt;the behavior&lt;&#x2F;h2&gt;
+&lt;p&gt;Working with &lt;code&gt;direnv&lt;&#x2F;code&gt;, you gain the ability to not only define environment variables in a &lt;code&gt;.envrc&lt;&#x2F;code&gt; file per directory, but also automatically configure your shell environment based on that file in other means. For example, you can automatically execute scripts or enter a Nix flake dev shell.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;automated-secure-shell-environments&quot;&gt;automated, secure shell environments&lt;&#x2F;h2&gt;
+&lt;p&gt;Due to the simple approach of a &lt;code&gt;.envrc&lt;&#x2F;code&gt; file and automatic nature of &lt;code&gt;direnv&lt;&#x2F;code&gt;, it provides a streamlined solution for automatically entering development environments in a snap. It also requires that you permit a directory before &lt;code&gt;direnv&lt;&#x2F;code&gt; will load variables or execute scripts, preventing accidental exposure in untrusted directories.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;an-example-with-nix-flakes&quot;&gt;an example with Nix flakes&lt;&#x2F;h2&gt;
+&lt;p&gt;Suppose we have a Nix flake in our project repository that defines a development shell environment. With &lt;code&gt;direnv&lt;&#x2F;code&gt;, we can automatically enter this shell whenever we cd into the project directory. We&#x27;ll start with this project&#x27;s Nix flake, which provides a shell with the necessary tools to build and develop the blog.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;description &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0xc dev shell&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;nixpkgs-unstable&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells&lt;&#x2F;span&gt;&lt;span&gt;.&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;x86_64-linux&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;; [
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;git
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;zola
+&lt;&#x2F;span&gt;&lt;span&gt;      ];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;PROJECT_NAME &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;0xc&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;shellHook &lt;&#x2F;span&gt;&lt;span&gt;= &amp;#39;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo $ Started devshell for $PROJECT_NAME
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        uname -v
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        git --version
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo &amp;quot;zola version $(zola --version)&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        echo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That ensures that I can access both &lt;code&gt;git&lt;&#x2F;code&gt; and &lt;code&gt;zola&lt;&#x2F;code&gt; in my dev shell.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;direnv&lt;&#x2F;code&gt; tool has native support for Nix flakes, so enabling this is a single line in our &lt;code&gt;.envrc&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;use flake
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That&#x27;s it! Now in the project, you&#x27;ll have to permit &lt;code&gt;direnv&lt;&#x2F;code&gt; once:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;direnv&lt;&#x2F;span&gt;&lt;span&gt; allow
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now you are ready to automatically enter your desired shell environment.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;graceful-departures&quot;&gt;graceful departures&lt;&#x2F;h2&gt;
+&lt;p&gt;Not only does &lt;code&gt;direnv&lt;&#x2F;code&gt; work well when navigating around projects, it also handles exiting an environment smoothly. Dependencies you may not have had that the Nix flake included in the dev shell, such as &lt;code&gt;zola&lt;&#x2F;code&gt;, will no longer be available after leaving the project directory.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[ ~&#x2F;Code&#x2F;blog ]: which zola
+&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;nix&#x2F;store&#x2F;qsaq50z4hln6f86ymvp5f5j01wqg21c3-zola-0.17.2&#x2F;bin&#x2F;zola
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;[ ~&#x2F;Code&#x2F;blog ]: cd ..
+&lt;&#x2F;span&gt;&lt;span&gt;direnv: unloading
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;[ ~&#x2F;Code ]: which zola
+&lt;&#x2F;span&gt;&lt;span&gt;which: no zola in (&#x2F;nix&#x2F;store&#x2F;16d7k6ljgy635fz5jn1flnvpx1gnx9cp-glib-2.76.4-bin&#x2F;bin:&#x2F;run&#x2F;wrappers&#x2F;bin:&#x2F;home&#x2F;tcarrio&#x2F;.local&#x2F;share&#x2F;flatpak&#x2F;exports&#x2F;bin:&#x2F;var&#x2F;lib&#x2F;flatpak&#x2F;exports&#x2F;bin:&#x2F;home&#x2F;tcarrio&#x2F;.nix-profile&#x2F;bin:&#x2F;etc&#x2F;profiles&#x2F;per-user&#x2F;tcarrio&#x2F;bin:&#x2F;nix&#x2F;var&#x2F;nix&#x2F;profiles&#x2F;default&#x2F;bin:&#x2F;run&#x2F;current-system&#x2F;sw&#x2F;bin:&#x2F;home&#x2F;tcarrio&#x2F;.local&#x2F;bin)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>NixOS Secrets with Agenix and Systemd</title>
+        <published>2023-09-19T00:00:00+00:00</published>
+        <updated>2023-09-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/"/>
+        <id>https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/nixos-agenix-systemd-secrets/">&lt;h2 id=&quot;prologue-what-is-nixos&quot;&gt;Prologue: What is NixOS?&lt;&#x2F;h2&gt;
+&lt;p&gt;I will assume that you&#x27;re here to learn more about managing secrets on a NixOS system. If you want to learn more about NixOS itself, check out the &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;manual&#x2F;&quot;&gt;NixOS manual&lt;&#x2F;a&gt;. There is a lot to catch up on.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ℹ️ I may add more updates to this blog post, but I want it available in case others run into the same issue I did for utilizing &lt;code&gt;agenix&lt;&#x2F;code&gt; in Systemd service units.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;🎙️I do make use of voice to text tooling, but I try to correct as much as possible.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;managing-secrets-on-nixos&quot;&gt;Managing Secrets on NixOS&lt;&#x2F;h2&gt;
+&lt;p&gt;NixOS being an entirely automated system has to conquer some of the same battles fought by other tools in the same space- Terraform for example automates the provisioning of resources and systems, and needs a way to maintain secrets on those. These should be kept as safe as possible, and as such has primitives around secrets. NixOS similarly has many tools that can be used, some reused across the industry like &lt;code&gt;age&lt;&#x2F;code&gt; and &lt;code&gt;sops&lt;&#x2F;code&gt;. They provide a full comparison of these tools and their integration with the NixOS system &lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Comparison_of_secret_managing_schemes&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;age-and-agenix&quot;&gt;Age and Agenix&lt;&#x2F;h2&gt;
+&lt;p&gt;The tool &lt;a href=&quot;https:&#x2F;&#x2F;age-encryption.org&#x2F;&quot;&gt;age&lt;&#x2F;a&gt; is a modern encryption tool designed to be simple to work with, requires no configuration out-of-the-box, and is designed to be composable. This makes it a great tool to use with Nix. The &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ryantm&#x2F;agenix&quot;&gt;agenix&lt;&#x2F;a&gt; project utilizes &lt;code&gt;age&lt;&#x2F;code&gt; in order to provide a pattern for managing secrets, and is separated into the CLI and the NixOS module. The CLI is used for interacting with secrets, and a &lt;code&gt;secrets.nix&lt;&#x2F;code&gt; file is provided in order to configure the target recipients for secret files, with these files existing in paths beneath the root directory of that &lt;code&gt;secrets.nix&lt;&#x2F;code&gt; file. Within your NixOS configuration, you can import the module, and then reference existing secrets and how they should be utilized in the system.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;where-does-systemd-come-into-play&quot;&gt;Where Does Systemd Come Into Play?&lt;&#x2F;h2&gt;
+&lt;p&gt;Well, I was building off an existing blog post by Tailscale on how to configure a NixOS server for Minecraft on a Tailnet. I&#x27;m mostly concerned on automatically wiring up a Tailscale service securely on my NixOS servers, so I wanted to apply the same principle while utilizing one of the secrets managing tools.&lt;&#x2F;p&gt;
+&lt;p&gt;So in this post, I&#x27;ll demonstrate this in the way I implemented the NixOS configuration to utilize &lt;code&gt;agenix&lt;&#x2F;code&gt; for automatic Tailscale connection with a secret token, managed in code securely with &lt;code&gt;age&lt;&#x2F;code&gt; encryption.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;generating-secrets-with-agenix&quot;&gt;Generating secrets with agenix&lt;&#x2F;h2&gt;
+&lt;p&gt;First step degenerating secrets with &lt;code&gt;agenix&lt;&#x2F;code&gt; is by setting up a &lt;code&gt;secrets.nix&lt;&#x2F;code&gt; file this file should define the public SSH keys of hosts or users who are able to decrypt the secrets.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is a hint for those who are not familiar, but the system has its own SSH public and private keys in the &lt;code&gt;&#x2F;etc&lt;&#x2F;code&gt; directory. If these exist then &lt;code&gt;agenix&lt;&#x2F;code&gt; will utilize those to decrypt the mounted secrets.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;secrets-nix&quot;&gt;secrets.nix&lt;&#x2F;h3&gt;
+&lt;p&gt;The output of the Nix expression is a map set. Each of these is a path, relative to the current directory of secrets.nix, and the public keys that the secret should be encrypted for. An example of the secrets.nix file:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;keys &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;ssh-rsa foobarbaz... host@system&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;tailscale.age&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;publicKeys &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Once this file is defined, &lt;code&gt;agenix&lt;&#x2F;code&gt; now understands within the context of the directory how to encrypt secrets with &lt;code&gt;age&lt;&#x2F;code&gt;. So, you can execute the &lt;code&gt;agenix&lt;&#x2F;code&gt; command in order to open a terminal editor, determined by the configured &lt;code&gt;VISUAL&lt;&#x2F;code&gt; environment variables, in which you can then insert the content and after saving the buffer will be encrypted to the desired file location.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;agenix -e tailscale.age
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;tailscale-nix&quot;&gt;tailscale.nix&lt;&#x2F;h3&gt;
+&lt;p&gt;I have broken out the tailscale.nix file into its own expression that can be imported by an exos configuration. It encapsulates all of the necessary configurations, namely installing the tailscale package, enabling the tailscale service, enabling port forwarding for the tailscale service, configuring a one-off Systemd unit file which references the agents mounted secret file. By referencing the content of that file in line within the Systemd unit script, the encrypted token is now available in plain text for the tailscale auto-configuration.&lt;&#x2F;p&gt;
+&lt;p&gt;The last important piece is that you must wait for the &lt;code&gt;run-agenix.d.mount&lt;&#x2F;code&gt; unit in this unit, otherwise there is the potential for a race condition where the &lt;code&gt;agenix&lt;&#x2F;code&gt; secret has not been decrypted to the secure location you are referencing, thus resulting in no content being passed for the token.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# tailscale.nix
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;config, pkgs, ... &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# the nix expression containing age secret configuration, enabling tailscale packages and service, networking rules, and the systemd autoconnect unit file
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Here, we mount the token file
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;tailscale-token &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;file &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;.&#x2F;tailscale.age&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;owner &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;group &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;mode &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;600&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# We&amp;#39;ll install the package to the system, enable the service, and set up some networking rules
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;environment&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;systemPackages &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;; [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;tailscale &lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;tailscale&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;networking &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;firewall &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;checkReversePath &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;loose&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;allowedUDPPorts &lt;&#x2F;span&gt;&lt;span&gt;= [ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;tailscale&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;port &lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;trustedInterfaces &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;tailscale0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Here is the magic, where we automatically connect with the tailscale CLI by passing our secret token, and ensure that agenix mounting was completed
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;systemd&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;tailscale-autoconnect &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;description &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;Automatic connection to Tailscale&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# We must make sure that both the tailscale service and the agenix file mounting are running &#x2F; complete before trying to connect to tailscale
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;after &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;network-pre.target&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;tailscale.service&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;run-agenix.d.mount&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;wants &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;network-pre.target&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;tailscale.service&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;run-agenix.d.mount&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;wantedBy &lt;&#x2F;span&gt;&lt;span&gt;= [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;multi-user.target&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Set this service as a oneshot job
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;serviceConfig&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;Type &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;oneshot&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Run the following shell script for the job, passing the mounted secret for the tailscale connection
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;script &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;; &amp;#39;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            # wait for tailscaled to settle
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            sleep 2
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            # check if we are already authenticated to tailscale
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            status=&amp;quot;$(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;tailscale&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;bin&#x2F;tailscale status -json | &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;jq&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;bin&#x2F;jq -r .BackendState)&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            if [ $status = &amp;quot;Running&amp;quot; ]; then
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;                exit 0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            fi
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            # otherwise authenticate with tailscale
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;tailscale&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;bin&#x2F;tailscale up -authkey &amp;quot;$(cat &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#87928a;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#87928a;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#87928a;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;tailscale-token&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#87928a;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;quot;)&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;tl-dr&quot;&gt;tl;dr&lt;&#x2F;h2&gt;
+&lt;p&gt;Agenix itself mounts files with Systemd in the &lt;code&gt;run-agenix.mount&lt;&#x2F;code&gt; unit. As such, you can utilize the mechanism of Systemd service definitions, namely &lt;code&gt;after&lt;&#x2F;code&gt; and &lt;code&gt;wants&lt;&#x2F;code&gt;, in order to ensure that the &lt;code&gt;agenix&lt;&#x2F;code&gt; secret mounts have been completed prior to starting your service. In this way, you can be sure that the secret is available.&lt;&#x2F;p&gt;
+&lt;p&gt;If you want to read more on NixOS configuration, you can check out my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;nix-config&quot;&gt;nix-config&lt;&#x2F;a&gt; repository which maintains several of my systems.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Nix Flakes Starter</title>
+        <published>2023-08-11T00:00:00+00:00</published>
+        <updated>2023-08-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.carrio.dev/blog/nix-flakes-starter/"/>
+        <id>https://blog.carrio.dev/blog/nix-flakes-starter/</id>
+        
+        <content type="html" xml:base="https://blog.carrio.dev/blog/nix-flakes-starter/">&lt;h2 id=&quot;what-is-nix&quot;&gt;What is Nix&lt;&#x2F;h2&gt;
+&lt;p&gt;Nix consists of many things, and because of the common naming of &amp;quot;Nix&amp;quot; throughout it all, it can be confusing beyond just the surface level.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt;OS: An Operating System powered by Nix configurations and package manager&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt; language: A declarative, pure, functional, domain-specific language&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Nix&lt;&#x2F;strong&gt; package manager: A purely functional package manager&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;As it pertains to this post on Nix Flakes, we&#x27;re mostly talking about the Nix &lt;em&gt;language&lt;&#x2F;em&gt;, which is used to implement a flake, and the Nix &lt;em&gt;package manager&lt;&#x2F;em&gt;, which can utilize and interact with flakes.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nix-flakes&quot;&gt;Nix Flakes&lt;&#x2F;h2&gt;
+&lt;p&gt;If you look up Nix flakes, the first article you&#x27;ll find it likely &lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Flakes&quot;&gt;the one on the NixOS Wiki&lt;&#x2F;a&gt;. This same article also clearly states at the top&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Nix flakes&lt;&#x2F;strong&gt; are an &lt;em&gt;experimental feature&lt;&#x2F;em&gt; of the Nix package manager.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Well that sounds dangerous, unstable, fragile, etc. etc. Yeah it does. But a lot of the Nix community believe that Nix flakes are &lt;strong&gt;The Future&lt;&#x2F;strong&gt;. And it&#x27;s been considered &amp;quot;experimental&amp;quot; for many years now, to be clear. But this post is less focused on the political discussion of flakes&#x27; stability and future and more on what it is, how to get started, and some example use cases.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;what-are-flakes&quot;&gt;What Are Flakes&lt;&#x2F;h3&gt;
+&lt;p&gt;Flakes provide a kind of specification around how to define a Nix expression, how dependencies are managed between it and others, and provide general improvements to the Nix ecosystem such as reproducibility and composability. A flake consists of a file system tree which contains a &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file in its root directory. You would expect to see something like the following in a Nix flake:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[0xc@sys ~]$ tree .&#x2F;devshells
+&lt;&#x2F;span&gt;&lt;span&gt;.
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.lock
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.nix
+&lt;&#x2F;span&gt;&lt;span&gt;└── README.md
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;1 directory, 3 files
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file offers a uniform &lt;a href=&quot;https:&#x2F;&#x2F;nixos.org&#x2F;manual&#x2F;nix&#x2F;stable&#x2F;command-ref&#x2F;new-cli&#x2F;nix3-flake.html#flake-format&quot;&gt;schema&lt;&#x2F;a&gt; that allows other flakes to be referenced as dependencies, and the values produced by the Nix expression in the &lt;code&gt;flake.nix&lt;&#x2F;code&gt; file follow a specific structure to support certain use cases. Since a flake can reference others in a way that supports the lockfile mechanism, even composed Nix flakes support reproducibility.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;nix&lt;&#x2F;code&gt; CLI also supports flakes as an experimental feature.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;creating-a-flake&quot;&gt;Creating a Flake&lt;&#x2F;h2&gt;
+&lt;p&gt;With the &lt;code&gt;nix&lt;&#x2F;code&gt; CLI, you can run:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;[0xc@sys ~]$ mkdir flake-test
+&lt;&#x2F;span&gt;&lt;span&gt;[0xc@sys ~]$ cd flake-test
+&lt;&#x2F;span&gt;&lt;span&gt;[0xc@sys ~]$ nix flake init
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;crafting-a-flake-file&quot;&gt;Crafting a Flake File&lt;&#x2F;h2&gt;
+&lt;p&gt;As mentioned, there is a uniform schema to Flake files. The following attributes are defined at the top-level in a Nix flake:&lt;&#x2F;p&gt;
+&lt;p&gt;Flake schema&lt;&#x2F;p&gt;
+&lt;p&gt;The flake.nix file is a Nix file but that has special restrictions (more on that later).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;description&lt;&#x2F;strong&gt;: a string describing the flake.
+&lt;strong&gt;inputs&lt;&#x2F;strong&gt;: an attribute set of all the dependencies of the flake.
+&lt;strong&gt;outputs&lt;&#x2F;strong&gt;: a function of one argument that takes an attribute set of all the realized inputs, and outputs another attribute set whose schema is described below.
+&lt;strong&gt;nixConfig&lt;&#x2F;strong&gt;: an attribute set of values which reflect the values given to nix.conf. This can extend the normal behavior of a user&#x27;s nix experience by adding flake-specific configuration, such as a binary cache.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;nixos.wiki&#x2F;wiki&#x2F;Flakes&quot;&gt;&lt;em&gt;Reference&lt;&#x2F;em&gt;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;description&lt;&#x2F;code&gt; is very straightforward, but let&#x27;s break down the remaining attributes, particularly &lt;code&gt;inputs&lt;&#x2F;code&gt; and &lt;code&gt;outputs&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;inputs&quot;&gt;Inputs&lt;&#x2F;h3&gt;
+&lt;!-- TODO --&gt;
+&lt;p&gt;The &lt;code&gt;inputs&lt;&#x2F;code&gt; schema allows the definition of zero or more flakes as references to the &lt;code&gt;outputs&lt;&#x2F;code&gt; schema. Any external requirements for the flake will be defined here, whether it&#x27;s a CLI tool, library, or service.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;inputs&lt;&#x2F;code&gt; allows you to define any number of flake inputs as local paths, Git repositories over SSH or HTTPS, and special shorthands for GitHub.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;inputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a GitHub repository by org&#x2F;repo and branch name (&amp;quot;master&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:NixOS&#x2F;nixpkgs&#x2F;master&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a Git repository by URL, using HTTPS or SSH protocol
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;https-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+https:&#x2F;&#x2F;git.example.test&#x2F;org&#x2F;repo?ref=branch&amp;amp;rev=deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;ssh-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+ssh:&#x2F;&#x2F;git.example.test&#x2F;org&#x2F;repo?ref=branch&amp;amp;rev=deadbeef&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a shallow clone (won&amp;#39;t clone the `.git` directory)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;shallow-clone-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;git+file:&#x2F;local&#x2F;project&#x2F;path?shallow=1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a local directory
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;relative-path-dir-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;path:&#x2F;local&#x2F;project&#x2F;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;absolute-path-dir-example&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&#x2F;local&#x2F;project&#x2F;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying a non-flake input
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;not-a-flake &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;github:0xc&#x2F;nonflake&#x2F;branch&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;flake &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# specifying that the dependency&amp;#39;s `inputs.nixpkgs` should inherit from this flake
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;inherit&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs-example &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;github&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;another&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;example&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;follows &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These inputs and their controls give flakes substantially more power over deterministic build processes and consistency across the dependencies utilized within the inputs and the flake definitions&#x27; resources.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;outputs&quot;&gt;Outputs&lt;&#x2F;h3&gt;
+&lt;p&gt;The magic of a flake. This is where we actually define the resources of a flake, and the schema provides us several mechanisms for things like development shells, applications, build targets, overlays, and more.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;applications&quot;&gt;Applications&lt;&#x2F;h4&gt;
+&lt;p&gt;These are predefined run targets in your flake. These are suitable for packaging your application so you can execute it consistently.&lt;&#x2F;p&gt;
+&lt;p&gt;Utilized with the &lt;code&gt;nix run&lt;&#x2F;code&gt; command. Within the outputs, you can specify these by doing:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;apps&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#b16139;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#867469;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;lt;target-name&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;program &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;run-the-thing&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This can be executed using &lt;code&gt;nix run .#target-name&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If you want to execute this with arguments you would run &lt;code&gt;nix run .#target-name -- ...&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;development-shells&quot;&gt;Development shells&lt;&#x2F;h4&gt;
+&lt;p&gt;Dev shells are an extremely useful feature of flakes. There are some differences to the legacy Nix shell and the new &lt;code&gt;devShells&lt;&#x2F;code&gt; functionality of Nix flakes.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;TODO: Add more info on these differences&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;You can define &lt;code&gt;devShells&lt;&#x2F;code&gt; in the &lt;code&gt;outputs&lt;&#x2F;code&gt;, and the most convenient way is using the &lt;code&gt;mkShell&lt;&#x2F;code&gt; function exposed in the &lt;code&gt;nixpkgs&lt;&#x2F;code&gt; input argument. Suppose you have the nixpkgs repository input as &lt;code&gt;pkgs&lt;&#x2F;code&gt;, then you would be able to do&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;self, pkgs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#478c90;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;go &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;go&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The default target can be invoked with &lt;code&gt;nix develop .&lt;&#x2F;code&gt; and in this case will provide the &lt;code&gt;git&lt;&#x2F;code&gt; package, available in your PATH.&lt;&#x2F;p&gt;
+&lt;p&gt;To invoke the &lt;code&gt;go&lt;&#x2F;code&gt; target, you would do &lt;code&gt;nix develop .#go&lt;&#x2F;code&gt;. Then we&#x27;d have the Go toolchain loaded and available so we could run or compile some Go code with &lt;code&gt;go build main.go&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;overlays&quot;&gt;Overlays&lt;&#x2F;h4&gt;
+&lt;p&gt;Overlays are an interesting albeit somewhat advanced topic in Nix, but the goal of overlays is to support advanced flake customization capabilities, such as overriding packages within a flake. Overlays supercedes an old approach to this which was limited in scope to this one simple use case, called &lt;code&gt;packageOverride&lt;&#x2F;code&gt; and &lt;code&gt;overridePackages&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Overlays are defined as a nested function whose first argument is &lt;code&gt;final&lt;&#x2F;code&gt; and second argument is &lt;code&gt;prev&lt;&#x2F;code&gt;. &lt;&#x2F;p&gt;
+&lt;p&gt;The following diagram visualizes the flow of the overlay function components throughout the system.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#171c19;color:#87928a;&quot;&gt;&lt;code&gt;&lt;span&gt;+---------------------+-----------------------+------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;|                     |                       |                              |
+&lt;&#x2F;span&gt;&lt;span&gt;|                     |                       |                              |
+&lt;&#x2F;span&gt;&lt;span&gt;|  +-------------+    |  +-------------+      |  +--------------+            |
+&lt;&#x2F;span&gt;&lt;span&gt;|  |             |    |  |             |      |  |              |            |
+&lt;&#x2F;span&gt;&lt;span&gt;|  +-----+       |    |  +-----+       |      |  +-----+        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;+-&amp;gt;|final|       |    +-&amp;gt;|final|       |      +-&amp;gt;|final|        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   +-----+       |       +-----+       |         +-----+        |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |       |             |         |              |            |
+&lt;&#x2F;span&gt;&lt;span&gt;   |    main     +---+   |             +--+      |              +------+     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   |             |  |      |              |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   +-----+       |  |      +-----+        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   +--&amp;gt;|prev |       |  |    +&amp;gt;|prev |        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   +-----+       |  |    | +-----+        |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   |             |   |   |             |  |    | |              |      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;   +-------------+   |   +-------------+  |    | +--------------+      |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                    |    |                       |     |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                  +-v--+ |                     +-v--+  |
+&lt;&#x2F;span&gt;&lt;span&gt;                     |                  |    | |                     |    |  |
+&lt;&#x2F;span&gt;&lt;span&gt;                     +------------------&amp;gt; &#x2F;&#x2F; +-+---------------------&amp;gt; &#x2F;&#x2F; +--+
+&lt;&#x2F;span&gt;&lt;span&gt;                                        +----+                       +----+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Within your flake, you can define overlays with the following:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Specifying an overlay by &amp;quot;name&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;overlays&lt;&#x2F;span&gt;&lt;span&gt;.&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#489963;&quot;&gt;&amp;lt;name&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; final: prev: { }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6d64;&quot;&gt;# Specifying the default overlay
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;overlays&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; final: prev: { }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#b16139;color:#ecf4ee;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These can be utilized in interesting ways, a good example is how the NodeJS runtimes and NPM dependencies like &lt;a href=&quot;https:&#x2F;&#x2F;yarnpkg.com&#x2F;&quot;&gt;Yarn&lt;&#x2F;a&gt; can be configured with overlays to ensure the correct underlying runtime is used for the package.&lt;&#x2F;p&gt;
+&lt;p&gt;My &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tcarrio&#x2F;devshells&quot;&gt;devshells&lt;&#x2F;a&gt; repository showcases this. A &lt;em&gt;paraphrased&lt;&#x2F;em&gt; version of the code would be:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#171c19;color:#87928a;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;let
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;node16Overlay &lt;&#x2F;span&gt;&lt;span&gt;= self: super: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nodejs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;yarn16Overlay &lt;&#x2F;span&gt;&lt;span&gt;= self: super: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;yarn &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;super&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;override &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;nodejs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;pkgsNode16 &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#1c9aa0;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nixpkgs &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;inherit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;system&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;overlays &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;node16Overlay yarn16Overlay&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;in rec &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;devShells &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;default &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;mkShell &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9f713c;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#55859b;&quot;&gt;with &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;pkgsNode16&lt;&#x2F;span&gt;&lt;span&gt;; [
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;nodejs-16_x
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b16139;&quot;&gt;yarn
+&lt;&#x2F;span&gt;&lt;span&gt;            ];
+&lt;&#x2F;span&gt;&lt;span&gt;        };
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;and-more&quot;&gt;And more&lt;&#x2F;h4&gt;
+&lt;p&gt;There are &lt;em&gt;even more&lt;&#x2F;em&gt; use cases for Nix flake outputs, that I won&#x27;t dive into much here. The resources mentioned throughout this article are extremely useful though, and there is tremendous depth to Nix that you can dive into.&lt;&#x2F;p&gt;
+&lt;!-- References --&gt;
+</content>
+        
+    </entry>
+</feed>

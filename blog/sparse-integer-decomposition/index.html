@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Codility :: Sparse Integer Decomposition</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>4 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-07-21
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/sparse-integer-decomposition/#the-task">The Task</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/sparse-integer-decomposition/#the-solution">The Solution</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/sparse-integer-decomposition/#the-breakdown">The Breakdown</a>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <p>Awhile back I had worked on some Codility exercises, one of which was this case for sparse integer decomposition. This solution ended up snagging me a top 5 percentile in performance and I figured I would share the approach.</p>
+<h2 id="the-task">The Task</h2>
+<p>A non-negative integer N is called sparse if its binary representation does not contain two consecutive bits set to 1. For example, 41 is sparse, because its binary representation is &quot;101001&quot; and it does not contain two consecutive 1s. On the other hand, 26 is not sparse, because its binary representation is &quot;11010&quot; and it contains two consecutive 1s.</p>
+<p>Two non-negative integers P and Q are called a sparse decomposition of integer N if P and Q are sparse and N = P + Q.</p>
+<p>For example:</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>    8 and 18 are a sparse decomposition of 26 (binary representation of 8 is &quot;1000&quot;, binary representation of 18 is &quot;10010&quot;);
+</span><span>    9 and 17 are a sparse decomposition of 26 (binary representation of 9 is &quot;1001&quot;, binary representation of 17 is &quot;10001&quot;);
+</span><span>    2 and 24 are not a sparse decomposition of 26; though 2 + 24 = 26, the binary representation of 24 is &quot;11000&quot;, which is not sparse.
+</span></code></pre>
+<p>Write a function:</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>def solution(N)
+</span></code></pre>
+<p>that, given a non-negative integer N, returns any integer that is one part of a sparse decomposition of N. The function should return −1 if there is no sparse decomposition of N.</p>
+<p>For example, given N = 26 the function may return 8, 9, 17 or 18, as explained in the example above. All other possible results for N = 26 are 5, 10, 16 and 21.</p>
+<p>Write an efficient algorithm for the following assumptions:</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>    N is an integer within the range [0..1,000,000,000].
+</span></code></pre>
+<h2 id="the-solution">The Solution</h2>
+<pre data-lang="python" style="background-color:#171c19;color:#87928a;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#55859b;">from </span><span>math </span><span style="color:#55859b;">import </span><span>ceil, log2
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">calculate_alternating_mask</span><span>(</span><span style="color:#b16139;">value</span><span>):
+</span><span>    </span><span style="color:#5f6d64;">&quot;&quot;&quot;
+</span><span style="color:#5f6d64;">    calculate_alternating_mask determines a binary mask with a maximum
+</span><span style="color:#5f6d64;">    range based on the provided value, then iterates through each bit in
+</span><span style="color:#5f6d64;">    the mask, alternating the setting of that bit to 0.
+</span><span style="color:#5f6d64;">    
+</span><span style="color:#5f6d64;">    the end result is a mask with at most every other bit set to 1, in the
+</span><span style="color:#5f6d64;">    worst case scenario that all bits were 1 in the binary representation
+</span><span style="color:#5f6d64;">    of the input value.
+</span><span style="color:#5f6d64;">    
+</span><span style="color:#5f6d64;">    @example: calculate_alternating_mask(15) -&gt; 0b1010
+</span><span style="color:#5f6d64;">    @example: calculate_alternating_mask(0b1111) -&gt; 0b1010
+</span><span style="color:#5f6d64;">    @example: calculate_alternating_mask(0xf) -&gt; 0b1010
+</span><span style="color:#5f6d64;">    
+</span><span style="color:#5f6d64;">    @example: calculate_alternating_mask(255) -&gt; 0b10101010
+</span><span style="color:#5f6d64;">    @example: calculate_alternating_mask(0b11111111) -&gt; 0b10101010
+</span><span style="color:#5f6d64;">    @example: calculate_alternating_mask(0xff) -&gt; 0b10101010
+</span><span style="color:#5f6d64;">    &quot;&quot;&quot;
+</span><span>    binary_index = </span><span style="color:#b16139;">ceil</span><span>(</span><span style="color:#b16139;">log2</span><span>(value))
+</span><span>    alternating_mask = </span><span style="color:#9f713c;">2 </span><span>** binary_index - </span><span style="color:#9f713c;">1
+</span><span>    
+</span><span>    zero_bit = </span><span style="color:#9f713c;">1
+</span><span>    </span><span style="color:#55859b;">while </span><span>binary_index &gt;= </span><span style="color:#9f713c;">0</span><span>:
+</span><span>        </span><span style="color:#55859b;">if </span><span>(zero_bit == </span><span style="color:#9f713c;">1</span><span>):
+</span><span>            alternating_mask -= </span><span style="color:#9f713c;">2 </span><span>** binary_index
+</span><span>        
+</span><span>        zero_bit ^= </span><span style="color:#9f713c;">0b1
+</span><span>        binary_index -= </span><span style="color:#9f713c;">1
+</span><span>    
+</span><span>    </span><span style="color:#55859b;">return </span><span>alternating_mask
+</span><span>
+</span><span style="color:#55859b;">def </span><span style="color:#478c90;">solution</span><span>(</span><span style="color:#b16139;">N</span><span>):
+</span><span>    </span><span style="color:#5f6d64;">&quot;&quot;&quot;
+</span><span style="color:#5f6d64;">    solution will specially handle cases at the minimum range of valid
+</span><span style="color:#5f6d64;">    input values to return early. otherwise, an alternating mask will
+</span><span style="color:#5f6d64;">    be generated to calculate a sparse integer based on the value.
+</span><span style="color:#5f6d64;">    &quot;&quot;&quot;
+</span><span>    </span><span style="color:#55859b;">if </span><span>N &lt;= </span><span style="color:#9f713c;">2</span><span>:
+</span><span>      </span><span style="color:#55859b;">return </span><span>N
+</span><span>
+</span><span>    </span><span style="color:#55859b;">return </span><span>N &amp; </span><span style="color:#b16139;">calculate_alternating_mask</span><span>(N)
+</span></code></pre>
+<h2 id="the-breakdown">The Breakdown</h2>
+<p>The wording of the problem would seem to indicate that it's possible to not find a sparse decomposition of a value, but generally speaking there will always be two components to derive from a single non-negative integer. The restrictions are only that the integer be part a sparse decomposition that has a corresponding but not reported sparse decomposition integer whose sums are the original value N. Since these decompositions are not limited by N &gt; 0 or N &gt; 1, this means we can break down any value M into N + P where 0 ≤ N ≤ M.</p>
+<p>With all of that in mind, the methodology here is to generate an alternating bitmask (1010101...) of equivalent binary order to the input number (4 = 0b100, mask = 0b101. 15 = 0b1111, mask = 0b1010). That is binary <code>AND</code>ed with the input number M to calculate a decomposition where there is never two successive 1s, as it's mathematically impossible given the mask never has two successive 1s and the nature of the binary AND operation.</p>
+<p>This only works because of loose requirements. For example, if the requirements were instead 0 &lt; N &lt; M, we could not return 0 or M. This solution could be extended to cover scenarios where the initial bitmask (1010) AND returns 0 or M, where we could bitshift the mask (0101) and repeat the check. At this point, if the result still returns 0 or M, there is no sparse decomposition that fulfills 0 &lt; N &lt; M.</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/coding/">coding</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/algorithms/">algorithms</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

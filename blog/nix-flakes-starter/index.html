@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+      
+    
+
+      <title></title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.carrio.dev/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://blog.carrio.dev/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev">
+                                <span itemprop="name">Home</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/blog">
+                                <span itemprop="name">Blog</span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https://blog.carrio.dev/tags">
+                                <span itemprop="name">Tags</span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Nix Flakes Starter</h1>
+        <span class="muted">
+    <svg class="icon i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>7 minute read</span>
+    <svg class="icon i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2023-08-11
+</span>
+    </header>
+    <div itemprop="articleBody">
+        <hr/>
+        
+
+<div class="toc">
+Table of Contents:
+    <ul>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#what-is-nix">What is Nix</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#nix-flakes">Nix Flakes</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#what-are-flakes">What Are Flakes</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#creating-a-flake">Creating a Flake</a>
+            
+        </li>
+    
+        <li>
+            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#crafting-a-flake-file">Crafting a Flake File</a>
+            
+                <ul>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#inputs">Inputs</a>
+                        </li>
+                    
+                        <li>
+                            <a href="https://blog.carrio.dev/blog/nix-flakes-starter/#outputs">Outputs</a>
+                        </li>
+                    
+                </ul>
+            
+        </li>
+    
+    </ul>
+</div>
+
+
+        <hr />
+        <h2 id="what-is-nix">What is Nix</h2>
+<p>Nix consists of many things, and because of the common naming of &quot;Nix&quot; throughout it all, it can be confusing beyond just the surface level.</p>
+<ul>
+<li><strong>Nix</strong>OS: An Operating System powered by Nix configurations and package manager</li>
+<li><strong>Nix</strong> language: A declarative, pure, functional, domain-specific language</li>
+<li><strong>Nix</strong> package manager: A purely functional package manager</li>
+</ul>
+<p>As it pertains to this post on Nix Flakes, we're mostly talking about the Nix <em>language</em>, which is used to implement a flake, and the Nix <em>package manager</em>, which can utilize and interact with flakes.</p>
+<h2 id="nix-flakes">Nix Flakes</h2>
+<p>If you look up Nix flakes, the first article you'll find it likely <a href="https://nixos.wiki/wiki/Flakes">the one on the NixOS Wiki</a>. This same article also clearly states at the top</p>
+<blockquote>
+<p><strong>Nix flakes</strong> are an <em>experimental feature</em> of the Nix package manager.</p>
+</blockquote>
+<p>Well that sounds dangerous, unstable, fragile, etc. etc. Yeah it does. But a lot of the Nix community believe that Nix flakes are <strong>The Future</strong>. And it's been considered &quot;experimental&quot; for many years now, to be clear. But this post is less focused on the political discussion of flakes' stability and future and more on what it is, how to get started, and some example use cases.</p>
+<h3 id="what-are-flakes">What Are Flakes</h3>
+<p>Flakes provide a kind of specification around how to define a Nix expression, how dependencies are managed between it and others, and provide general improvements to the Nix ecosystem such as reproducibility and composability. A flake consists of a file system tree which contains a <code>flake.nix</code> file in its root directory. You would expect to see something like the following in a Nix flake:</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>[0xc@sys ~]$ tree ./devshells
+</span><span>.
+</span><span>├── flake.lock
+</span><span>├── flake.nix
+</span><span>└── README.md
+</span><span>
+</span><span>1 directory, 3 files
+</span></code></pre>
+<p>This <code>flake.nix</code> file offers a uniform <a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html#flake-format">schema</a> that allows other flakes to be referenced as dependencies, and the values produced by the Nix expression in the <code>flake.nix</code> file follow a specific structure to support certain use cases. Since a flake can reference others in a way that supports the lockfile mechanism, even composed Nix flakes support reproducibility.</p>
+<p>The <code>nix</code> CLI also supports flakes as an experimental feature.</p>
+<h2 id="creating-a-flake">Creating a Flake</h2>
+<p>With the <code>nix</code> CLI, you can run:</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>[0xc@sys ~]$ mkdir flake-test
+</span><span>[0xc@sys ~]$ cd flake-test
+</span><span>[0xc@sys ~]$ nix flake init
+</span></code></pre>
+<h2 id="crafting-a-flake-file">Crafting a Flake File</h2>
+<p>As mentioned, there is a uniform schema to Flake files. The following attributes are defined at the top-level in a Nix flake:</p>
+<p>Flake schema</p>
+<p>The flake.nix file is a Nix file but that has special restrictions (more on that later).</p>
+<p><strong>description</strong>: a string describing the flake.
+<strong>inputs</strong>: an attribute set of all the dependencies of the flake.
+<strong>outputs</strong>: a function of one argument that takes an attribute set of all the realized inputs, and outputs another attribute set whose schema is described below.
+<strong>nixConfig</strong>: an attribute set of values which reflect the values given to nix.conf. This can extend the normal behavior of a user's nix experience by adding flake-specific configuration, such as a binary cache.</p>
+<p><a href="https://nixos.wiki/wiki/Flakes"><em>Reference</em></a></p>
+<p>The <code>description</code> is very straightforward, but let's break down the remaining attributes, particularly <code>inputs</code> and <code>outputs</code>.</p>
+<h3 id="inputs">Inputs</h3>
+<!-- TODO -->
+<p>The <code>inputs</code> schema allows the definition of zero or more flakes as references to the <code>outputs</code> schema. Any external requirements for the flake will be defined here, whether it's a CLI tool, library, or service.</p>
+<p>The <code>inputs</code> allows you to define any number of flake inputs as local paths, Git repositories over SSH or HTTPS, and special shorthands for GitHub.</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#b16139;">inputs </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> {
+</span><span>    </span><span style="color:#5f6d64;"># specifying a GitHub repository by org/repo and branch name (&quot;master&quot;)
+</span><span>    </span><span style="color:#9f713c;">nixpkgs</span><span>.</span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">github:NixOS/nixpkgs/master</span><span>&quot;;
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># specifying a Git repository by URL, using HTTPS or SSH protocol
+</span><span>    </span><span style="color:#9f713c;">https-example</span><span>.</span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">git+https://git.example.test/org/repo?ref=branch&amp;rev=deadbeef</span><span>&quot;;
+</span><span>    </span><span style="color:#9f713c;">ssh-example</span><span>.</span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">git+ssh://git.example.test/org/repo?ref=branch&amp;rev=deadbeef</span><span>&quot;;
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># specifying a shallow clone (won&#39;t clone the `.git` directory)
+</span><span>    </span><span style="color:#9f713c;">shallow-clone-example</span><span>.</span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">git+file:/local/project/path?shallow=1</span><span>&quot;;
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># specifying a local directory
+</span><span>    </span><span style="color:#9f713c;">relative-path-dir-example</span><span>.</span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">path:/local/project/path</span><span>&quot;;
+</span><span>    </span><span style="color:#9f713c;">absolute-path-dir-example</span><span>.</span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">/local/project/path</span><span>&quot;;
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># specifying a non-flake input
+</span><span>    </span><span style="color:#9f713c;">not-a-flake </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">url </span><span>= &quot;</span><span style="color:#489963;">github:0xc/nonflake/branch</span><span>&quot;;
+</span><span>        </span><span style="color:#9f713c;">flake </span><span>= </span><span style="color:#9f713c;">false</span><span>;
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#5f6d64;"># specifying that the dependency&#39;s `inputs.nixpkgs` should inherit from this flake
+</span><span>    </span><span style="color:#55859b;">inherit</span><span style="background-color:#b16139;color:#ecf4ee;">-</span><span style="color:#9f713c;">nixpkgs-example </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> </span><span style="background-color:#b16139;color:#ecf4ee;">{</span><span>
+</span><span>        </span><span style="color:#9f713c;">url </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> </span><span style="background-color:#b16139;color:#ecf4ee;">&quot;</span><span style="color:#9f713c;">github</span><span style="background-color:#b16139;color:#ecf4ee;">:</span><span style="color:#9f713c;">another</span><span style="background-color:#b16139;color:#ecf4ee;">/</span><span style="color:#9f713c;">example</span><span style="background-color:#b16139;color:#ecf4ee;">&quot;</span><span>;
+</span><span>        </span><span style="color:#9f713c;">inputs</span><span>.</span><span style="color:#9f713c;">nixpkgs</span><span>.</span><span style="color:#9f713c;">follows </span><span>= &quot;</span><span style="color:#489963;">nixpkgs</span><span>&quot;;
+</span><span>    }</span><span style="background-color:#b16139;color:#ecf4ee;">;</span><span>
+</span><span style="background-color:#b16139;color:#ecf4ee;">}</span><span>
+</span></code></pre>
+<p>These inputs and their controls give flakes substantially more power over deterministic build processes and consistency across the dependencies utilized within the inputs and the flake definitions' resources.</p>
+<h3 id="outputs">Outputs</h3>
+<p>The magic of a flake. This is where we actually define the resources of a flake, and the schema provides us several mechanisms for things like development shells, applications, build targets, overlays, and more.</p>
+<h4 id="applications">Applications</h4>
+<p>These are predefined run targets in your flake. These are suitable for packaging your application so you can execute it consistently.</p>
+<p>Utilized with the <code>nix run</code> command. Within the outputs, you can specify these by doing:</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#b16139;">apps</span><span>.</span><span style="font-style:italic;color:#867469;">${</span><span style="font-style:italic;color:#b16139;">system</span><span style="font-style:italic;color:#867469;">}</span><span>.</span><span style="color:#489963;">&lt;target-name&gt; </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> {
+</span><span>    </span><span style="color:#9f713c;">type </span><span>= &quot;</span><span style="color:#489963;">app</span><span>&quot;;
+</span><span>    </span><span style="color:#9f713c;">program </span><span>= &quot;</span><span style="color:#489963;">run-the-thing</span><span>&quot;;
+</span><span>}</span><span style="background-color:#b16139;color:#ecf4ee;">;</span><span>
+</span></code></pre>
+<p>This can be executed using <code>nix run .#target-name</code>.</p>
+<p>If you want to execute this with arguments you would run <code>nix run .#target-name -- ...</code></p>
+<h4 id="development-shells">Development shells</h4>
+<p>Dev shells are an extremely useful feature of flakes. There are some differences to the legacy Nix shell and the new <code>devShells</code> functionality of Nix flakes.</p>
+<p><strong>TODO: Add more info on these differences</strong></p>
+<p>You can define <code>devShells</code> in the <code>outputs</code>, and the most convenient way is using the <code>mkShell</code> function exposed in the <code>nixpkgs</code> input argument. Suppose you have the nixpkgs repository input as <code>pkgs</code>, then you would be able to do</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#b16139;">outputs </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> </span><span style="color:#478c90;">{ </span><span>self, pkgs </span><span style="color:#478c90;">}</span><span>: {
+</span><span>    </span><span style="color:#9f713c;">devShells </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">default </span><span>= </span><span style="color:#b16139;">pkgs</span><span>.</span><span style="color:#b16139;">mkShell </span><span>{
+</span><span>            </span><span style="color:#9f713c;">packages </span><span>= [</span><span style="color:#b16139;">pkgs</span><span>.</span><span style="color:#b16139;">git</span><span>];
+</span><span>        };
+</span><span>
+</span><span>        </span><span style="color:#9f713c;">go </span><span>= </span><span style="color:#b16139;">pkgs</span><span>.</span><span style="color:#b16139;">mkShell </span><span>{
+</span><span>            </span><span style="color:#9f713c;">packages </span><span>= [</span><span style="color:#b16139;">pkgs</span><span>.</span><span style="color:#b16139;">go</span><span>];
+</span><span>        };
+</span><span>    };
+</span><span>}</span><span style="background-color:#b16139;color:#ecf4ee;">;</span><span>
+</span></code></pre>
+<p>The default target can be invoked with <code>nix develop .</code> and in this case will provide the <code>git</code> package, available in your PATH.</p>
+<p>To invoke the <code>go</code> target, you would do <code>nix develop .#go</code>. Then we'd have the Go toolchain loaded and available so we could run or compile some Go code with <code>go build main.go</code>.</p>
+<h4 id="overlays">Overlays</h4>
+<p>Overlays are an interesting albeit somewhat advanced topic in Nix, but the goal of overlays is to support advanced flake customization capabilities, such as overriding packages within a flake. Overlays supercedes an old approach to this which was limited in scope to this one simple use case, called <code>packageOverride</code> and <code>overridePackages</code>.</p>
+<p>Overlays are defined as a nested function whose first argument is <code>final</code> and second argument is <code>prev</code>. </p>
+<p>The following diagram visualizes the flow of the overlay function components throughout the system.</p>
+<pre style="background-color:#171c19;color:#87928a;"><code><span>+---------------------+-----------------------+------------------------------+
+</span><span>|                     |                       |                              |
+</span><span>|                     |                       |                              |
+</span><span>|  +-------------+    |  +-------------+      |  +--------------+            |
+</span><span>|  |             |    |  |             |      |  |              |            |
+</span><span>|  +-----+       |    |  +-----+       |      |  +-----+        |            |
+</span><span>+-&gt;|final|       |    +-&gt;|final|       |      +-&gt;|final|        |            |
+</span><span>   +-----+       |       +-----+       |         +-----+        |            |
+</span><span>   |             |       |             |         |              |            |
+</span><span>   |    main     +---+   |             +--+      |              +------+     |
+</span><span>   |             |   |   |             |  |      |              |      |     |
+</span><span>   |             |   |   +-----+       |  |      +-----+        |      |     |
+</span><span>   |             |   +--&gt;|prev |       |  |    +&gt;|prev |        |      |     |
+</span><span>   |             |   |   +-----+       |  |    | +-----+        |      |     |
+</span><span>   |             |   |   |             |  |    | |              |      |     |
+</span><span>   +-------------+   |   +-------------+  |    | +--------------+      |     |
+</span><span>                     |                    |    |                       |     |
+</span><span>                     |                    |    |                       |     |
+</span><span>                     |                    |    |                       |     |
+</span><span>                     |                  +-v--+ |                     +-v--+  |
+</span><span>                     |                  |    | |                     |    |  |
+</span><span>                     +------------------&gt; // +-+---------------------&gt; // +--+
+</span><span>                                        +----+                       +----+
+</span></code></pre>
+<p>Within your flake, you can define overlays with the following:</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6d64;"># Specifying an overlay by &quot;name&quot;
+</span><span style="color:#b16139;">overlays</span><span>.&quot;</span><span style="color:#489963;">&lt;name&gt;</span><span>&quot; </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> final: prev: { }</span><span style="background-color:#b16139;color:#ecf4ee;">;</span><span>
+</span><span style="color:#5f6d64;"># Specifying the default overlay
+</span><span style="color:#b16139;">overlays</span><span>.</span><span style="color:#b16139;">default </span><span style="background-color:#b16139;color:#ecf4ee;">=</span><span> final: prev: { }</span><span style="background-color:#b16139;color:#ecf4ee;">;</span><span>
+</span></code></pre>
+<p>These can be utilized in interesting ways, a good example is how the NodeJS runtimes and NPM dependencies like <a href="https://yarnpkg.com/">Yarn</a> can be configured with overlays to ensure the correct underlying runtime is used for the package.</p>
+<p>My <a href="https://github.com/tcarrio/devshells">devshells</a> repository showcases this. A <em>paraphrased</em> version of the code would be:</p>
+<pre data-lang="nix" style="background-color:#171c19;color:#87928a;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#55859b;">let
+</span><span>    </span><span style="color:#9f713c;">node16Overlay </span><span>= self: super: {
+</span><span>        </span><span style="color:#9f713c;">nodejs </span><span>= </span><span style="color:#b16139;">self</span><span>.</span><span style="color:#b16139;">nodejs-16_x</span><span>;
+</span><span>    };
+</span><span>    </span><span style="color:#9f713c;">yarn16Overlay </span><span>= self: super: {
+</span><span>        </span><span style="color:#9f713c;">yarn </span><span>= </span><span style="color:#b16139;">super</span><span>.</span><span style="color:#b16139;">yarn</span><span>.</span><span style="color:#b16139;">override </span><span>{
+</span><span>            </span><span style="color:#9f713c;">nodejs </span><span>= </span><span style="color:#b16139;">self</span><span>.</span><span style="color:#b16139;">nodejs-16_x</span><span>;
+</span><span>        };
+</span><span>    };
+</span><span>    </span><span style="color:#9f713c;">pkgsNode16 </span><span>= </span><span style="color:#1c9aa0;">import </span><span style="color:#b16139;">nixpkgs </span><span>{
+</span><span>        </span><span style="color:#55859b;">inherit </span><span style="color:#9f713c;">system</span><span>;
+</span><span>        </span><span style="color:#9f713c;">overlays </span><span>= [</span><span style="color:#b16139;">node16Overlay yarn16Overlay</span><span>];
+</span><span>    };
+</span><span style="color:#55859b;">in rec </span><span>{
+</span><span>    </span><span style="color:#9f713c;">devShells </span><span>= {
+</span><span>        </span><span style="color:#9f713c;">default </span><span>= </span><span style="color:#b16139;">pkgs</span><span>.</span><span style="color:#b16139;">mkShell </span><span>{
+</span><span>            </span><span style="color:#9f713c;">packages </span><span>= </span><span style="color:#55859b;">with </span><span style="color:#b16139;">pkgsNode16</span><span>; [
+</span><span>                </span><span style="color:#b16139;">nodejs-16_x
+</span><span>                </span><span style="color:#b16139;">yarn
+</span><span>            ];
+</span><span>        };
+</span><span>    };
+</span><span>}
+</span></code></pre>
+<h4 id="and-more">And more</h4>
+<p>There are <em>even more</em> use cases for Nix flake outputs, that I won't dive into much here. The resources mentioned throughout this article are extremely useful though, and there is tremendous depth to Nix that you can dive into.</p>
+<!-- References -->
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Tom Carrio
+                
+                
+                
+                    
+                    tagged
+                    
+                        <a href="https://blog.carrio.dev/tags/functional/">functional</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/open-source/">open source</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/automation/">automation</a>
+                        
+                            
+                                
+                                    ,
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/build-tools/">build tools</a>
+                        
+                            
+                                
+                                    and
+                                
+                            
+                        
+                    
+                        <a href="https://blog.carrio.dev/tags/nix/">nix</a>
+                        
+                            
+                        
+                    
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>
