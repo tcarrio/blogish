@@ -82,6 +82,10 @@ Before adding a new SSH key to the ssh-agent, you should have checked for existi
   > Agent pid 59566
   ```
 
+  > ℹ️ If you are using the **Fish shell**, recent versions support the following alternative:
+  > ```
+  > $ eval "$(ssh-agent -c)" 
+
 2. Add your SSH key to the ssh-agent. If you used an existing SSH key rather than generating a new SSH key, you'll need to replace id_ed25519 in the command with the name of your existing private key file.
 
   ```bash
