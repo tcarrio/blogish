@@ -6,7 +6,7 @@ theme = "0xc-dark"
 output_dir = "public"
 
 generate_feeds = true
-feed_filenames = ["rss.xml"]
+feed_filename = "rss.xml"
 
 taxonomies = [
     # You can enable/disable RSS
