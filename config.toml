@@ -5,7 +5,7 @@ theme = "0xc-dark"
 
 output_dir = "public"
 
-generate_feed = true
+generate_feeds = true
 
 taxonomies = [
     # You can enable/disable RSS
